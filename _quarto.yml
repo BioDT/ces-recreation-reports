@@ -1,0 +1,43 @@
+project:
+  type: manuscript
+
+manuscript:
+  article: index.qmd
+  notebooks:
+    - notebook: technical_supplement.md
+      title: Technical Supplement
+    - notebook: rse_report.md
+      title: RSE Report
+    - notebook: package_demo.qmd
+      title: Demo
+  code-links:
+    - text: Code
+      icon: github
+      href: https://github.com/BioDT/uc-ces-recreation
+
+format:
+  html:
+    toc: true
+    highlight-style: github
+
+  pdf:
+    colorlinks: true
+    documentclass: scrartcl
+    number-sections: true
+    toc: true
+    toccolor: blue
+    linkcolor: purple
+
+  jats: default
+
+execute:
+  freeze: true
+
+affiliations:
+  - id: ukceh
+    name: UK Centre for Ecology & Hydrology
+    city: Edinburgh
+    url: https://www.ceh.ac.uk/
+
+bibliography: references.bib
+
