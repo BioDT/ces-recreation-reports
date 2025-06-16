@@ -1,5 +1,6 @@
 *.html
 *.pdf
+*.quarto_ipynb
 
 .quarto/
 _freeze/
@@ -7,3 +8,5 @@ _project
 *_files/
 
 .obsidian/
+
+/.quarto/

@@ -7,7 +7,7 @@ authors:
     orcid: 0000-0002-8082-8566
   - name: "Maddalena Tigli <a href='https://github.com/madtig' style='color: black'><i class='bi bi-github'></i></a>"
 
-date: today
+date: last-modified
 date-format: long
 abstract: >
   This report provides a high-level, chronological overview of development work carried out between November 2024 and June 2025. The intention is to provide some context and explanation for posterity. We also make several recommendations for further development work. Most items are accompanied by one or more links to issues and/or pull requests on GitHub, which often contain further details and references to specific lines of code.
@@ -110,6 +110,24 @@ The SPEAK study was scheduled to launch in early February 2025. Hence, there was
 The initial expectation was that publishing the app through DataLabs would be quick and simple. However, it quickly became clear that this would not be feasible because DataLabs does not give deployed apps write access to the filesystem. This was a problem for us since files were being written to disk during the creation of personas and at various points during the calculation of Recreational Potential. To get around the persona issue we would have needed to very quickly reformulate the app to use remote storage such as [Google sheets](https://github.com/BioDT/uc-ces-recreation/issues/11). However, there other places where data was being written to disk that would have been more complicated to fix. 
 
 Fortunately we were able to instead publish the app to UKCEH's Posit Connect server, which does allow applications to access the filesystem.
+
+:::{.callout-note}
+#### Publishing to UKCEH's Posit Connect server
+
+Probably the easiest way to publish to Posit Connect is to install the R package `rsconnect` and run the following commands from the root of the repository:
+
+```R
+rsconnect::addServer("https://connect-apps.ceh.ac.uk", name="connect-apps.ceh.ac.uk")
+rsconnect::connectApiUser(server="connect-apps.ceh.ac.uk", account="<username>", apiKey="<api key>")
+rsconnect::deployApp(appDir=".")
+```
+
+This will take a long time if you have a lot of data to upload - for me it took up to an hour to upload ~2 gigabytes of data.
+
+You will want to add the directory `rsconnect/` to your `.gitignore` file.
+
+See the [UKCEH Posit Connect documentation](https://connect-apps.ceh.ac.uk/__docs__/user/publishing-r/) for further guidance (requires an account with UKCEH Posit Connect).
+:::
 
 There were a few minor additions required before we could make the app available to SPEAK study participants. First, the app needed to be accessible to study participants but ideally not anyone else. We agreed that it was sufficient to have a single, global password for the app which would be shared with the participants. For this we used an `R` package called [ShinyManager](https://datastorm-open.github.io/shinymanager/) which checks the username/password combination provided by the user against the correct values set as shell environment variables.
 

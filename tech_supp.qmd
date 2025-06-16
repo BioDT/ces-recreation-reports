@@ -2,76 +2,60 @@
 title: BioDT Recreational Potential Model
 subtitle: Technical Supplement
 authors:
-  - name: Joe Marsh Rossney
-    affiliation: UK Centre for Ecology & Hydrology
-  - name: Maddalena Tigli
-    affiliation: UK Centre for Ecology & Hydrology
+  - name: "Joe Marsh Rossney <a href='https://github.com/jmarshrossney' style='color: black'><i class='bi bi-github'></i></a>"
+    affiliations: UK Centre for Ecology & Hydrology
+    orcid: 0000-0002-8082-8566
+  - name: "Maddalena Tigli <a href='https://github.com/madtig' style='color: black'><i class='bi bi-github'></i></a>"
+
 date: last-modified
 date-format: long
 abstract: >
   This supplement provides technical details about the BioDT Recreational Potential model (LINK TO SPECIFIC RELEASE).
+
+code-annotations: hover
 ---
 
-## Introduction
+
+## Description of the model
+
+While there have been several publications citing the RP model, none so far have included a mathematical description of the model itself. In fact the mathematical basis of the RP model is extremely simple. Nevertheless, it is worth being fully explicit. 
+
+<!-- Were it not for an area-dependent rescaling step it would be nothing more than a linear combination (i.e. a weighted sum) at each 20 metre squared pixel.-->
 
 
-## Mathematical description of the model
+### Inputs
 
-The RP model takes two inputs:
+The RP model takes three inputs:
 
-1. A persona
-2. An area
+1. A 
+2. A _persona_, i.e. a set of 87 numbers (0--10) corresponding to the 87 unique features present in the raster data.
+3. A 'region of interest'
 
 and evaluates ...
 
-While there have been several publications citing the RP model, none so far have included a mathematical description of the model itself.
+...
 
-In fact the mathematical basis of the RP model is extremely simple. Were it not for a area-dependent rescaling step (which arguably could be dropped) it would be nothing more than a linear combination (i.e. a weighted sum) at each 20 metre squared pixel.
+### Presence/absence rasters
 
-Nevertheless, it is worth being fully explicit; by writing out the calculation in full, we can easily see where 
+We begin by defining some notation.
 
+Let $I : \mathbb{R}^2 \to \{0, 1\}$ be a binary-valued function whose domain can be interpreted as a two-dimensional spatial (e.g. lat-lon) domain, $x \in \mathbb{R}^2$. This is a mathematical representation of a single raster layer in a '[one-hot](https://en.wikipedia.org/wiki/One-hot)' representation, where a value of $I(x) = 1$ indicates presence of a feature at the coordinate $x$, and $I(x) = 0$ indicates absence. 
 
+The RP model currently includes 87 features/items grouped into four components. Each of these has its own presence/absence raster. We will therefore introduce two subscript indices and write each layer as $I_{ij}(x)$, where
 
-We begin by defining some short-hand notation.
+- $i \in \{1, 2, 3, 4\}$ labels the component to which $I_{ij}$ belongs, and
+- $j \in \{1, 2, \ldots, n_i\}$ labels the item/feature within that component, of which there are $n_i$.
 
-Let $f : \mathbb{R}^2 \to \mathbb{R}$ be a scalar function whose domain can be interpreted as a two-dimensional spatial (e.g. lat-lon) domain, $x \in \mathbb{R}^2$. This is a mathematical representation of a single _raster_ layer. A multi-layer 'stack' of $n$ rasters can be denoted by a collection of layers enumerated by a subscript index, $\left( f_1(x), f_2(x), \ldots, f_n(x)\right)$.
+For example, if we say that $i=4$ labels the 'water' component, and $j=1$ labels the 'pond' item, then $I_{41}(x)$ takes a value of $1$ whenever there is a pond at $x$, and a value of $0$ elsewhere.
 
-### Domain-dependent rescalings
+Let us be explicit in labelling the components:
 
-Let $f \vert_{\mathcal{X}}$ denote the restriction of $f$ to a domain $\mathcal{X} \subset \mathbb{R}^2$ which we will assume is simply connected, i.e. a single enclosed area with no holes. We now define a family of rescaled functions,
-
-$$
-\hat{f}(x \,; \mathcal{X}) := \frac{f(x) - \min f \big\vert_{\mathcal{X}}}{\max f \big\vert_{\mathcal{X}} - \min f \big\vert_{\mathcal{X}}} \, ,
-$$
-
-each of which corresponds to a particular choice of restriction, i.e. a particular area.
-
-Assuming that $f(x)$ is not a constant function on $\mathcal{X}$, these rescaled functions are 'normalised' to the unit interval $[0, 1]$ within the domain $\mathcal{X}$, i.e. 
-
-$$
-\min_{x\in\mathcal{X}} \hat{f}(x \,; \mathcal{X}) = 0 \, , \qquad
-\max_{x\in\mathcal{X}} \hat{f}(x \,; \mathcal{X}) = 1 \, .
-$$
-
-Of course, there is no guarantee on what values $\hat{f}(x \,; \mathcal{X})$ may take for values $x \notin \mathcal{X}$ outside of the area.
-
-It is also important to be aware that, in general,
-
-$$
-\hat{f}(x \,; \mathcal{X}_1) \neq \hat{f}(x \,; \mathcal{X}_2) \, .
-$$
-
-That is, the RP value at any given pixel should be expected to change when a different area is selected, even if the persona and the input data stays the same.
-
-
-### Basic layers
-
-For the landscape and natural features components (i.e. $i = 1,2$) the feature rasters are precisely the binary presence/absence rasters discussed previously,
-
-$$
-f_{ij}(x) = I_{ij}(x) \, , \qquad i = 1, 2 \, .
-$$
-
+| $i$ | Component        | Short code |
+| --- | ---------------- | ---------- |
+| 1   | Landscape        | `SLSRA`    |
+| 2   | Natural Features | `FIPS_N`   |
+| 3   | Infrastructure   | `FIPS_I`   |
+| 4   | Water            | `Water`    |
 
 ### Proximity contributions
 
@@ -79,169 +63,244 @@ For certain features like rivers and lakes it does not make sense to restrict th
 
 It makes sense to attempt to account for the presence of these features nearby. 
 
-Let $\mathcal{Y}_{ij} \subset \mathbb{R}^2$ denote the set of coordinates in which the feature $(ij)$ is present, i.e.
+Let $\mathcal{P}_{ij} \subset \mathbb{R}^2$ denote the set of coordinates in which the feature $(ij)$ is present, i.e.
 
 $$
-\mathcal{Y}_{ij} := \left\{ y \in \mathbb{R}^2 \mid \mathbb{I}_{ij}(y) \right\}
-$$
+\mathcal{P}_{ij} := \left\{ x' \in \mathbb{R}^2 \mid I_{ij}(x') = 1 \right\} \, .
+$$ {#eq-presence}
 
-First, each pixel is assigned a value that is the distance to the *nearest* feature.
+We first compute a 'distance raster' in which each pixel is assigned a value that is the (Euclidean) distance to the *nearest* pixel in which the feature $(ij)$ is present,
 
 $$
-d_{ij}(x) = \min_{y\in \mathcal{Y}_{ij}} \lVert x - y \rVert_2
-$$
+d_{ij}(x) = \min_{x'\in \mathcal{P}_{ij}} \lVert x - x' \rVert_2 \, ,
+$$ {#eq-distance}
 
-where $\lVert x - y \rVert_2 = \sqrt{(x_1 - y_1)^2 + (x_2 - y_2)^2}$ is the usual Euclidean distance.
+where $\lVert x - x' \rVert_2 = \sqrt{(x_1 - x'_1)^2 + (x_2 - x'_2)^2}$.
 
 These distances must be mapped to the unit interval such that $0 \mapsto 1$ and $\infty \mapsto 0$, i.e. so that presence of the feature in this pixel results in the highest value of $1$, tailing off to $0$ when the feature is very far away.
 
-There are many different ways to achieve this. For historical reasons (https://doi.org/10.1016/j.ecolind.2014.04.018) the function chosen is a smooth, monotonically decreasing function in the logistic family,
+There are many different ways to achieve this. Following @Paracchini2014 [p. 374 -- Eq. 1], the function chosen is a smooth, monotonically decreasing function in the logistic family,
 
 $$
-f_{ij}(x) = \frac{\kappa + 1}{\kappa + \exp(\alpha \, d_{ij}(x))} \, , \qquad i=3,4 \, .
-$$ 
-{#eq-proximity}
+u(d_{ij}(x) \,; \alpha, \kappa) = \frac{\kappa + 1}{\kappa + \exp(\alpha \, d_{ij}(x))} \, .
+$$  {#eq-proximity}
 
-It remains to specify values for the parameters $\kappa$ and $\alpha$, the latter of which is most important since it determines the rate at which the value of $f_{ij}$ declines as the distance to the nearest feature increases.
+It remains to specify values for the parameters $\kappa$ and $\alpha$, the latter of which is most important since it determines the rate at which the value of $u$ declines as the distance to the nearest feature increases.
 
 The parameters chosen in the original version of this code were^[The provenance of these values, which date back to the [earliest version of the code](https://github.com/BioDT/uc-ces/commit/5c5961376df6753725e634378fa709dac1050ff6), has been lost. Somewhat confusingly, earlier versions of the code also contained an explicit cutoff at $d=1500$, suggesting that the authors intended distances below this to result in meaningful contributions to the RP. In the author's opinion, there is no reason whatsoever to think that these values are particularly meaningful. The precision with which $\alpha$ is given is a particular curiosity.]
 
 $$
 \kappa = 6 \, , \qquad \alpha = 0.01011 \, ,
-$$
+$$ {#eq-proxparams}
 
 resulting in a function that halves at approximately $d=175$ (metres) and drops to $0.1$ at approximately $d=375$. At this distance, features with a user-provided score of $10$ (i.e. the highest) would be equivalent to a local feature given a score of $1$ (the lowest). It is safe to assume that at distances greater than this the contribution from the feature would be indiscernible to the user.
 
-(See plot here: https://github.com/BioDT/uc-ces-recreation/issues/19)
+==See plot here: https://github.com/BioDT/uc-ces-recreation/issues/19 ==
+
+### Calculation of a single component
+
+As mentioned previously, there are 87 features in total, each of which corresponds to (a) persona score,
+
+$$
+\rho_{ij} \in \{0, 1, \ldots, 10\} \, ,
+$$ {#eq-score}
+
+and (b) a raster layer $f_{ij}(x)$. For the landscape and natural features components (i.e. $i = 1,2$) the feature rasters are precisely the binary presence/absence rasters discussed previously,
+
+$$
+f_{ij}(x) = I_{ij}(x) \, , \qquad i = 1, 2 \, .
+$$ {#eq-raster12}
+
+For the infrastructure and water components ($i=3, 4$) the features rasters contain the proximity contributions described above,
 
 
 $$
 f_{ij}(x) = u(d_{ij}(x) \,; \alpha, \kappa) \, , \qquad i = 3, 4 \, .
-$$
+$$ {#eq-raster23}
 
-### Calculation of a single component
-
-Each component is calculated as a simple weighted sum of the features (items) contained within it,
+Each component is calculated as a simple weighted sum of the features contained within it,
 
 $$
-C_i(x \,; \{\rho_i\}) = \sum_{j=1}^{n_i} \rho_{ij} f_{ij}(x) \, .
-$$
+F_i(x \,; \rho_i) = \sum_{j=1}^{n_i} \rho_{ij} f_{ij}(x) \, ,
+$$ {#eq-component}
 
-It is then rescaled within the chosen area according to the procedure above
+where we have permitted $\rho_i$ to denote the set of persona scores $\{\rho_{i1}, \rho_{i2}, \ldots, \rho_{i n_i} \}$ for the $i$-th component.
 
-$$
-C_i(x \,; \rho_i) \longrightarrow \hat{C}_i(x \,; \{\rho_i\}, \mathcal{X})
-$$
+### Domain-dependent rescalings
 
-The four rescaled components are then added
+Let $F \vert_{\mathcal{R}}$ denote the restriction of a function $F$ to a domain $\mathcal{R} \subset \mathbb{R}^2$ which defines the region in which we wish to compute Recreational Potential. We now define a family of rescaled functions,
 
 $$
-\mathrm{RP}(x \,; \rho_i, \mathcal{X}) = \sum_{i=1}^4 \hat{C}_i(x \,; \rho_i , \mathcal{X})
-$$
+\hat{F}(x \,; \mathcal{R}) := \frac{F(x) - \min F \big\vert_{\mathcal{R}}}{\max F \big\vert_{\mathcal{R}} - \min F \big\vert_{\mathcal{R}}} \, ,
+$$ {#eq-rescale}
 
-and once again rescaled (in the same area) to make the result fall in the interval $[0, 1]$.
+each of which corresponds to a particular choice of restriction, i.e. a particular region of interest.
+
+Assuming that $F(x)$ is not a constant function on $\mathcal{R}$, these rescaled functions are 'normalised' to the unit interval $[0, 1]$ *within* the region of interest, i.e. 
 
 $$
-\mathrm{RP} \longrightarrow \widehat{\mathrm{RP}}
+\min_{x\in\mathcal{R}} \hat{F}(x \,; \mathcal{R}) = 0 \, , \qquad
+\max_{x\in\mathcal{R}} \hat{F}(x \,; \mathcal{R}) = 1 \, .
+$$ {#eq-minmax}
+
+It is important to be aware that with this approach to rescaling introduces a dependence on the region of interest. That is, 
+
 $$
+\hat{F}(x \,; \mathcal{R}_1) \neq \hat{F}(x \,; \mathcal{R}_2) \, .
+$$ {#eq-regiondependence}
+
+Thus, the RP value at any given pixel should be expected to change when a different area is selected, even if the persona and the input data stays the same.
+
+### Calculation of Recreational Potential
+
+
+To compute the Recreational Potential value, the four rescaled components are summed,
+
+$$
+F_{\mathrm{RP}}(x \,; \rho, \mathcal{R}) = \sum_{i=1}^4 \hat{F}_i(x \,; \rho_i , \mathcal{R}) \, ,
+$$ {#eq-rp}
+
+and rescaled $F_{\text{RP}} \longrightarrow \hat{F}_\text{RP}$ using @eq-rescale once more (with the same $\mathcal{R}$) so that the result falls in the interval $[0, 1]$.
 
 
 ## Overview of the code
 
 ### Repository contents
 
-Output of the `tree` command:
+The repository is organised in the following way, as shown using the `tree` command:
 
 ```txt
-├── CONTRIBUTING.md
-├── DESCRIPTION
+├── CONTRIBUTING.md  # <1>
+├── DESCRIPTION  # <2>
 ├── inst
 │   ├── examples
-│   │   ├── capture_messages.R
+│   │   ├── capture_messages.R # <3>
 │   │   ├── compute_component.R
 |   |   ...
-│   │   └── save_persona.R
+│   │   └── save_persona.R  # <3>
 │   ├── extdata
 │   │   ├── config
-│   │   │   └── config.csv
+│   │   │   └── config.csv  # <4>
 │   │   ├── personas
-│   │   │   └── presets.csv
+│   │   │   └── presets.csv  # <5>
 │   │   ├── rasters
 │   │   │   ├── Bush
-│   │   │   │   ├── FIPS_I.tif
+│   │   │   │   ├── FIPS_I.tif  # <6>
 │   │   │   │   ├── FIPS_N.tif
 │   │   │   │   ├── SLSRA.tif
-│   │   │   │   └── Water.tif
+│   │   │   │   └── Water.tif   # <6>
 │   │   │   └── Scotland
-│   │   │       ├── FIPS_I.tif
+│   │   │       ├── FIPS_I.tif  # <7>
 │   │   │       ├── FIPS_N.tif
 │   │   │       ├── SLSRA.tif
-│   │   │       └── Water.tif
+│   │   │       └── Water.tif   # <7>
 │   │   └── shapefiles
 │   │       ├── Bush
-│   │       │   ├── Bush.cpg
+│   │       │   ├── Bush.cpg  # <8>
 │   │       │   ├── Bush.dbf
 │   │       │   ├── Bush.prj
 │   │       │   ├── Bush.shp
-│   │       │   └── Bush.shx
+│   │       │   └── Bush.shx  # <8>
 │   │       └── Scotland
-│   │           ├── Scotland.cpg
+│   │           ├── Scotland.cpg  # <9>
 │   │           ├── Scotland.dbf
 │   │           ├── Scotland.prj
 │   │           ├── Scotland.shp
-│   │           └── Scotland.shx
+│   │           └── Scotland.shx  # <9>
 │   └── scripts
 │       ├── cli
-│       │   ├── app.sif
-│       │   ├── main.R
+│       │   ├── app.sif  # <10>
+│       │   ├── main.R  # <11>
 │       │   └── README.md
 │       └── data_production
-│           ├── app.sif
-│           ├── main.R
+│           ├── app.sif  # <12>
+│           ├── main.R  # <13>
 │           └── README.md
-├── LICENSE
-├── LICENSE.md
+├── LICENSE  # <14>
+├── LICENSE.md  # <14>
 ├── man
-│   ├── assert_to_bool.Rd
+│   ├── assert_to_bool.Rd  # <15>
 │   ├── assert_valid_bbox.Rd
 │   ...
-│   └── timed.Rd
-├── NAMESPACE
-├── R                     # <1>
-│   ├── app_run.R         # <1>
-│   ├── app_server.R      # <1>
-│   ├── app_text.R        # <1>
-│   ├── app_theme.R       # <1>
-│   ├── app_ui.R          # <1>
-│   ├── bbox.R            # <1>
-│   ├── config.R          # <1>
-│   ├── data_download.R   # <1>
-│   ├── data_input.R      # <1>
-│   ├── data_production.R # <1>
-│   ├── example.R         # <1>
-│   ├── legacy.R          # <1>
-│   ├── persona.R         # <1>
-│   ├── recreation.R      # <1>
-│   └── utils.R           # <1>
+│   └── timed.Rd  # <15>
+├── NAMESPACE  # <16>
+├── R
+│   ├── app_run.R         # <17>
+│   ├── app_server.R
+│   ├── app_text.R
+│   ├── app_theme.R
+│   ├── app_ui.R
+│   ├── bbox.R
+│   ├── config.R
+│   ├── data_download.R
+│   ├── data_input.R
+│   ├── data_production.R
+│   ├── example.R
+│   ├── legacy.R
+│   ├── persona.R
+│   ├── recreation.R
+│   └── utils.R           # <17>
 ├── README.md
-├── renv.lock
+├── renv.lock  # <18>
 ├── scripts
-│   ├── cli_test.sh
-│   ├── dev.sh
-│   ├── pre-commit.R
+│   ├── cli_test.sh  # <19>
+│   ├── dev.sh  # <20>
+│   ├── pre-commit.R  # <21>
 │   ├── README.md
-│   └── run_app.sh
+│   └── run_app.sh  # <22>
 ├── tests
 │   └── testthat
-│       └── test_io.R
+│       └── test_io.R  # <23>
 └── vignettes
-    ├── compute_potential.qmd
+    ├── compute_potential.qmd  # <24>
     ├── personas.qmd
-    └── run_app.qmd
+    └── run_app.qmd  # <24>
 ```
 
-1. Source code for the package
+1. Instructions for potential contributors.
+2. The standard [`DESCRIPTION` file](https://r-pkgs.org/description.html) for R packages, containing metadata about the package.
+3. Simple examples using the package functions, which get included in the generated documentation.
+4. Configuration file, mapping layer names to raster values (for the pre-processing step) and descriptions (used in the Shiny app).
+5. File containing two 'preset' personas: the 'hard' and 'soft' recreationalists described in @Rolph2024.
+6. Dataset covering a small area, for use in examples and vignettes.
+7. Dataset for all of Scotland. This is not included in the package and is instead downloaded separately.
+8. Shapefile and auxiliary data for the example dataset.
+9. Shapefile and auxiliary data for the full Scotland-wide dataset.
+10. Container definition file used to build a Singularity container for `cli/main.R`.
+11. Command-line script for the model taking a persona and bounding box as input. This is expected to be called from the main BioDT app.
+12. Container definition file used to build a Singularity container for `data_production/main.R`.
+13. Script that executes all steps of the data pre-processing pipeline.
+14. MIT licenses (`.md` for the repository, no extension for the package).
+15. Compiled documentation in Markdown format, generated using [roxygen2](https://roxygen2.r-lib.org/).
+16. The standard [`NAMESPACE`](https://r-pkgs.org/namespace.html) file for R packages, containing a list of functions provided by the package.
+17. Source code for the package.
+18. [`renv`](https://rstudio.github.io/renv/) lockfile used (in theory) to install packages deterministically. Used when deploying app to Posit Connect.
+19. Bash script that runs `Rscript inst/scripts/cli/main.R` with example data.
+20. Bash script that runs `pre-commit` if available, or else `Rscript scripts/pre-commit.R`, as well as the tests.
+21. R script that emulates the behaviour of `pre-commit` when run, in case the latter is not installed.
+22. Bash script that loads the local version of the package and runs the Shiny app, for convenience during development.
+23. A file containing [unit tests](https://testthat.r-lib.org/). Essentially tokenistic, but provides a template for more unit tests to be added in future.
+24. Some bare-bones [vignettes](https://r-pkgs.org/vignettes.html) demonstrating simple use of the package.
 
+:::{.callout-note}
+#### A note on the `inst/` directory
+
+Apparently it has become standard practice to use the `inst/` directory to distribute additional elements such as scripts and Shiny apps along with the package. This is the practice we have adopted here. There are really just two important things to know about the `inst/` directory:
+
+First, that its contents are copied to the top-level of the package when the package is built. Hence, the top level of the built package will contain `examples/`, `extdata/` and `scripts/` (the directory containing shell scripts is not included in the package).
+
+Hence, in order for file paths to work when the package is installed, one must omit `inst/` from the path. But this means the path will not work during development.
+
+The way to regain consistency between the two situations (installed versus not installed) is to use[`system.file`](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/system.file). There are several examples of this in the code, including the one below, where paths to files or directories under `inst/` needed to be constructed.
+
+```R
+get_preset_persona_file <- function() {
+    system.file("extdata", "personas", "presets.csv",
+        package = "biodt.recreation", mustWork = TRUE
+    )
+}
+```
+:::
 
 ### Production of input data
 
@@ -303,32 +362,3 @@ Memory use - terra only has to load one pixel at a time per parallel thread. Thi
 
 #### Higher memory use in distance
 
-
-## How to
-
-:::{.callout-note}
-##### Publishing to UKCEH's Posit Connect server
-
-Probably the easiest way to publish to Posit Connect is to install the R package `rsconnect` and run the following commands from the root of the repository:
-
-```R
-rsconnect::addServer("https://connect-apps.ceh.ac.uk", name="connect-apps.ceh.ac.uk")
-rsconnect::connectApiUser(server="connect-apps.ceh.ac.uk", account="<username>", apiKey="<api key>")
-rsconnect::deployApp(appDir=".")
-```
-
-This will take a long time if you have a lot of data to upload - for me it took up to an hour to upload ~2 gigabytes of data.
-
-You will want to add the directory `rsconnect/` to your `.gitignore` file.
-
-See the [UKCEH Posit Connect documentation](https://connect-apps.ceh.ac.uk/__docs__/user/publishing-r/) for further guidance (requires an account with UKCEH Posit Connect).
-:::
-
-
-:::{.callout-tip}
-##### Variable names in R
-
-Unlike Python, R does not allow variable names to have leading underscores. That is, `x <- 10` is fine but `_x <- 10` is not.
-
-In our case the use of leading underscores led to a very confusing error message ([#17](https://github.com/BioDT/uc-ces-recreation2/issues/17)).
-:::

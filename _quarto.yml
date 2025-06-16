@@ -22,7 +22,7 @@ format:
     toc-location: right
     code-overflow: wrap
     highlight-style: github
-    html-math-method: katex
+    html-math-method: mathjax
 
   #pdf:
     #colorlinks: true
