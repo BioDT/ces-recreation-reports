@@ -1,0 +1,513 @@
+---
+title: BioDT Recreational Potential Model
+subtitle: Developer Report
+authors:
+  - name: "Joe Marsh Rossney <a href='https://github.com/jmarshrossney' style='color: black'><i class='bi bi-github'></i></a>"
+    affiliations: UK Centre for Ecology & Hydrology
+    orcid: 0000-0002-8082-8566
+  - name: "Maddalena Tigli <a href='https://github.com/madtig' style='color: black'><i class='bi bi-github'></i></a>"
+
+date: today
+date-format: long
+abstract: >
+  This report provides a high-level, chronological overview of development work carried out between November 2024 and June 2025. The intention is to provide some context and explanation for posterity. We also make several recommendations for further development work. Most items are accompanied by one or more links to issues and/or pull requests on GitHub, which often contain further details and references to specific lines of code.
+citation:
+  title: "BioDT Recreational Potential Model: Developer Report"
+---
+
+## Background
+
+### Existing code
+
+The Recreational Potential model has had a complicated history of development involving several individuals working independently in different languages (QGIS, Python and R).
+
+As of November 2024, the model existed as an interactive [Shiny app](https://shiny.posit.co/) written in the `R` language. The actual computation of RP was deeply intertwined with Shiny app code and pre-processing of raster data, although much of it was factored out into functions.
+
+The user could load, edit and save personas which were stored in a single `.csv` file. They could then choose between a selection of geographical areas to run the model, corresponding to a collection of shapefiles stored alongside the code.
+
+As well as the persona `.csv` and shapefiles, the model required input data in the form of raster files (`.tif` extension) covering Scotland at 20 metre resolution. For the most part (with the exception of the slope layer) these raster were integer-valued, with different integers corresponding to different categories of land cover. For example, each pixel in the `Water_Lakes` layer could take any of the following values:
+
+| Raster Value | Corresponding Feature |
+| ------------ | --------------------- |
+| 5            | Pond                  |
+| 1            | Lochan                |
+| 4            | Small Loch            |
+| 2            | Medium Loch           |
+| 3            | Large Loch            |
+| 6            | Major Loch            |
+| 0 or `NA`    | No feature present    |
+
+Both code and data were held on [NERC DataLabs](https://eds.ukri.org/tools/datalabs), a browser-based service for environmental data science resembling [JupyterHub](https://jupyter.org/hub) and [Google Colab](https://colab.google/) in which [Jasmin](https://jasmin.ac.uk/) users can run instances of [R Studio](https://posit.co/download/rstudio-desktop/) and publish Shiny apps.
+
+Parts of the code were being tracked using git, with the remote living in a private (but now public) repository within the [`BioDT` GitHub organisation](https://github.com/BioDT), although the most up-to-date code on DataLabs was several weeks ahead of the most recent commit.
+
+### SPEAK
+
+The objective of the SPEAK study (REF) was to gain insights into the RP model from the perspective of users. The study recruited approximately 40 members of the public, who would be given access to the RP app to use in the planning stage of recreational activities. The participants would then go off and do an activity, and then fill out a post-activity survey. Participants would be provided with GPS-enabled [Garmin](https://www.garmin.com/en-GB/) watches which would give the researchers the means to track participants' paths during their recreational activities.
+
+### BioDT
+
+The requirements of BioDT were quite different than those of SPEAK. The BioDT consortium have collaborated on an R Shiny app which attempts to bring the various models, or 'prototype Digital Twins' (pDTs), together through a single user interface.
+
+The way this was supposed to end up working is this:
+
+- Users would interact with the main [BioDT app](https://app.biodt.eu/app/biodtshiny), providing the information needed to run one or more of the available models (e.g. the Biodiversity model and the Recreational Potential model, which make up the Cultural Ecosystem Services pDT).
+- A request would then be sent to run the model(s), with inputs provided by the user, on the [LUMI HPC cluster](https://www.lumi-supercomputer.eu/). Since access to LUMI is restricted, the request is made via an intermediate layer called [Lexis](https://docs.lexis.tech/).
+- This would trigger a [slurm](https://slurm.schedmd.com/overview.html) job submission to run a [containerised](https://sylabs.io/) version of the model(s) on LUMI.
+- The results would be transferred back, again via Lexis, for the user to view in the app.
+
+Thus, from the BioDT perspective, embedding the RP model within another Shiny app was unhelpful. Instead, the RP model needed to be runnable via a command line script taking (i) a persona and (ii) a target region as command-line arguments. This script would then be containerised to facilitate running on LUMI.
+
+### Initial scope & development objectives
+
+The main issues motivating the move to bring in additional software developers were:
+
+- Access to the RP app required an account on DataLabs, which could not be provided to members of the public.
+- The RP app was too slow: very small regions (e.g. Bush estate) took minutes to run, and larger regions (Cairngorms) took hours.
+- Potential users were limited to computing RP within the pre-determined regions, which did not cover all of Scotland.
+- In its existing form, i.e. as a Shiny app, the model could not be incorporated in the main BioDT app.
+
+Hence, the original development objectives were:
+
+1. Make the app accessible to participants in the SPEAK study.
+2. Improve the execution speed and ability to scale to larger areas.
+3. Provide a means for users to choose the region of interest.
+4. Disaggregate the RP computation from the Shiny app, and reformulate it so that it could be run on LUMI via the BioDT app.
+
+Initially, a total of five weeks (split 3:2 between JMR:MT) were allocated for this work. However, more time was made available as the scope of the work increased as described below.
+
+### Expanded scope & revised development objectives
+
+After gaining familiarity with the codebase and a better understanding of the objectives and the way the model was intended to function, it became clear that the most straightforward way to meet all of the objectives simultaneously was to fully rewrite the code from scratch. Some outstanding issues required substantial work to fix within the existing framework, but could be neatly circumvented in a full rewrite. In addition, a full rewrite would be the most effective way to improve the speed and scalability (objective 2) and the flexibility to add or modify functionality (including objective 3).
+
+==TODO: revised objectives==
+
+## Overview of work done
+
+### Reconfiguration of git repository & developer setup
+
+Although it is possible to give multiple users access to a DataLabs notebook, simultaneous access by multiple users is not currently supported. Furthermore, since all users share the same user space, only one user may cache their git configuration and GitHub credentials.
+
+The first task was therefore to move development off of DataLabs and use GitHub for version control in a proper multi-developer setup. The most recent (as of 22/11/2024) version of the code and data was downloaded from DataLabs and added _without modification_ to a new 'orphan' git branch --- see [commit a795456](https://github.com/BioDT/uc-ces-recreation2/tree/a795456f38d9c9c26eb75418823adabaa67ac228).
+
+After some discussion, the old `main` branch was moved to [`old-main`](https://github.com/BioDT/uc-ces-recreation/tree/old-main) to preserve the history, and tagged [`2024-model`](https://github.com/BioDT/uc-ces-recreation/tree/2024-model) to facilitate rediscovery in future.^[The `2024-model` tag on GitHub is a snapshot of all of the code that was on DataLabs. This included multiple versions of the RP model. The 'working version' at that time was kept under the [`R_ShinyVersion_ReducedModel/` subdirectory](https://github.com/BioDT/uc-ces-recreation/tree/2024-model/R_ShinyVersion_ReducedModel).] The new branch was renamed `main` and another branch `develop` was created by branching from `main`. `develop` was assigned as the default branch to align with a workflow where contributions are merged via Pull Requests to `develop`, which is periodically merged with `main` after ensuring that everything is functional and self-consistent.
+
+Run-time calls to `install.packages` were removed and instead the [`renv`](https://rstudio.github.io/renv/index.html) package was used to compile a list of version-pinned dependencies (see comments in [#1](https://github.com/BioDT/uc-ces-recreation/pull/1) for further explanation).
+
+**Pull Requests merged:**
+
+- [A working Singularity container with minimal modifications to the existing code #1](https://github.com/BioDT/uc-ces-recreation/pull/1) (this was a red herring stemming from a misunderstanding)
+- [Introduce formatR #13](https://github.com/BioDT/uc-ces-recreation/pull/13) (later replaced by StyleR)
+
+**Issues closed:**
+
+- [The containerisation branch needs to be manually merged with `main` #2](https://github.com/BioDT/uc-ces-recreation/issues/2)
+
+### Publishing existing app to Posit Connect
+
+The SPEAK study was scheduled to launch in early February 2025. Hence, there was a quite urgent need to provide a version of the RP app that could be accessed by study participants through their browser. This led to the decision to prioritise publishing the RP app in its existing form (i.e. objective 1), and postpone development work towards the other objectives (2--4).
+
+The initial expectation was that publishing the app through DataLabs would be quick and simple. However, it quickly became clear that this would not be feasible because DataLabs does not give deployed apps write access to the filesystem. This was a problem for us since files were being written to disk during the creation of personas and at various points during the calculation of Recreational Potential. To get around the persona issue we would have needed to very quickly reformulate the app to use remote storage such as [Google sheets](https://github.com/BioDT/uc-ces-recreation/issues/11). However, there other places where data was being written to disk that would have been more complicated to fix. 
+
+Fortunately we were able to instead publish the app to UKCEH's Posit Connect server, which does allow applications to access the filesystem.
+
+There were a few minor additions required before we could make the app available to SPEAK study participants. First, the app needed to be accessible to study participants but ideally not anyone else. We agreed that it was sufficient to have a single, global password for the app which would be shared with the participants. For this we used an `R` package called [ShinyManager](https://datastorm-open.github.io/shinymanager/) which checks the username/password combination provided by the user against the correct values set as shell environment variables.
+
+UKCEH requires that user-facing apps meet a set of criteria before they can be published.
+
+1. Adhere to UKCEH branding guidelines.
+2. Include a link to the [UKCEH privacy notice](https://www.ceh.ac.uk/privacy-notice).
+3. Include a contact email.
+
+Satisfying these requirements is straightforward with Shiny apps especially, where there is a template theme available at [github.com/NERC-CEH/UKCEH_shiny_theming](https://github.com/NERC-CEH/UKCEH_shiny_theming). However, in our case applying this theme caused some buttons to become invisible, which had to be fixed with some custom CSS as detailed in this [Issue](https://github.com/NERC-CEH/UKCEH_shiny_theming/issues/5).
+
+**Pull Requests merged:**
+
+- [Publishing the Recreation Potential app to Posit Connect #14](https://github.com/BioDT/uc-ces-recreation/pull/14)
+
+**Issues closed:**
+
+- [Global password for Shiny app #5](https://github.com/BioDT/uc-ces-recreation/issues/5) (see [commit ab21bd](https://github.com/BioDT/uc-ces-recreation/pull/14/commits/ab21bd1a81f1b3ec969d2eb5486598db138d511c) for implementation)
+- [Comply with UKCEH publishing guidelines #15](https://github.com/BioDT/uc-ces-recreation/issues/15)
+- [App crashes when loading custom persona #17](https://github.com/BioDT/uc-ces-recreation/issues/17)
+
+### Full rewrite of the RP model
+
+The original aim of [#18](https://github.com/BioDT/uc-ces-recreation/pull/18) was to _refactor_ the existing code to make it possible to run the RP model via a script, independently of the Shiny app. As explained earlier, however, the decision was taken to rewrite the code from scratch.
+
+The model itself --- i.e. the mapping of persona scores, area of interest and raster data to Recreational Potential scores --- has never (to our knowledge) been defined unambiguously. Most aspects of the model could be figured out by tracing through the existing code, but there were some examples where the intended behaviour was unclear and plausibly different from the actual behaviour. Thus in order to construct the definition given in the Technical Supplement required some inference.
+
+In the process of arriving at a mathematical definition of the RP model (==TODO, link to Tech Supp==), it became transparent that the 'dynamical' part --- i.e. the calculations involving user-provided inputs --- was little more than a sum of pre-computed raster layers weighted by the persona scores. The 'non-dynamical' part dealt with quantities that only needed to be computed _once_, ahead of time, and stored for later use.
+
+Hence, the revised design split the code into three independent parts:
+
+1. 'Non-dynamic' raster pre-processing, i.e. production of input data (independent of user).
+2. 'Dynamic' calculation of Recreational Potential (based on user-provided persona and region of interest).
+3. Implementation of the Shiny app.
+
+Concretely, the dynamic part consisted of reading the rasters from the disk, and then performing the following steps:
+
+1. For each of the four components:
+	1. Multiply each layer by a scalar.
+	2. Sum the layers.
+	3. Rescale the result to the unit interval.
+2. Sum the components.
+3. Rescale the result to the unit interval.
+
+Steps 1.1 and 1.2 are better treated as a single step; an independent multiply-and-sum at each spatial location. This is close to the simplest mathematical operation one can do on a computer, and is both extremely quick and highly parallelisable. All of the slower, more memory-intensive computations could be performed up-front.
+
+:::{.callout-note}
+#### One-hot encoding
+
+In the 2024 model, the raster layers (were supposed to, but see [#23](https://github.com/BioDT/uc-ces-recreation/issues/23)) take integer values, so a layer might look something like this:
+
+$$
+C_i = \begin{bmatrix}
+\ddots \\
+& 1 & 0 & 0 \\
+& 2 & 1 & 0 \\
+& 2 & 1 & 3 & \\
+& & & & \ddots
+\end{bmatrix}
+$$
+
+These integers are really labels for different categories corresponding to the features present in the layer (see the table at the top of this document).
+
+These values are then supposed to be remapped to user scores, which involves an indexing operation for each layer, effectively `values(layer) <- mapping[values(layer)]`. This isn't particularly inefficient or problematic in and of itself, but it requires serious due diligence with the input data. For example, one may not perform any operation on the input data that assumes continuous data, such as reprojecting.
+
+In order to pre-compute the proximity layers ([#21](https://github.com/BioDT/uc-ces-recreation/issues/21) ) we needed to switch to a *one-hot* representation, where each feature type gets its own layer that is boolean valued --- the feature is either present or not.
+
+$$
+C_i \overset{\text{one hot}}{\longrightarrow} ( C_{i0}, C_{i1}, C_{i2}, C_{i3}, \ldots)
+$$
+
+$$
+\begin{align}
+C_{i0} &= \begin{bmatrix}
+\ddots \\
+& 0 & 1 & 1 \\
+& 0 & 0 & 1 \\
+& 0 & 0 & 0 & \\
+& & & & \ddots
+\end{bmatrix} \, , \quad
+C_{i1} = \begin{bmatrix}
+\ddots \\
+& 1 & 0 & 0 \\
+& 0 & 1 & 0 \\
+& 0 & 1 & 0 & \\
+& & & & \ddots
+\end{bmatrix} \, , \\
+C_{i2} &= \begin{bmatrix}
+\ddots \\
+& 0 & 0 & 0 \\
+& 1 & 0 & 0 \\
+& 1 & 0 & 0 & \\
+& & & & \ddots
+\end{bmatrix} \, , \quad
+C_{i3} = \begin{bmatrix}
+\ddots \\
+& 0 & 0 & 0 \\
+& 0 & 0 & 0 \\
+& 0 & 0 & 1 & \\
+& & & & \ddots
+\end{bmatrix} \, .
+\end{align}
+$$
+
+If we run with this and give all 87 feature types their own layer, the recreational potential can be computed in a single vectorised step as a weighted sum of layers.
+
+This has a number of advantages:
+
+- Avoids indexing step - just multiplication and addition
+- By representing present/absent as 1/0, interpolations (e.g. due to a reprojection) can be meaningfully interpreted
+- Reflects how we should conceptualise the recreation potential - nothing more complicated than a linear combination
+- Allows for more efficient memory management - only needs to hold 2 layers in memory at any time (the accumulated sum + the next layer to be added to the sum)
+
+:::
+
+This decomposition into a one-time pre-processing stage and a dynamical stage, which would be rendered transparent by any good definition of the model, is the essential reason for the multiple orders of magnitude improvement in speed and memory use. Further gains resulted from a number of factors made possible through the rewrite:
+
+- Eliminated intermediate raster i/o operations that were previously required to keep the peak memory requirements within the total amount of memory available.
+- Replaced indexing operations with multiply operations, made possible by using a one-hot representation for the input rasters, instead of integer-valued categorical rasters.
+- Replaced loops with vectorised operations using [`terra::app`](https://rspatial.github.io/terra/reference/app.html) and related functions.
+
+There were also a number of subtle bugs in the original code that led to incorrect outputs ([#22](https://github.com/BioDT/uc-ces-recreation/issues/22), [#23](https://github.com/BioDT/uc-ces-recreation/issues/23)) and were fixed during the rewrite.
+
+**Pull Requests merged:**
+
+- [Rewrite and separate model code from shiny app #18](https://github.com/BioDT/uc-ces-recreation/pull/18)
+- [Rework input data production #29](https://github.com/BioDT/uc-ces-recreation/pull/29)
+
+**Issues closed:**
+
+- [Peak memory use is too high #4](https://github.com/BioDT/uc-ces-recreation/issues/4)
+- [Running the model without the Shiny app #6](https://github.com/BioDT/uc-ces-recreation/issues/6)
+- [Separation of input data and configuration, outputs and intermediate artefacts #7](https://github.com/BioDT/uc-ces-recreation/issues/7)
+- [Remove redundant packages #12](https://github.com/BioDT/uc-ces-recreation/issues/12)
+- [App crashes if name of persona `.csv` does not match variable contained therein #16](https://github.com/BioDT/uc-ces-recreation/issues/16)
+- [Persona csv need only contain a list of numbers #20](https://github.com/BioDT/uc-ces-recreation/issues/20)
+- [Proximity rasters can be pre-computed #21](https://github.com/BioDT/uc-ces-recreation/issues/21)
+- [Proximity should be computed using unique features instead of non-unique persona scores #22](https://github.com/BioDT/uc-ces-recreation/issues/22)
+- [Mismatch between integer-integer lookup table and double-valued raster data breaks the raster reclassification step #23](https://github.com/BioDT/uc-ces-recreation/issues/23)
+- [Input rasters should be integer-typed #24](https://github.com/BioDT/uc-ces-recreation/issues/24)
+- [Missing values in rasters should be consistently NA, not NaN #26](https://github.com/BioDT/uc-ces-recreation/issues/26)
+- [One-hot encode the input raster #27](https://github.com/BioDT/uc-ces-recreation/issues/27)
+
+### Full rewrite of the Shiny app
+
+Although the original plan was to deploy the existing app for the SPEAK study, and only then move on to look at improvements in speed and scale, some factors outside of our immediate control meant that the model rewrite ([#18](https://github.com/BioDT/uc-ces-recreation/pull/18)) was essentially complete before the original app was shared with participants.
+
+This opened up the tantalising possibility of using the new model back-end, which was significantly faster and able to work with arbitrary regions of interest rather than the fixed set of shapefiles, for the SPEAK study. However, the new back-end required a new front-end Shiny app.
+
+:::{.callout-note}
+#### Use of Generative AI tools
+At this point I (JMR) wish to be transparent about my use of Generative AI tools for explaining and generating code. For a number of reasons this seemed a 'good' time to lean on Generative AI: the tight deadline (a few days), low stakes (the user interface cannot be 'incorrect' and need not be well-written), and the fact that I had never written a Shiny app before (or any `R` at all for that matter), combined to influence my decision. I used the GPT-4 Turbo model through the [Edinburgh Language Model (ELM)](https://elm.edina.ac.uk/) interface provided by [Edina](https://edina.ac.uk/) at the University of Edinburgh.
+
+In this case I found Generative AI to be very helpful; I was able to learn R Shiny principles and syntax 'on the fly' through exposure to lots of generated examples. This stands in contrast to other frustrating and unproductive experiences I have had with Generative AI in domains where I have more existing knowledge and interest in the subject.
+
+Part of the reason that Generative AI works well here is that R Shiny is extremely popular so there is an abundance of existing R Shiny code available on the internet. I wish to acknowledge the countless individuals whose work (or hobby) shared online has contributed to the generated outputs that I used during this work.
+:::
+
+The rewritten app was released to SPEAK study participants in the second week of February. Several issues and possible UI improvements were identified by users in the early period (see list of Issues below). These were addressed and the app redeployed.
+
+As an example, it is important to inform users if there is something wrong with the area selected, e.g. it is too big, too small, or does not overlap with an area in which there is data. However, some initial naive mechanisms for checking these properties were quite inefficient, so as to be noticeable from the user perspective. [#79](https://github.com/BioDT/uc-ces-recreation/pull/79) improves the way bounding boxes are checked for validity (size, location within Scotland) using `terra::relate`. 
+
+To ensure that the specific version of the app used in this study could be identified in future, the final deployment (February 25th) was tagged [`SPEAK-prerelease`](https://github.com/BioDT/uc-ces-recreation/tree/SPEAK-prerelease) on GitHub.
+
+**Pull Requests merged:**
+
+- [Rewrite shiny app #28](https://github.com/BioDT/uc-ces-recreation/pull/28)
+- [App improvements #30](https://github.com/BioDT/uc-ces-recreation/pull/30)
+- [Posit Connect #37](https://github.com/BioDT/uc-ces-recreation/pull/37)
+- [Final-final app updates before study launch #38](https://github.com/BioDT/uc-ces-recreation/pull/38)
+- [Fix data production #46](https://github.com/BioDT/uc-ces-recreation/pull/46)
+- [FAQs texts #47](https://github.com/BioDT/uc-ces-recreation/pull/47)
+- [Post-launch tweaks #54](https://github.com/BioDT/uc-ces-recreation/pull/54)
+- [Fix bug in appending personas to existing file #58](https://github.com/BioDT/uc-ces-recreation/pull/58)
+- [Improve handling of bbox checks #79](https://github.com/BioDT/uc-ces-recreation/pull/79)
+
+**Issues closed:**
+
+- [App hangs when output or temporary directory doesn't exist #3](https://github.com/BioDT/uc-ces-recreation/issues/3)
+- [User documentation for the Shiny app #8](https://github.com/BioDT/uc-ces-recreation/issues/8)
+- [App crashes if name of persona `.csv` does not match variable contained therein #16](https://github.com/BioDT/uc-ces-recreation/issues/16)
+- [Should be possible to download + upload persona files from the app #31](https://github.com/BioDT/uc-ces-recreation/issues/31)
+- [Indicate computations in progress using `waiter` tool #32](https://github.com/BioDT/uc-ces-recreation/issues/32)
+- [Slider for lower cutoff value, below which is transparent #33](https://github.com/BioDT/uc-ces-recreation/issues/33)
+- [Toggle greyscale on background map #34](https://github.com/BioDT/uc-ces-recreation/issues/34)
+- [Subheaders for item groups #36](https://github.com/BioDT/uc-ces-recreation/issues/36)
+- [Users should not be able to overwrite existing personas #42](https://github.com/BioDT/uc-ces-recreation/issues/42)
+- [Fail gracefully for cases of zero recreational potential #44](https://github.com/BioDT/uc-ces-recreation/issues/44)
+- [Use Scotland shapefile instead of bbox for checking if user area selection out of bounds #45](https://github.com/BioDT/uc-ces-recreation/issues/45)
+- [Local path network data missing #48](https://github.com/BioDT/uc-ces-recreation/issues/48)
+- [Data production jumbled up layers #49](https://github.com/BioDT/uc-ces-recreation/issues/49)
+- [Mapping of csv rows onto sliders is broken #55](https://github.com/BioDT/uc-ces-recreation/issues/55)
+
+### Script & container
+
+As explained previously, the key requirement for BioDT was to factor out the RP model calculation into a command-line script that takes the two user-provided inputs as arguments:
+
+1. A full persona, given as a `.csv` file.
+2. A region in which to calculate RP, given as a quadruple of 'bounding box' coordinates.
+
+This was an almost trivial addition to the code after the full rewrite.
+
+The main substantive task was to configure parsing command line inputs. We decided against using third-party packages ([optparse](https://github.com/trevorld/r-optparse/), [argparse](https://github.com/trevorld/r-argparse)) and stick with base R functionality. The result is a very simple command-line interface, lacking nice-to-have features such as argument validation, but sufficient for a 'minimum working example' to be handed over to the BioDT team.
+
+We then produced a [Singularity](https://github.com/sylabs/singularity) container `.def` file based on the [`rocker/r-ver`](https://rocker-project.org/images/versioned/r-ver.html) image (preferred over `r-base`) which is itself based on the Ubuntu image. The build stage involves (i) installing required C and C++ libraries using `apt-get`, (ii) installing the `biodt.recreation` package from GitHub, and (iii) downloading the data. Once the container is built, one can run `singularity run app.sif ARGS` in order to execute `Rscript scripts/cli/main.R ARGS` inside the container.
+
+We also created a container for the input data production script, anticipating that this would need to be run on LUMI or wherever else we could access a high-memory compute node for the calculation of distances (see @sec-distance).
+
+**Pull Requests merged:**
+
+- [Run the Recreational Potential model as a script #67](https://github.com/BioDT/uc-ces-recreation/pull/67)
+- [Add singularity container for CLI and data production scripts #90](https://github.com/BioDT/uc-ces-recreation/pull/90)
+
+**Issues closed:**
+
+- [Run model using Rscript + args #60](https://github.com/BioDT/uc-ces-recreation/issues/60)
+- [Singularity container for the cli #70](https://github.com/BioDT/uc-ces-recreation/issues/70)
+- [Singularity container for the data production script #89](https://github.com/BioDT/uc-ces-recreation/issues/89)
+
+### Packaging and repository management
+
+- Packaging in R does not feel as natural as Python
+- Started with separate directories containing model, data production, and Shiny app, since these had different dependencies, and it seemed to make sense to let the Shiny app depend on the model package as a dependency.
+- Decided to return to a single-package layout for simplicity and maintenance reasons; it was too awkward to develop the model code and the Shiny app code simultaneously.
+
+- Use of `inst/`
+
+- Included Lintr and Styler packages which help make the format consistent as well as catching syntax bugs. Maintaining a consistent format is useful for ensuring that meaningful changes in commits are not obscured by formatting changes.
+- Added a couple of simple tests which run using `testthat`. However, due to the time pressures we did not develop any further tests, which is unfortunate.
+- Added pre-commit hooks which run the tests, but also a script that can run them in case the developer does not want to install pre-commit.
+
+- Finally, we added `Roxygen2`-style documentation for all the functions, which produces nicely formatted Markdown documentation in RStudio.
+- We added some vignettes that demonstrate basic usage, although this could be expanded.
+- Vignettes are run during the build stage of the package. This meant they could not use the full input data since (i) it is unacceptable to have to download 2GB data just to build the package, and (ii) we did not want the package to contain 2GB data itself. To get around this, we included some small rasters in the package (`inst/extdata/rasters/Bush`) and wrote some helper functions for accessing it.
+
+**Pull Requests merged:**
+
+- [Add pre-commit hooks #73](https://github.com/BioDT/uc-ces-recreation/pull/73)
+- [Tidy up the main model package #76](https://github.com/BioDT/uc-ces-recreation/pull/76)
+- [Tidy up Shiny App #78](https://github.com/BioDT/uc-ces-recreation/pull/78)
+- [Single package layout (take 2) #80](https://github.com/BioDT/uc-ces-recreation/pull/80) (first attempt in [#74](https://github.com/BioDT/uc-ces-recreation/pull/74))
+- [Improve examples and vignettes #81](https://github.com/BioDT/uc-ces-recreation/pull/81)
+- [Bring data production into the main package #88](https://github.com/BioDT/uc-ces-recreation/pull/88)
+
+**Issues closed:**
+
+- [Instructions and guidelines for contributors #10](https://github.com/BioDT/uc-ces-recreation/issues/10)
+- [Improve developer workflow #63](https://github.com/BioDT/uc-ces-recreation/issues/63)
+- [Expand examples in roxygen2 documentation to include vignettes #77](https://github.com/BioDT/uc-ces-recreation/issues/77)
+- [API for data download #83](https://github.com/BioDT/uc-ces-recreation/issues/83)
+
+### Proximity contributions and pair-wise distances
+
+The 2024 version of the Shiny app contained a step, applying to each road/track/path feature (`FIPS_I` component) and river/lake feature (`Water` component), which involved a determination of the distance from each pixel to the nearest pixel in which that feature was present.^[In truth, while this was the intention, it was not quite what was being calculated - see [#22](https://github.com/BioDT/uc-ces-recreation/issues/22))]
+
+This step, which after the rewrite became the final stage of the raster pre-processing pipeline, presented challenges when scaling it up from small regions to the whole of Scotland at 20 metre squared resolution.
+
+As a result, the version used in the SPEAK study _did not include these proximity contributions_. Not everyone was displeased by this --- there was generally an acknowledgement that the proximity part of the model needed some more thought. Unfortunately, when linear features (width ~1 pixel) were reprojected onto the Leaflet map this led to some quite confusing results ([#61](https://github.com/BioDT/uc-ces-recreation/issues/61)).
+
+#### Why is this any different from the other data production stages?
+
+Because every single other processing step is entirely local - all of the information required to generate an output value for a pixel at coordinate $x$ is contained in the input pixels at coordinate $x$. This makes it trivial to process the data in chunks, and memory costs scale linearly with the area of the chunks.
+
+In contrast, a pairwise distance calculation is non-local, since the output value at $x$ depends on the entire set of input values, i.e. at all coordinates.
+
+Hence, when one calls `terra::distance` on a Scotland-wide raster, one immediately encounters segmentation faults indicating that the C++ backend to `terra` has attempted to write to a location in memory that does not exist (because it could not be allocated).
+
+On my (JMR) desktop I have 16GB RAM. With `terra::terraOptions(memfrac = 0.5)` there is a bit under 8GB to play with. From playing I found I could process Scotland in slices of 1/8 the total size. On DataLabs there is double the RAM, and I could process 1/4-sized slices, which was reassuring. Extrapolating, this gives 64GB as a ballpark figure for the required RAM to process all of Scotland in one go. LUMI (or indeed any other HPC facility) would provide a compute node with the required RAM. Unfortunately, our project's allocation on LUMI expired before we managed to attempt this.
+
+
+Code for some of these attempts can be found in the [`legacy.R`](https://github.com/BioDT/uc-ces-recreation/blob/develop/R/legacy.R) file.
+
+#### Attempt 1: cutoff distance parameter in `terra::distance`
+
+As of version 1.8.21, we can set a cutoff distance `maxdist` in `terra::distance`, beyond which distances are assigned `NA`, which reduces the function from being global to being dependent only on pixels within the cutoff distance. However, based on cursory look at the code for this cutoff (which was introduced into `terra` just 2 weeks earlier in [this commit](https://github.com/rspatial/terra/commit/d95d4bed0c94a7c1dddde2753508dbad21cb0131)!) I could not see evidence of sophisticated memory management based on cutoff distances --- it appears to just mask the output. Perhaps this will be improved in future.
+
+#### Attempt 2: Create a buffer region around features
+
+Since the model is only sensitive to distances within around 400m, any pixel greater than 400m from the nearest feature may as well not be computed and just be set to `NA`. This can be achieved be computing a buffer region around each feature and restricting `terra::distance` to the buffer region only.
+
+We made two attempts to compute a buffer using `terra::focal` and `terra::buffer` in the notebooks `focal.qmd` and `buffer.qmd` [here](https://github.com/BioDT/uc-ces-recreation/tree/f880edd80a294df98a810bbaa6ba54711e8f1142/data). Unfortunately the use of `terra::buffer` on a raster runs into the exact same memory issues as the distance calculation; both `buffer` and `distance` call `GDALComputeProximity` under the hood (see [this comment](https://github.com/BioDT/uc-ces-recreation/pull/46#discussion_r1959525834)).
+
+The use of `terra::focal`, which can be used to apply a function over a moving window (e.g. with radius 500m) over the raster, was successful at reducing memory requirements, but took an extremely long time.
+
+In the case of linear features such as roads, paths and rivers, it would have been _significantly_ more efficient to compute a buffer region using the original vector layers ([#51](https://github.com/BioDT/uc-ces-recreation/issues/51)). Unfortunately we were not able to obtain access to these layers at the time.
+
+#### Attempt 3: Replace with convolution
+
+The outputs of `terra::distance` (distances in metres) are passed through a logistic function to map them to the unit interval. There is nothing particularly important about computing distances accurately; it just matters that the outputs of the composition of the distance and logistic function fall monotically from 1 to 0 over the right range. It seemed reasonable, therefore, to swap this pair of functions for a single convolution, e.g. with a Gaussian kernel. This would reduce memory requirements for the same reason as computing the buffer using a sliding window reduces memory requirements; only small chunks of the raster need to be loaded into memory at any given time.
+
+However, the outputs of a convolution were qualitatively different from the distance + logistic. This is most obvious when one considers extended bodies such as lakes; the output of the convolution in the centre of the lake will be different than at the borders, whereas the output of distance + logistic is constant over the lake surface. The result is also different when two features are present in the convolutional window.
+
+#### Attempt 4: Compute distance in overlapping subdomains:
+
+Since `terra::distance` is a global function, it cannot be decomposed into independent subdomains to be computed sequentially. However, since we only care about distances under 500m, domain decomposition is possible provided the domains overlap by at least this distance.
+
+==Madda to write up==
+
+**Pull Requests merged:**
+
+- [Fix data production #46](https://github.com/BioDT/uc-ces-recreation/pull/46) (note - this PR tried several approaches to reducing the memory requirements, but did not reach a satisfactory solution.)
+- https://github.com/BioDT/uc-ces-recreation/pull/92
+- https://github.com/BioDT/uc-ces-recreation/pull/95
+
+**Issues closed:**
+
+- [Missing distance calculation in data production #43](https://github.com/BioDT/uc-ces-recreation/issues/43)
+- [Path to config.csv is not working as intended #64](https://github.com/BioDT/uc-ces-recreation/issues/64)
+
+
+## Discussion and recommendations
+
+At the time of writing there are around 20 open issues on the GitHub repository.
+
+| Issue                                                                                                                                                    | Theme                                                                           | Comments                                       |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------- |
+| [Use Google Sheets for persona configuration #11](https://github.com/BioDT/uc-ces-recreation/issues/11)                                                  | Functionality / User experience                                                 |                                                |
+| [Explanation for 'proximity' contributions #19](https://github.com/BioDT/uc-ces-recreation/issues/19)                                                    | Documentation / Research required                                               | I.e. justify the use of Eq. @eq-proximity      |
+| [Explain how contributions to the recreational potential are weighted #25](https://github.com/BioDT/uc-ces-recreation/issues/25)                         | Documentation / Research required                                               | I.e. justify the use of Eq. ==TODO==           |
+| [Toggle layers more efficiently using showGroup / hideGroup #35](https://github.com/BioDT/uc-ces-recreation/issues/35)                                   | Efficiency                                                                      | Probably inconsequential                       |
+| [Modify logistic function parameters so that proximity scores fall off over a longer distance #39](https://github.com/BioDT/uc-ces-recreation/issues/39) | Research required                                                               | I.e. justify the use of Eq. ==TODO==           |
+| [Documentation explaining how the data was produced #41](https://github.com/BioDT/uc-ces-recreation/issues/41)                                           | Documentation                                                                   | Important                                      |
+| [Use descriptive feature/layer names #50](https://github.com/BioDT/uc-ces-recreation/issues/50)                                                          | Good practice                                                                   | Important                                      |
+| [Compute 500m buffer using original vector layers #51](https://github.com/BioDT/uc-ces-recreation/issues/51)                                             | Efficiency                                                                      |                                                |
+| [Replace HTML with Markdown for extended text sections in Shiny app #52](https://github.com/BioDT/uc-ces-recreation/issues/52)                           | Developer experience                                                            |                                                |
+| [Relationship between the Recreational Potential model/app and 'Digital Twins' #53](https://github.com/BioDT/uc-ces-recreation/issues/53)                | Documentation                                                                   | Discussed in Sec ==TODO==                      |
+| [Consider non-linear colour mapping for the app #56](https://github.com/BioDT/uc-ces-recreation/issues/56)                                               | User experience / Research required                                             |                                                |
+| [Include sufficient information in persona csv files for manual editing #57](https://github.com/BioDT/uc-ces-recreation/issues/57)                       | User experience                                                                 |                                                |
+| [Download map from shiny app #59](https://github.com/BioDT/uc-ces-recreation/issues/59)                                                                  | Functionality / User experience                                                 |                                                |
+| [Project rasters onto ESPG:3857 ahead of time #61](https://github.com/BioDT/uc-ces-recreation/issues/61)                                                 | Efficiency / User experience                                                    | Important                                      |
+| [Remove requirement for filesystem write access #71](https://github.com/BioDT/uc-ces-recreation/issues/71)                                               |                                                                                 | Required for deployment on DataLabs            |
+| [Expand suite of tests #82](https://github.com/BioDT/uc-ces-recreation/issues/82)                                                                        | Good practice                                                                   |                                                |
+| [Installed package fails to read tiff files when initial download times out #86](https://github.com/BioDT/uc-ces-recreation/issues/86)                   | User experience                                                                 |                                                |
+| [Tiff error on Windows #87](https://github.com/BioDT/uc-ces-recreation/issues/87)                                                                        | **Bug (live)**                                                                  | **Important**                                  |
+| [terra::distance throwing error for large, sparse raster during write to disk #91](https://github.com/BioDT/uc-ces-recreation/issues/91)                 | Bug (circumvented by [#92](https://github.com/BioDT/uc-ces-recreation/pull/92)) | Possible upstream (terra) bug, worth reporting |
+| [Reduce size of input rasters #93](https://github.com/BioDT/uc-ces-recreation/issues/93)                                                                 | User experience                                                                 |                                                |
+
+### Making the model more interpretable
+
+It is important to be up front about the fact that the RP model is ill-defined from a mathematical perspective, in the sense that it constructs a continuous scale using operations on ordinal (persona scores) and nominal (feature presence/absence) data. The common refrain in situations like this is to say that "values are relative, not absolute". However, this is not correct. There is no scale, therefore there is nothing to which values can be relative. 
+
+This is not to say that the model cannot encode useful information, but to caution against over-interpreting the RP values, and to dispute that the quantitative nature of the model is a sign of robustness and scientific rigour in and of itself.
+
+Of course, such pearl-clutching misses the point. The purpose of the model is not to quantify and understand an objective physical world, but to serve as a qualitative input in an individual's assessment about where to recreate.
+
+The design objectives of the model should therefore include the maximisation of a user's ability to discern suitable locations to recreate. Thus, the mathematical construction of the model, like the user interface, is just another design choice to be iteratively refined based on user feedback from stakeholder engagement studies such as SPEAK.
+
+With this point in mind, I recommend changes to the RP model that would take it in the direction of greater simplicity, transparency and interpretability to both users and researchers.
+
+1. Do not rescale the four components to $[0, 1]$; instead, let RP be a simple weighted sum of all 87 items.
+2. Do not rescale the final result either, or at least make it a _global_ rescaling by dividing by the maximum value of RP possible, not just the maximum value in the chosen region. Note that the colour mapping can still be adjusted to make sure different values are clearly differentiable.
+3. Replace the logistic function in the proximity part with a simple linear decrease over a fixed decrease. That is, a straight line from $(0, 1)$ to $(d_{\text{max}}, 0)$ where $d_{\text{max}}$ is a distance explicitly chosen, perhaps even by the user as a 'hyper-parameter' of the model. It would be a simple extension to make $d_\text{max}$ specific to individual items, e.g. larger for major lochs than for cycle paths.
+
+### Changes to the UI
+
+Anecdotal evidence suggests that participants in the SPEAK study found the individual components more useful than their aggregate, the RP layer. It would not be difficult to provide them with the option to toggle individual _items_ (e.g. cycle paths) on the map, as well as their persona-weighted sum. Some users may prefer to omit items by deselecting a checkbox rather than navigating to the persona tab and giving them a score of 0.
+
+As well as providing control at the item level, the app should also contain information about the origin of the data they are seeing.
+
+Linear features should be vector layers rather than rasters. This would avoid pixelation of roads, cycle paths etc.
+
+The UI may also display the latitude-longitude coordinate or [what3words](https://what3words.com/) based on the cursor position. This would help users look up the relevant area on another service such as Komoot or Alltrails.
+
+### More datasets
+
+The RP app is currently missing some important information that users would need to plan their activity. This includes things like parking spaces, toilets, places to eat etc.
+
+==TODO: more?==
+
+### Towards a Digital Twin
+
+The RP model is intended to form half of the Cultural Ecosystem Services 'Prototype Digital Twin', but the relationship between the RP model and a vision of a Digital Twin is not always transparent [#53](https://github.com/BioDT/uc-ces-recreation/issues/53).
+
+The following is quoted from the [BioDT website](https://biodt.eu/DigitalTwin) (accessed 19/02/2025)
+
+> The BioDT consortium adheres to the following definition of a digital twin (DT), released by the [Digital Twin Consortium](https://www.digitaltwinconsortium.org/):
+> 
+> A digital twin is a virtual representation of real-world entities and processes, synchronized at a specified frequency and fidelity.
+> 
+> Here, fidelity refers to the level of precision captured by the DT in comparison with its physical counterpart.
+
+The RP model in its current form does not fit this definition. It would be difficult to argue that customising a persona amounts to "synchronising at a specified frequency and fidelity" a "virtual representation of real-world entities and processes."
+
+From the author's perspective, there are two planned enhancements that will move the RP model in the direction of a Digital Twin:
+
+1. Combine the RP model with the [biodiversity model](https://github.com/BioDT/uc-ces/tree/main) as described in @Rolph2024.
+2. Update the raster data at a "specified frequency" to "synchronise" it with the "real-world entities" it is representing.
+
+However, meeting this definition of Digital Twin cannot be an objective in and of itself; it must be an outcome that is realised in pursuit of other objectives. Concretely, the frequency with which input data is updated should be determined by trading off the needs of users with the cost of the data download and pre-processing pipeline.
+
+In cases where the utility of real-time data updates is clear, it may be worth considering whether integrating the BioDT app with third party data services may be more efficient. For example, providing users with a link to a local weather forecast is perfectly sufficient; there would be no need to embed real-time weather forecasts in the app itself.
+
+## Concluding remarks
+
+In the author's opinion, one of the key contributions from this period of development work was to write down a concrete, unambiguous definition of the RP model (==Link==). From this flowed the substantial improvements to the design and efficiency of the code, and the ability to verify that it is working as expected.
+
+This also exposed the simplicity at the heart of the RP model --- that it is essentially a weighted sum of 87 items representing presence/absence/proximity to a landscape feature. This is a very good thing! It turns out that we do not need to expend vast amounts of energy, water and money to compute Recreational Potential. Considering the objective is for users to be able to easily run the model many, many times, the (business and environmental) case for a small computational footprint is high. Were I to take this project forward I would lean into the simplicity and aim to provide users with the most relevant information in a transparent manner. 
+
+If the intention is to scale up the BioDT app, or the CES component, to make it widely available to members of the public, it may be wise to clearly demarcate the role of researchers --- i.e. the science content, stakeholder engagement --- and to then outsource development work to professional app developers. It may be fruitful to look for possible integrations with popular apps used by recreationalists, and perhaps consider presenting the CES app as an 'add-on' to existing apps rather than a competitor.
+
+On a personal note, this was a valuable opportunity to learn to code in `R`.

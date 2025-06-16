@@ -3,4 +3,7 @@
 
 .quarto/
 _freeze/
-_manuscript/
+_project
+*_files/
+
+.obsidian/

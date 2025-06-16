@@ -2,15 +2,42 @@
 title: BioDT Recreational Potential Model
 authors:
   - name: Joe Marsh Rossney
-    email: joemar@ceh.ac.uk
-    affiliations:
-      - ref: ukceh
-    url: https://github.com/jmarshrossney
     orcid: 0000-0002-8082-8566
+    affiliation: UK Centre for Ecology & Hydrology
   - name: Maddalena Tigli
-    email: madtig@ceh.ac.uk
-    url: https://github.com/madtig
+  - name: Christopher Andrews
+  - name: Jan Dick
+  - name: Simon Rolph
+
+date: today
+date-format: long
+abstract: >
+  These documents collectively describe the xyz.
+
+toc: false
+number-sections: false
 ---
 
-## Section
-This is a simple placeholder for the manuscript's main document [@knuth84].
+### Documents provided here
+
+#### [Main article](report.html)
+
+Brief desc
+
+- [Technical Supplement](tech_supp.html)
+- [Developer's report](dev_report.html)
+- [Demonstration of use](demo.html)
+
+### Code and data
+
+- R Package, available at https://github.com/BioDT/uc-ces-recreation
+- Data, available at ZENODO LINK
+
+### Associated publications
+
+- @Dick2025
+
+- SPEAK paper
+- BioDT paper
+- etc.
+

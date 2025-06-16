@@ -1,37 +1,34 @@
 project:
-  type: manuscript
+  type: website
+  output-dir: _project
 
-manuscript:
-  article: index.qmd
-  notebooks:
-    - notebook: technical_supplement.md
-      title: Technical Supplement
-    - notebook: rse_report.md
-      title: RSE Report
-    - notebook: package_demo.qmd
-      title: Demo
-  code-links:
-    - text: Code
-      icon: github
-      href: https://github.com/BioDT/uc-ces-recreation
+# Shared config for all documents
+
+# Metadata
+citation: true
+doi: to-do
+#copyright: UK Centre for Ecology & Hydrology, 2025
+license: CC BY
+
+bibliography: references.bib
+number-sections: true
+number-depth: 3
+toc: true
+toc-depth: 3
 
 format:
   html:
-    toc: true
+    embed-resources: true
+    toc-location: right
+    code-overflow: wrap
     highlight-style: github
+    html-math-method: katex
 
-  pdf:
-    colorlinks: true
-    documentclass: scrartcl
-    number-sections: true
-    toc: true
-    toccolor: blue
-    linkcolor: purple
-
-  jats: default
-
-execute:
-  freeze: true
+  #pdf:
+    #colorlinks: true
+    #documentclass: scrartcl
+    #toccolor: blue
+    #linkcolor: purple
 
 affiliations:
   - id: ukceh
@@ -39,5 +36,34 @@ affiliations:
     city: Edinburgh
     url: https://www.ceh.ac.uk/
 
-bibliography: references.bib
+# Website config
+website:
+  title: BioDT Recreational Potential Model
+  navbar:
+    left:
+      - href: report.qmd
+        text: Main Article
+      - href: tech_supp.qmd
+        text: Technical Supplement
+      - href: dev_report.qmd
+        text: Developers' Report
+      - href: demo.qmd
+        text: Code Demo
+    tools:
+      - text: R Package
+        icon: github
+        href: "https://github.com/BioDT/uc-ces-recreation"
+      - text: Data
+        icon: database
+      - text: Page Source
+        icon: git
+        href: "https://github.com/BioDT/ces-recreation-reports"
 
+  page-footer: 
+    right: "© Footer"
+    border: false
+    background: light
+
+# Re-compute only when source changes
+execute:
+  freeze: auto

@@ -1,7 +1,0 @@
----
-title: Demonstration of Recreational Potential calculation
----
-
-```{r}
-print("hi")
-```

@@ -1,0 +1,279 @@
+---
+title: BioDT Recreational Potential Model
+subtitle: Summary
+authors:
+  - name: Joe Marsh Rossney
+    orcid: 0000-0002-8082-8566
+    affiliation:
+      - ref: ukceh
+  - name: Maddalena Tigli
+    affiliation:
+      - ref: ukceh
+  - name: Christopher Andrews
+    affiliation:
+      - ref: ukceh
+  - name: Jan Dick
+    affiliation:
+      - ref: ukceh
+  - name: Simon Rolph
+    affiliation:
+      - ref: ukceh
+
+date: today
+date-format: long
+abstract: >
+  These documents collectively describe the xyz.
+
+citation: true
+license: CC BY
+funding: This work was funded by BioDT
+---
+
+## Background
+
+TODO Brief history of recreational potential work, with references
+
+ESTIMAP (“Ecosystem Service Mapping Tool”) is a collection of spatially explicit models, originally developed to support policies at a European scale [@Zulian2013; @Paracchini2014;  @Zulian2018].
+
+
+TODO Brief introduction to BioDT, the CES project and the recreational potential component. [@Dick2022; @Rolph2024]
+
+
+The BioDT consortium ... 
+As a member of this
+Cultural Ecosystem Services (CES) 
+Digital Twin (DT).
+
+The CES DT was imagined as a platform that brings together near real time data from a wide range of sources in a manner that is somehow tailored to the individual user. The proposed pDT focuses on two components:
+
+1. **Recreational Potential (RP)** - the capacity of an area to sustain the recreational activities valuable to an individual user
+2. **Biodiversity** - the xyz
+
+The rationale behind bringing these two components together into a unified framework was that for many people, encountering interesting flora or fauna can enrich their recreational experience and help them to value the ecosystem... ?
+
+The driving motivation for this work is to promote good health and connection to nature through physical activity outdoors. However, there is also a possible synergy with conservation science, which are increasingly using data collected by non-scientists through 'citizen science' apps such as iNaturalist and xyz. Potentially, certain users could be encouraged to visit areas where there is a greater need for sampling.
+
+The RP component and the biodiversity component are distinct models that have been developed independently of each other. However, in both cases their output is simple a collection of raster layers, which can be manipulated, combined and displayed in the front-end app.
+
+Earlier on in the BioDT project, rudimentary versions of the RP and biodiversity components were combined in a single raster overlay. However, this was limited to pre-calculated 'static' raster layers covering a small region (the Cairngorms National Park) rather than all of Scotland.
+
+Since then, work has focused on improving the speed and scalability of these components, to enable the interactive and personalisable ...
+
+In this short report we will describe basic aspects of the Recreational Potential model. For a detailed account of the inner workings of the model the reader is directed to the accompanying [technical supplement](tech_supp.md).
+
+
+Test footnote^[This is a test footnote.].
+
+@knuth84 
+
+## Model description
+
+The output of the Recreational Potential (RP) model is an two-dimensional array of numbers (a _raster_) representing an RP value for each 20x20 metre square area of land (_pixel_) within a given area.
+
+A single RP value is made up of 87 _items_ representing distinct attributes of the land. The 87 items are grouped into four _components_:
+
+- **_Landscape_** - the suitability of land to support recreational activity.
+- **_Natural Features_** influencing the potential.
+- **_Infrastructure_** features influencing the potential.
+- **_Water_** - rivers and lakes.
+
+An RP value is calculated by weighting each item by a _score_ that reflects the importance of that item to the user. A full set of 87 scores is referred to as a _persona._
+
+The RP model requires two inputs from users:
+
+1. A persona
+2. An area (within Scotland) in which to calculate RP
+
+Given these inputs, the model computes an RP value for each 20x20 metre square of land within the area specified, with higher values indicating greater Recreational Potential for that specific persona.
+
+The values are rescaled so that they fall between zero and one. They can then be mapped to colours and displayed as a _heat map_ over a map of Scotland.
+
+TODO: screenshot
+
+The input data for the RP model are a collection of 87 raster layers for each of the 87 items, covering Scotland at a resolution of 20x20m.
+
+For items belonging to the *Landscape* component or the *Natural Features* component, these rasters contain just ones and zeros, with $1$ indicating presence of the feature in that pixel and $0$ indicating absence.
+
+For items belonging to the _Infrastructure_ component or the _Water_ component, the input rasters contain values _between_ zero and one. Here, $1$ still indicates presence of the feature in that pixel, but $0$ instead indicates that the feature is not only absent in that pixel, but all surrounding pixels within a certain distance. The range of values between zero and one are used to signify that the feature is nearby, but not present in this pixel itself. Higher values correspond to the feature being closer.
+
+## Overview of the code
+
+Source code for the most up-to-date version of the RP model can be found on GitHub at https://github.com/BioDT/uc-ces-recreation.
+
+The code is bundled as an `R` _package_. This has a number of advantages compared with a stand-alone script, such as the ability to ... through a standardised installation procedure that ...
+
+In practical terms, this means the functionality is provided through a collection of _functions_ that, after installing the package, are accessible to the user using the syntax `package::function`. the `biodt.recreation` namespace using the 
+
+Along with these functions, the package contains 
+
+- A **license** (following other BioDT projects, we used the MIT license).
+- **Documentation**, which renders nicely in IDEs such as RStudio.
+- **Vignettes** - examples showcasing use of the package.
+- **Metadata** including the code authors and the version number of the package.
+- A list of **dependencies**, i.e. other `R` packages that `biodt.recreation` requires to work. Installing `biodt.recreation` using standard tools will also automatically install these dependencies.
+
+### Development timeline
+
+- TODO Originally copied from someone else's python model?
+
+The RP model for Scotland has been gradually developed within UKCEH over a number of years, with various contributors.
+
+- TODO When was the calibration etc done?
+- Add SPEAK study
+
+| Time period   | Activity         | Contributors                       | Relevant links                                                                                                                                                   |
+| ------------- | ---------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2023          | Code development | Will Bolton, Chris Andrews         | https://github.com/BioDT/uc-ces/tree/main/recreation_model                                                                                                       |
+| 2024          |                  | Chris Andrews, Maddalena Tigli     | https://github.com/BioDT/uc-ces-recreation/tree/2024-model                                                                                                       |
+| Jan-June 2025 |                  | Joe Marsh Rossney, Maddalena Tigli | Version used in SPEAK study: https://github.com/BioDT/uc-ces-recreation/tree/SPEAK-prerelease<br>Development version: https://github.com/BioDT/uc-ces-recreation |
+
+- TODO Link to Zenodo
+
+
+### Production of input data
+
+
+
+The 'raw' data is downloaded from various locations (TODO - Chris).
+There is then a series of processing steps to transform it into the form needed for the RP model.
+
+In an ideal world this data production 'pipeline' would be entirely automated through one or more scripts. This would enable the input data to be more easily regenerated / updated in future.
+
+
+This data is currently stored on DropBox, but will be moved to Zenodo.
+
+### Recreational Potential calculation
+
+For SLSRA and FIPS_N features, $f_{ij}(x, y)$ is either zero, indicating absence of the feature in that pixel, or one, indicating presence.
+
+Thus, for $i = 1, 2$,
+
+$$
+f_{ij}(x) = \begin{cases}
+1 & \text{if feature present in pixel} \\
+0 & \text{if feature absent in pixel} 
+\end{cases}
+$$
+
+and for $i = 3, 4$,
+
+$$
+f_{ij}(x) = \begin{cases}
+1 & \text{if feature present in pixel} \\
+
+0 & \text{if feature} \gtrapprox 500\text{m away} 
+\end{cases}
+$$
+
+
+
+Each component is 
+
+$$
+C_i(x, y) = \mathrm{normalise}\left\{ \sum_{j=1}^{N_\text{features}} \rho_{ij} \, f_{ij}(x, y)\right\}
+$$
+
+
+
+$$
+\mathrm{RP}(x,y) = \mathrm{normalise} \left\{ \sum_{i=1}^4 C_i(x,y) \right\}
+$$
+
+### Interactive app
+
+- TODO: How to access the app on DataLabs and run it
+
+- TODO: how to run it locally
+
+However, the essential steps are: (i) create a persona using the 'Persona' tab, (ii) draw a box on the map using the square orange button, and finally (iii) click the 'Update Map' button to compute the Recreational Potential value.
+
+## Basic usage
+
+These instructions cover setup and basic usage of the RP model.
+
+It is assumed that the user is familiar with the following:
+
+- Installing `R` packages
+- Executing lines of `R` code in interactive sessions
+- Running `R` scripts
+
+More detailed instructions for developers can be found in the [`README.md`](https://github.com/BioDT/uc-ces-recreation/blob/main/README.md) file in the repository.
+
+### Prerequisites
+
+- R version 4.4.x
+- Ensure you have either `remotes` or `devtools` installed (using e.g. `install.packages` or `renv::install`)
+- It is recommended to perform the following steps using an R envirnoment managed by [`renv`](https://rstudio.github.io/renv/)
+- There are certain C++ libraries that are required by the R packages, and need to be installed on the system. Most importantly is the GDAL library.
+### Installation
+
+1. Install the package:
+
+```R
+remotes::install_github("BioDT/uc-ces-recreation")
+```
+
+2. Download the data:
+
+```R
+biodt.recreation::download_data()
+```
+
+### Usage
+
+3. Run the app:
+
+```R
+biodt.recreation::run_app()
+```
+
+4. Use the package in a script
+
+```R
+library(terra)
+library(biodt.recreation)
+
+persona <- load_persona("path/to/my_persona.csv", "Running")
+bbox <- ext(xmin, xmax, ymin, ymax)
+
+layers <- compute_potential(persona, bbox)
+
+plot(layers$Recreational_Potential)
+```
+
+### Documentation
+
+TODO
+
+
+## Discussion
+
+- The model is very fast and embarrassingly parallel - therefore can scale very well, to large areas and/or high resolutions.
+- However, the use-case for large areas is unclear, and the resolution depends on the datasets being used.
+
+- The data production pipeline could be improved:
+	- Fully automated / scripted would allow easier updating with more / updated datasets
+	- Also reproducibility and transparency of how the data was produced (many users wanted to know more about the input data)
+
+ - Use of rasters is a problem for linear features
+	 - Use vector layers for linear features and distance
+	 - This would also make data production easier
+
+- Digital twin?
+
+
+## Further reading
+
+
+## CRediT statement {.appendix}
+
+To do: https://www.elsevier.com/en-gb/researcher/author/policies-and-guidelines/credit-author-statement
+
+**JMR:**
+
+## Acknowledgements {.appendix}
+
+- BioDT
+- SPEAK
+- Will Bolton contributed to the first version of the code.
+- Megan Williams?
