@@ -32,6 +32,7 @@ The [Developers' Report](dev_report.html) provides a high-level, chronological o
 
 The [Code Demonstration](demo.html) ...
 
+
 ### Code and data
 
 Code for the Recreational Potential model is available as an R Package hosted on GitHub at https://github.com/BioDT/uc-ces-recreation.

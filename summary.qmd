@@ -27,6 +27,13 @@ TODO Brief history of recreational potential work, with references
 
 ESTIMAP (“Ecosystem Service Mapping Tool”) is a collection of spatially explicit models, originally developed to support policies at a European scale [@Zulian2013; @Paracchini2014;  @Zulian2018].
 
+[OpenNESS project](https://oppla.eu/groups/openness/openness-project) 2012-2017 [@Zulian2018]. (note www.openness-project.eu has been abandoned)
+
+Something something _Long Term Socio-Ecological Research Platforms_ (LTSER) [@Dick2018]
+
+BioDT project 2022-2025 [@Horizon2022], outputs include [@Rolph2024].
+
+SPEAK has something to do with [@Powerll2024] ?
 
 TODO Brief introduction to BioDT, the CES project and the recreational potential component. [@Dick2022; @Rolph2024]
 
@@ -249,15 +256,25 @@ TODO
 
 - Digital twin?
 
+## Funding {.appendix}
 
-## Further reading {.appendix}
+Funding for OpenNESS came from the European Community's Seventh Framework Programme (FP7/2007-2013) under grant agreement no 308428, OpenNESS Project (Operationalisation of Natural Capital and Ecosystem Services: From Concepts to Real-world Applications.)
 
-The [Technical Supplement](tech_supp.html) contains a much greater level of detail. This document would be useful for someone aiming to understand the full process, starting from the download of 'raw' datasets, and following through all the way to the final RP calculation.
+Funding for BioDT came from the European Union's Horizon Europe Research and Innovation Programme under grant agreement No 101057437 (BioDT project, [https://doi.org/10.3030/101057437](https://doi.org/10.3030/101057437))
 
-The [Developers' Report](dev_report.html) provides an account of the work done to rewrite the model. This includes detail on tried-and-abandoned ideas, justifications for decisions made, and recommendations for future development work. It would be useful for someone intending to continue development of the RP model.
+Funding for SPEAK came from the Natural Environment Research Council – Growing Shoots Partnership and application co-creation bursary. NE/Y005805/1 _Growing Shoots​
 
-- SPEAK paper
-- Simon's paper
+## CRediT statement {.appendix}
+
+**To do**: https://www.elsevier.com/en-gb/researcher/author/policies-and-guidelines/credit-author-statement
+
+## Acknowledgements {.appendix}
+
+- Will Bolton contributed to the first version of the code.
+- Megan Williams?
+
+We are very grateful to all the partipcants of the SPEAK project which this output is based on including: Alastair Leaver, Alice MacSporran, Brian Cassidy, Chris Pollock, David Giles, Jean Cowie, Joanna Gilliatt, Justyna Olszewska, Laura Taylor, Maddi Bunker, Rebecca MacLennan, S Mayes, Shaila Rao, Steve MacKinnon and Tom Gebbie, Active Stirling. We are equally grateful to an additional 18 partipcants who preferred to remain anonymous. ​
+
 
 ## Correspondence {.appendix}
 
@@ -267,16 +284,4 @@ The [Developers' Report](dev_report.html) provides an account of the work done t
 
 - `{joemar,madtig}@ceh.ac.uk` for enquiries related to the code and anything else appearing in the technical supplement and/or developer's report.
 
-## CRediT statement {.appendix}
-
-To do: https://www.elsevier.com/en-gb/researcher/author/policies-and-guidelines/credit-author-statement
-
-**JMR:**
-
-## Acknowledgements {.appendix}
-
-- BioDT
-- SPEAK
-- Will Bolton contributed to the first version of the code.
-- Megan Williams?
-
+​
