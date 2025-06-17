@@ -465,6 +465,10 @@ At the time of writing there are around 20 open issues on the GitHub repository.
 | [terra::distance throwing error for large, sparse raster during write to disk #91](https://github.com/BioDT/uc-ces-recreation/issues/91)                 | Bug (circumvented by [#92](https://github.com/BioDT/uc-ces-recreation/pull/92)) | Possible upstream (terra) bug, worth reporting |
 | [Reduce size of input rasters #93](https://github.com/BioDT/uc-ces-recreation/issues/93)                                                                 | User experience                                                                 |                                                |
 
+Some issues are relatively obvious bug fixes or quality-of-life improvements which need not be discussed.
+
+Instead, we will focus on more 
+
 ### Making the model more interpretable
 
 It is important to be up front about the fact that the RP model is ill-defined from a mathematical perspective, in the sense that it constructs a continuous scale using operations on ordinal (persona scores) and nominal (feature presence/absence) data. The common refrain in situations like this is to say that "values are relative, not absolute". However, this is not correct. There is no scale, therefore there is nothing to which values can be relative. 
@@ -477,9 +481,23 @@ The design objectives of the model should therefore include the maximisation of 
 
 With this point in mind, I recommend changes to the RP model that would take it in the direction of greater simplicity, transparency and interpretability to both users and researchers.
 
-1. Do not rescale the four components to $[0, 1]$; instead, let RP be a simple weighted sum of all 87 items.
-2. Do not rescale the final result either, or at least make it a _global_ rescaling by dividing by the maximum value of RP possible, not just the maximum value in the chosen region. Note that the colour mapping can still be adjusted to make sure different values are clearly differentiable.
-3. Replace the logistic function in the proximity part with a simple linear decrease over a fixed decrease. That is, a straight line from $(0, 1)$ to $(d_{\text{max}}, 0)$ where $d_{\text{max}}$ is a distance explicitly chosen, perhaps even by the user as a 'hyper-parameter' of the model. It would be a simple extension to make $d_\text{max}$ specific to individual items, e.g. larger for major lochs than for cycle paths.
+1. **Do not rescale the four components** to $[0, 1]$; instead, let RP be a simple weighted sum of all 87 items.
+2. **Do not rescale the final result either**, or at least make it a _global_ rescaling by dividing by the maximum value of RP possible, not just the maximum value in the chosen region. Note that the colour mapping can still be adjusted to make sure different values are clearly differentiable.
+3. **Replace the logistic function in the proximity part with a simple linear decrease** over a fixed length scale. That is, a straight line from $(0, 1)$ to $(d_{\text{max}}, 0)$ where $d_{\text{max}}$ is a distance explicitly chosen, perhaps even by the user as a 'hyper-parameter' of the model. It would be a simple extension to make $d_\text{max}$ specific to individual items, e.g. larger for major lochs than for cycle paths.
+
+#### Why not rescale the components?
+
+Regarding point 1, the argument given for rescaling the four components before summing them was so that they "contribute equally" to the RP value, despite containing different numbers of items --- the Landscape (`SLSRA`) component contains 39 items whilst the Infrastructure component (`FIPS_I`) only contains 10.
+
+The problem with this is not that the argument is wrong per se, but that the outcome is undesirable. It means that, regardless of how the user configures their persona, these four components will always contribute equally to the RP value.
+
+To illustrate the problem we can take an extreme example. Let's say the user really loves water and scores all lakes and rivers with 10s and 9s, but they have little interest in paths and actively dislike roads, so score them 1s and 0s, respectively. They would reasonably expect rivers and lakes to appear with the highest RP values on the map, and paths and roads to be lowest. However, the paths (scored with 1s) will actually contribute more to the RP value than the rivers (scored with 9s) and therefore show up as having a higher RP value. Why is this? Ignoring the possibility that different features overlap, after rescaling paths will still be effectively scored 1, whereas rivers will be effectively scored 0.9.
+
+Put differently, this rescaling of the components means that only _within-component_ differences in the scores are translated into differences in RP value. The fact that 9 (rivers) is much larger than 1 (paths) in absolute terms is irrelevant, due to the rescaling.
+
+When the RP value is just a simple weighted sum, these confusing outcomes are avoided and the relationship between the scores and the RP values becomes much more transparent.
+
+This is reason enough to remove the rescaling step, but there is another angle to this, which is that most pixels only have a handful of features 'present' within them. One does not often find roads overlapping lakes overlapping lowlands --- they are mutually exclusive. If one wanted to rescale or normalise the RP values, the maximum number of overlapping features is a far more relevant quantity than the number of features within a component.
 
 ### Changes to the UI
 
@@ -490,12 +508,6 @@ As well as providing control at the item level, the app should also contain info
 Linear features should be vector layers rather than rasters. This would avoid pixelation of roads, cycle paths etc.
 
 The UI may also display the latitude-longitude coordinate or [what3words](https://what3words.com/) based on the cursor position. This would help users look up the relevant area on another service such as Komoot or Alltrails.
-
-### More datasets
-
-The RP app is currently missing some important information that users would need to plan their activity. This includes things like parking spaces, toilets, places to eat etc.
-
-==TODO: more?==
 
 ### Towards a Digital Twin
 
@@ -516,9 +528,9 @@ From the author's perspective, there are two planned enhancements that will move
 1. Combine the RP model with the [biodiversity model](https://github.com/BioDT/uc-ces/tree/main) as described in @Rolph2024.
 2. Update the raster data at a "specified frequency" to "synchronise" it with the "real-world entities" it is representing.
 
-However, meeting this definition of Digital Twin cannot be an objective in and of itself; it must be an outcome that is realised in pursuit of other objectives. Concretely, the frequency with which input data is updated should be determined by trading off the needs of users with the cost of the data download and pre-processing pipeline.
+However, meeting this definition of Digital Twin cannot be an objective in and of itself; it must be an outcome that is realised in pursuit of other objectives. The availability of near real-time data does not justify real-time updates to the RP model. Rather, the frequency with which to update these datasets should be determined by trading off the needs of users with the monetary and environmental cost of the data acquisition and processing pipeline.
 
-In cases where the utility of real-time data updates is clear, it may be worth considering whether integrating the BioDT app with third party data services may be more efficient. For example, providing users with a link to a local weather forecast is perfectly sufficient; there would be no need to embed real-time weather forecasts in the app itself.
+In cases where the utility of real-time data updates is clear, it may be worth considering whether integrating the BioDT app with third party data services may be more efficient. For example, providing users with a link to a local weather forecast is perfectly sufficient; there would be no need to embed real-time weather forecasts in the app itself. Third-party services could provide information as to the availability of parking, toilets, places to eat, and other things that people may need to plan their activity.
 
 ## Concluding remarks
 

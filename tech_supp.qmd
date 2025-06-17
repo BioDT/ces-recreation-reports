@@ -165,8 +165,6 @@ and rescaled $F_{\text{RP}} \longrightarrow \hat{F}_\text{RP}$ using @eq-rescale
 
 ## Overview of the code
 
-### Repository contents
-
 The repository is organised in the following way, as shown using the `tree` command:
 
 ```txt
@@ -309,17 +307,16 @@ get_preset_persona_file <- function() {
 ### Interactive app
 
 
-## Rationale for code structure
+## Production of input data
+
+Non-dynamic part
+
+### Manual part
+
+### Scripted part
 
 
-
-
-### Factoring expensive computations out
-
-As explained [in this comment](https://github.com/BioDT/uc-ces-recreation/pull/18#discussion_r1938481780), the result of this is that the dynamic part of the model (i.e. the part that gets updated based on user input) is nothing more than the weighted sum in Eq ==@equation==.
-
-This is the number one reason for the dramatic improvement in the speed at which RP can be computed, and the ability to compute RP over much larger areas without exhausting the available memory ([#4](https://github.com/BioDT/uc-ces-recreation/issues/4)). These points are explained in more detail in @sec-whyfast.
-
+## Dynamic partls
 
 ## Computational efficiency
 
@@ -327,6 +324,12 @@ This is the number one reason for the dramatic improvement in the speed at which
 - Memory requirements
 - Speed of calculation for dynamic part
 - Parallelisability
+
+### Factoring expensive computations out
+
+As explained [in this comment](https://github.com/BioDT/uc-ces-recreation/pull/18#discussion_r1938481780), the result of this is that the dynamic part of the model (i.e. the part that gets updated based on user input) is nothing more than the weighted sum in Eq ==@equation==.
+
+This is the number one reason for the dramatic improvement in the speed at which RP can be computed, and the ability to compute RP over much larger areas without exhausting the available memory ([#4](https://github.com/BioDT/uc-ces-recreation/issues/4)). These points are explained in more detail in @sec-whyfast.
 
 ### Speed and memory use {#sec-whyfast}
 
