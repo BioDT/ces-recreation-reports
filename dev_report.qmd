@@ -1,6 +1,6 @@
 ---
 title: The BioDT Recreational Potential Model
-subtitle: Developer Report
+subtitle: Developers' Report
 authors:
   - name: "Joe Marsh Rossney <a href='https://github.com/jmarshrossney' style='color: black'><i class='bi bi-github'></i></a>"
     affiliations: UK Centre for Ecology & Hydrology
@@ -341,7 +341,7 @@ The main substantive task was to configure parsing command line inputs. We decid
 
 We then produced a [Singularity](https://github.com/sylabs/singularity) container `.def` file based on the [`rocker/r-ver`](https://rocker-project.org/images/versioned/r-ver.html) image (preferred over `r-base`) which is itself based on the Ubuntu image. The build stage involves (i) installing required C and C++ libraries using `apt-get`, (ii) installing the `biodt.recreation` package from GitHub, and (iii) downloading the data. Once the container is built, one can run `singularity run app.sif ARGS` in order to execute `Rscript scripts/cli/main.R ARGS` inside the container.
 
-We also created a container for the input data production script, anticipating that this would need to be run on LUMI or wherever else we could access a high-memory compute node for the calculation of distances (see @sec-distance).
+We also created a container for the input data production script, anticipating that this would need to be run on LUMI or wherever else we could access a high-memory compute node for the calculation of distances (see @sec-proximity).
 
 **Pull Requests merged:**
 
@@ -386,7 +386,7 @@ We also created a container for the input data production script, anticipating t
 - [Expand examples in roxygen2 documentation to include vignettes #77](https://github.com/BioDT/uc-ces-recreation/issues/77)
 - [API for data download #83](https://github.com/BioDT/uc-ces-recreation/issues/83)
 
-### Proximity contributions and pair-wise distances
+### Proximity contributions and pair-wise distances {#sec-proximity}
 
 The 2024 version of the Shiny app contained a step, applying to each road/track/path feature (`FIPS_I` component) and river/lake feature (`Water` component), which involved a determination of the distance from each pixel to the nearest pixel in which that feature was present.^[In truth, while this was the intention, it was not quite what was being calculated - see [#22](https://github.com/BioDT/uc-ces-recreation/issues/22))]
 
@@ -453,15 +453,15 @@ At the time of writing there are around 20 open issues on the GitHub repository.
 | Issue                                                                                                                                                    | Theme                                                                           | Comments                                       |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------- |
 | [Use Google Sheets for persona configuration #11](https://github.com/BioDT/uc-ces-recreation/issues/11)                                                  | Functionality / User experience                                                 |                                                |
-| [Explanation for 'proximity' contributions #19](https://github.com/BioDT/uc-ces-recreation/issues/19)                                                    | Documentation / Research required                                               | I.e. justify the use of Eq. @eq-proximity      |
-| [Explain how contributions to the recreational potential are weighted #25](https://github.com/BioDT/uc-ces-recreation/issues/25)                         | Documentation / Research required                                               | I.e. justify the use of Eq. ==TODO==           |
+| [Explanation for 'proximity' contributions #19](https://github.com/BioDT/uc-ces-recreation/issues/19)                                                    | Documentation / Research required                                               |                                                |
+| [Explain how contributions to the recreational potential are weighted #25](https://github.com/BioDT/uc-ces-recreation/issues/25)                         | Documentation / Research required                                               |                                                |
 | [Toggle layers more efficiently using showGroup / hideGroup #35](https://github.com/BioDT/uc-ces-recreation/issues/35)                                   | Efficiency                                                                      | Probably inconsequential                       |
-| [Modify logistic function parameters so that proximity scores fall off over a longer distance #39](https://github.com/BioDT/uc-ces-recreation/issues/39) | Research required                                                               | I.e. justify the use of Eq. ==TODO==           |
+| [Modify logistic function parameters so that proximity scores fall off over a longer distance #39](https://github.com/BioDT/uc-ces-recreation/issues/39) | Research required                                                               |                                                |
 | [Documentation explaining how the data was produced #41](https://github.com/BioDT/uc-ces-recreation/issues/41)                                           | Documentation                                                                   | Important                                      |
 | [Use descriptive feature/layer names #50](https://github.com/BioDT/uc-ces-recreation/issues/50)                                                          | Good practice                                                                   | Important                                      |
 | [Compute 500m buffer using original vector layers #51](https://github.com/BioDT/uc-ces-recreation/issues/51)                                             | Efficiency                                                                      |                                                |
 | [Replace HTML with Markdown for extended text sections in Shiny app #52](https://github.com/BioDT/uc-ces-recreation/issues/52)                           | Developer experience                                                            |                                                |
-| [Relationship between the Recreational Potential model/app and 'Digital Twins' #53](https://github.com/BioDT/uc-ces-recreation/issues/53)                | Documentation                                                                   | Discussed in Sec ==TODO==                      |
+| [Relationship between the Recreational Potential model/app and 'Digital Twins' #53](https://github.com/BioDT/uc-ces-recreation/issues/53)                | Documentation                                                                   | Discussed in @sec-dt                           |
 | [Consider non-linear colour mapping for the app #56](https://github.com/BioDT/uc-ces-recreation/issues/56)                                               | User experience / Research required                                             |                                                |
 | [Include sufficient information in persona csv files for manual editing #57](https://github.com/BioDT/uc-ces-recreation/issues/57)                       | User experience                                                                 |                                                |
 | [Download map from shiny app #59](https://github.com/BioDT/uc-ces-recreation/issues/59)                                                                  | Functionality / User experience                                                 |                                                |
@@ -486,7 +486,7 @@ Instead, we will focus on a more
 - Proximity stuff
 
 
-Use descriptive names for the features / layers {#sec-layernames}
+#### Use descriptive names for the features / layers {#sec-layernames}
 
 https://github.com/BioDT/uc-ces-recreation/issues/49
 
@@ -680,7 +680,7 @@ Future work should take a different approach to handling user's personas, such a
 
 On services such as DataLabs this is not permitted...
 
-### Towards a Digital Twin
+### Towards a Digital Twin {#sec-dt}
 
 The RP model is intended to form half of the Cultural Ecosystem Services 'Prototype Digital Twin', but the relationship between the RP model and a vision of a Digital Twin is not always transparent [#53](https://github.com/BioDT/uc-ces-recreation/issues/53).
 

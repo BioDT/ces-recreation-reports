@@ -7,7 +7,7 @@ authors:
     affiliation: UK Centre for Ecology & Hydrology
   - name: Maddalena Tigli
     orcid: 0000-0001-8083-0589
-  - name: Christopher Andrews
+  - name: Chris Andrews
   - name: Jan Dick
   - name: Simon Rolph
 
@@ -31,9 +31,9 @@ ESTIMAP (“Ecosystem Service Mapping Tool”) is a collection of spatially expl
 
 Something something _Long Term Socio-Ecological Research Platforms_ (LTSER) [@Dick2018]
 
-BioDT project 2022-2025 [@Horizon2022], outputs include [@Rolph2024].
+BioDT project 2022-2025, outputs include [@Rolph2024; @Dick2025b]. 
 
-SPEAK has something to do with [@Powerll2024] ?
+SPEAK has something to do with Powell2024 ?
 
 TODO Brief introduction to BioDT, the CES project and the recreational potential component. [@Dick2022; @Rolph2024]
 
@@ -58,7 +58,7 @@ Earlier on in the BioDT project, rudimentary versions of the RP and biodiversity
 
 Since then, work has focused on improving the speed and scalability of these components, to enable the interactive and personalisable ...
 
-In this short report we will describe basic aspects of the Recreational Potential model. For a detailed account of the inner workings of the model the reader is directed to the accompanying [technical supplement](tech_supp.md).
+In this short report we will describe basic aspects of the Recreational Potential model. For a detailed account of the inner workings of the model the reader is directed to the accompanying [technical supplement](tech_supp.html).
 
 ## Model description
 

@@ -6,7 +6,7 @@ authors:
     affiliation: UK Centre for Ecology & Hydrology
   - name: Maddalena Tigli
     orcid: 0000-0001-8083-0589
-  - name: Christopher Andrews
+  - name: Chris Andrews
   - name: Jan Dick
   - name: Simon Rolph
 
