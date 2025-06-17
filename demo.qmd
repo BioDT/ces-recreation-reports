@@ -6,109 +6,107 @@ title: Demonstration of Recreational Potential calculation
 print("hi")
 ```
 
-
 ## Basic usage
 
 These instructions cover setup and basic usage of the RP model.
 
 It is assumed that the user is familiar with the following:
 
-- Installing `R` packages
-- Executing lines of `R` code in interactive sessions
-- Running `R` scripts
+-   Installing `R` packages
+-   Executing lines of `R` code in interactive sessions
+-   Running `R` scripts
 
 More detailed instructions for developers can be found in the [`README.md`](https://github.com/BioDT/uc-ces-recreation/blob/main/README.md) file in the repository.
 
 ### Prerequisites
 
-- R version 4.4.x
-- Ensure you have either `remotes` or `devtools` installed (using e.g. `install.packages` or `renv::install`)
-- It is recommended to perform the following steps using an R envirnoment managed by [`renv`](https://rstudio.github.io/renv/)
-- There are certain C++ libraries that are required by the R packages, and need to be installed on the system. Most importantly is the GDAL library.
+-   R version 4.4.x
+-   Ensure you have either `remotes` or `devtools` installed (using e.g. `install.packages` or `renv::install`)
+-   It is recommended to perform the following steps using an R envirnoment managed by [`renv`](https://rstudio.github.io/renv/)
+-   There are certain C++ libraries that are required by the R packages, and need to be installed on the system. Most importantly is the GDAL library.
 
 ```{r}
-install.packages("remotes")
+#install.packages("remotes")
 ```
 
 ### Installation
 
-1. Install the package:
+1.  Install the package:
 
 ```{r}
-remotes::install_github("BioDT/uc-ces-recreation")
+#remotes::install_github("BioDT/uc-ces-recreation")
 ```
 
-2. Download the data:
+2.  Download the data:
 
 ```{r}
-options(timeout=1200)
-biodt.recreation::download_data()
+#options(timeout=1200)
+#biodt.recreation::download_data()
 ```
 
 ### Usage
 
-3. Run the app:
+3.  Run the app:
 
 ```{r}
-#| eval: false
-
-biodt.recreation::run_app()
+# #| eval: false
+# 
+# biodt.recreation::run_app()
 ```
 
-4. Use the package in a script
+4.  Use the package in a script
 
 ```{r}
-library(terra)
-library(biodt.recreation)
-
-persona_file <- get_preset_persona_file()
-persona_df <- read_persona_csv(persona_file)
-persona_df
-
-hr_persona <- load_persona(persona_file, "Hard_Recreationalist")
-hr_persona
+# library(terra)
+# library(biodt.recreation)
+# 
+# persona_file <- get_preset_persona_file()
+# persona_df <- read_persona_csv(persona_file)
+# persona_df
+# 
+# hr_persona <- load_persona(persona_file, "Hard_Recreationalist")
+# hr_persona
 ```
 
 ```{r}
-# Replace this with get_data_dir() if you have downloaded the full dataset!
-data_dir <- get_example_data_dir()
+# # Replace this with get_data_dir() if you have downloaded the full dataset!
+# data_dir <- get_example_data_dir()
 ```
 
 ## Load/create a persona
 
 ```{r}
-persona <- get_example_persona()
-persona
+#persona <- get_example_persona()
+#persona
 ```
 
 ## Select an area of interest
 
 ```{r}
-bbox <- get_example_bbox()
-bbox
+#bbox <- get_example_bbox()
+#bbox
 ```
 
 ## Compute a single component
 
 ```{r}
-fips_n <- compute_fips_n(persona, bbox, data_dir)
-terra::plot(fips_n)
+#fips_n <- compute_fips_n(persona, bbox, data_dir)
+#terra::plot(fips_n)
 ```
 
 ```{r}
-water <- compute_component("Water", persona, bbox, data_dir)
-terra::plet(water)
+#water <- compute_component("Water", persona, bbox, data_dir)
+#terra::plet(water)
 ```
 
 ## Compute all layers
 
 ```{r}
-layers <- compute_potential(persona, bbox, data_dir)
-names(layers)
+#layers <- compute_potential(persona, bbox, data_dir)
+#names(layers)
 
-terra::plot(layers[["Recreational_Potential"]])
+#terra::plot(layers[["Recreational_Potential"]])
 ```
-
 
 ### Documentation
 
