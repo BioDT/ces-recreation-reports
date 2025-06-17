@@ -1,5 +1,5 @@
 ---
-title: BioDT Recreational Potential Model
+title: The BioDT Recreational Potential Model
 authors:
   - name: Joe Marsh Rossney
     orcid: 0000-0002-8082-8566
@@ -16,28 +16,35 @@ abstract: >
 
 toc: false
 number-sections: false
+
+nocite: |
+  @Dick2025
 ---
 
-### Documents provided here
+### Contents
 
-#### [Main article](report.html)
+The [Summary](summary.html) provides an overview of the model ...
 
-Brief desc
+The [Technical Supplement](tech_supp.html) covers technical details about the BioDT Recreational Potential model (LINK TO SPECIFIC RELEASE). This includes a mathematical description of the model and aspects of the code.
 
-- [Technical Supplement](tech_supp.html)
-- [Developer's report](dev_report.html)
-- [Demonstration of use](demo.html)
+The [Developer's Report](dev_report.html) provides a high-level, chronological overview of development work carried out between November 2024 and June 2025. The intention is to provide some context and explanation for posterity. We also make several recommendations for further development work. Most items are accompanied by one or more links to issues and/or pull requests on GitHub, which often contain further details and references to specific lines of code.
+
+The [Code Demonstration](demo.html) ...
 
 ### Code and data
 
-- R Package, available at https://github.com/BioDT/uc-ces-recreation
-- Data, available at ZENODO LINK
+Code for the Recreational Potential model is available as an R Package hosted on GitHub at https://github.com/BioDT/uc-ces-recreation.
+
+The model requires some input data, which has been deposited on Zenodo **HERE**.
+
+**To do:** specific version of code on Zenodo?
 
 ### Associated publications
 
-- @Dick2025
+:::{#refs}
+:::
 
 - SPEAK paper
 - BioDT paper
-- etc.
-
+- Simon's paper
+- Code/data DOI

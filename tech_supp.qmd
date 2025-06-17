@@ -1,5 +1,5 @@
 ---
-title: BioDT Recreational Potential Model
+title: The BioDT Recreational Potential Model
 subtitle: Technical Supplement
 authors:
   - name: "Joe Marsh Rossney <a href='https://github.com/jmarshrossney' style='color: black'><i class='bi bi-github'></i></a>"
@@ -10,18 +10,18 @@ authors:
 date: last-modified
 date-format: long
 abstract: >
-  This supplement provides technical details about the BioDT Recreational Potential model (LINK TO SPECIFIC RELEASE).
+  This supplement provides technical details about the BioDT Recreational Potential model (LINK TO SPECIFIC RELEASE). This includes a mathematical description of the model, and aspects of the code.
 
 code-annotations: hover
 ---
 
-
 ## Description of the model
 
-While there have been several publications citing the RP model, none so far have included a mathematical description of the model itself. In fact the mathematical basis of the RP model is extremely simple. Nevertheless, it is worth being fully explicit. 
+While there have been several publications citing the RP model, none so far have included a mathematical description of the model itself.
+
+In fact the mathematical basis of the RP model is extremely simple. Nevertheless, it is worth being fully explicit. 
 
 <!-- Were it not for an area-dependent rescaling step it would be nothing more than a linear combination (i.e. a weighted sum) at each 20 metre squared pixel.-->
-
 
 ### Inputs
 
@@ -32,8 +32,6 @@ The RP model takes three inputs:
 3. A 'region of interest'
 
 and evaluates ...
-
-...
 
 ### Presence/absence rasters
 
@@ -163,7 +161,9 @@ $$ {#eq-rp}
 and rescaled $F_{\text{RP}} \longrightarrow \hat{F}_\text{RP}$ using @eq-rescale once more (with the same $\mathcal{R}$) so that the result falls in the interval $[0, 1]$.
 
 
-## Overview of the code
+## Overview of the repository
+
+The repository can be found at [github.com/BioDT/uc-ces-recreation](https://github.com/BioDT/uc-ces-recreation).
 
 The repository is organised in the following way, as shown using the `tree` command:
 
@@ -269,7 +269,7 @@ The repository is organised in the following way, as shown using the `tree` comm
 12. Container definition file used to build a Singularity container for `data_production/main.R`.
 13. Script that executes all steps of the data pre-processing pipeline.
 14. MIT licenses (`.md` for the repository, no extension for the package).
-15. Compiled documentation in Markdown format, generated using [roxygen2](https://roxygen2.r-lib.org/).
+15. Compiled documentation for the package, generated using [roxygen2](https://roxygen2.r-lib.org/).
 16. The standard [`NAMESPACE`](https://r-pkgs.org/namespace.html) file for R packages, containing a list of functions provided by the package.
 17. Source code for the package.
 18. [`renv`](https://rstudio.github.io/renv/) lockfile used (in theory) to install packages deterministically. Used when deploying app to Posit Connect.
@@ -300,68 +300,241 @@ get_preset_persona_file <- function() {
 ```
 :::
 
-### Production of input data
-
-### Recreational Potential calculation
-
-### Interactive app
-
-
 ## Production of input data
 
-Non-dynamic part
+The data production, or raster pre-processing stage refers to the production of the rasters that are directly multiplied by the persona scores in the dynamic part of the model. That is, the output of this stage is four multi-layered rasters $(f_1, f_2, f_3, f_4)$ corresponding to the four components, where $f_i := (f_{i1}, f_{i2}, \ldots, f_{i n_i})$, whose individual layers $f_{ij}$ are defined by @eq-raster12 (for $i = 1, 2$) and @eq-raster23 (for $i=2,3$).
+
+The process of producing these rasters is currently split into two distinct parts:
+
+1. A manual part in which categorical rasters are constructed from raw downloaded datasets using QGIS
+2. A scripted part in which these categorical rasters are converted into the form required by the model, using `R`.
+
+The scripted part is executed by running `inst/scripts/data_production/main.R` (or the containerised version) with the manually-produced categorical rasters already present. This script essentially boils down to calling four functions which are found in `R/data_production.R`:
+
+```R
+reproject_all(indir = "Stage_0", outdir = "Stage_1")
+one_hot_all(indir = "Stage_1", outdir = "Stage_2")
+stack_all(indir = "Stage_2", outdir = "Stage_3")
+compute_proximity_rasters(indir = "Stage_3", outdir = "Stage_4")
+```
+
 
 ### Manual part
 
-### Scripted part
+**Chris' work.**
 
+### Quantising the slope raster
 
-## Dynamic partls
+With one exception, every raster layer produced by the manual process is an integer-valued categorical raster. The single exception is a 'slope' raster containing the average absolute gradient $s(x)$ within each pixel.
 
-## Computational efficiency
+We use `terra::classify` to quantise this continuous range into six categories according to their steepness,
 
-- Storage requirements
-- Memory requirements
-- Speed of calculation for dynamic part
-- Parallelisability
+$$
+C_{\text{slope}}(x) = \begin{cases}
+1 & &0 \leq s(x) < 1.72 \\
+2 & &1.72 \leq s(x) < 2.86 \\
+3 & &2.86 \leq s(x) < 5.71 \\
+4 & &5.71 \leq s(x) < 11.31 \\
+5 & &11.31 \leq s(x) < 16.7 \\
+6 & &16.7 \leq s(x) \, .
+\end{cases}
+$$ {#eq-slopequant}
 
-### Factoring expensive computations out
+The origin of these intervals is another historical artefact for which we have precedent albeit not a deeper justification.
 
-As explained [in this comment](https://github.com/BioDT/uc-ces-recreation/pull/18#discussion_r1938481780), the result of this is that the dynamic part of the model (i.e. the part that gets updated based on user input) is nothing more than the weighted sum in Eq ==@equation==.
+### Reprojection
 
-This is the number one reason for the dramatic improvement in the speed at which RP can be computed, and the ability to compute RP over much larger areas without exhausting the available memory ([#4](https://github.com/BioDT/uc-ces-recreation/issues/4)). These points are explained in more detail in @sec-whyfast.
+The categorical rasters produced in the previous stage do not necessarily share the exact same coordinate grid. They can be coerced to share the same grid using `terra::project`.
 
-### Speed and memory use {#sec-whyfast}
+We projected all rasters onto a reference raster with the following properties:
+
+- **Coordinate reference system** (CRS): [EPSG:27700](https://epsg.io/27700) (British National Grid)
+- **Resolution**: 20 metres x 20 metres
+- **Extent**: $(x_\text{min}, x_\text{max}, y_\text{min}, y_\text{max}) = (-10000, 660000, 460000, 1220000)$.
+
+We used the 'nearest' interpolation mode (`method="near"`) since the data is categorical. The resulting rasters therefore contain the same set of integer values.
+
+### Conversion to one-hot representation
+
+The next stage converts the categorical rasters ($C_i(x) \in \{0, 1, \ldots, n_i\}$ into a set of presence/absence rasters for each feature. These binary-valued rasters are referred to as the *one-hot* representation of the data.
+
+Consider the following categorical raster,
+
+$$
+C_i = \begin{bmatrix}
+\ddots \\
+& 1 & 0 & 0 \\
+& 2 & 1 & 0 \\
+& 2 & 1 & 3 & \\
+& & & & \ddots
+\end{bmatrix} \, .
+$$ {#eq-catraster}
+
+The one-hot encoding of this raster is written
+
+$$
+C_i \overset{\text{one hot}}{\longrightarrow} ( I_{i0}, I_{i1}, I_{i2}, I_{i3}, \ldots) \, ,
+$$ {#eq-catonehot}
+
+where the binary-valued presence/absence rasters are, in this case,
+
+$$
+\begin{align}
+I_{i0} &= \begin{bmatrix}
+\ddots \\
+& 0 & 1 & 1 \\
+& 0 & 0 & 1 \\
+& 0 & 0 & 0 & \\
+& & & & \ddots
+\end{bmatrix} \, , \quad
+I_{i1} = \begin{bmatrix}
+\ddots \\
+& 1 & 0 & 0 \\
+& 0 & 1 & 0 \\
+& 0 & 1 & 0 & \\
+& & & & \ddots
+\end{bmatrix} \, , \\
+I_{i2} &= \begin{bmatrix}
+\ddots \\
+& 0 & 0 & 0 \\
+& 1 & 0 & 0 \\
+& 1 & 0 & 0 & \\
+& & & & \ddots
+\end{bmatrix} \, , \quad
+I_{i3} = \begin{bmatrix}
+\ddots \\
+& 0 & 0 & 0 \\
+& 0 & 0 & 0 \\
+& 0 & 0 & 1 & \\
+& & & & \ddots
+\end{bmatrix} \, .
+\end{align}
+$$ {#eq-onehot}
+
+**TODO:** This has a number of advantages: (**Duplicated in dev report**)
+
+- Avoids indexing step - just multiplication and addition
+- By representing present/absent as 1/0, interpolations (e.g. due to a reprojection) can be meaningfully interpreted
+- Reflects how we should conceptualise the recreation potential - nothing more complicated than a linear combination
+- Allows for more efficient memory management - only needs to hold 2 layers in memory at any time (the accumulated sum + the next layer to be added to the sum)
+
+The implementation of this step involves the use of `terra::lapp` to parallelise the calculation over the spatial domain. In practice we use `NA` instead of `0` to denote absence.
 
 ```R
-compute_component <- function(component, persona, bbox, data_dir = NULL, skip_checks = FALSE) {
-    if (is.null(data_dir)) {
-        data_dir <- get_data_dir()
-    }
-    if (!skip_checks) {
-        assert_valid_component(component)
-        assert_valid_data_dir(data_dir)
-        assert_valid_bbox(bbox)
-    }
-    raster <- load_raster(
-        file.path(data_dir, paste0(component, ".tif")),
-        bbox
-    )
-    scores <- persona[names(raster)]
-    result <- terra::app(raster, function(features) {  # <1>
-		sum(scores * features, na.rm = TRUE)           # <1>
-    })                                                 # <1>
-    return(result)
-}
+one_hot_pixel <- function(x) {  # <1>
+	out <- matrix(0, nrow = length(x), ncol = length(feature_mapping))
+	for (i in seq_along(feature_mapping)) {
+		out[, i] <- ifelse(x == as.numeric(feature_mapping[i]), 1, NA)
+	}
+	return(out)
+}  # <1>
+
+layer <- terra::lapp(  # <2>
+	layer,  # <2>
+	fun = one_hot_pixel,  # <2>
+	filename = outfile,  # <3>
+	overwrite = TRUE,
+	wopt = list(
+		names = names(feature_mapping),
+		datatype = "INT1U"
+	)  # <3>
+)
 ```
-1. Compute a weighted sum
 
-`terra::app` automatically parallelises this multiply-and-sum operation across the grid; each 'pixel' is computed in a separate thread.
+1. Take a single pixel value (`x`) of a single-layered raster and return the one-hot representation at that point, i.e. a vector of `n_i` values of which up to one is `1` (present) and the remainder are `NA` (absent).
+2. Apply this function in a vectorised fashion to every pixel of the input faster.
+3. Write the outputs to `outfile` as they are computed, to reduce memory requirements.
 
-Even better, when `terra::app` is applied to a simple operator such as `sum`, it actually calls a fast `C++` implementation rather than a pure `R` one (see the [terra documentation](https://rdrr.io/cran/terra/man/app.html)).
+### Stacking into component rasters
 
-Memory use - terra only has to load one pixel at a time per parallel thread. This means at any given instance only $N_\text{threads} \times N_\text{layers}$ values need to be loaded in memory, irrespective of how many pixels there are in total.
+This stage is nothing more than combining many single-layered rasters files into a single multi-layered raster for each component. Roughly speaking, we do
+
+```R
+# Construct a list of rasters from each .tif file in `infiles`
+rasters <- lapply(infiles, terra::rast)
+
+# Construct a single multi-layered raster from this list
+stacked <- terra::rast(rasters)
+
+# Re-apply layer names
+layer_names <- unlist(lapply(rasters, names))
+names(stacked) <- layer_names
+
+# Write the combined raster to disk
+terra::writeRaster(stacked, outfile)
+```
+
+Note that `terra::rast(rasters)` does not preserve layer names when `rasters` is a list of rasters, hence the need for the two lines prior to `writeRaster`.
+
+:::{.callout-warning}
+#### A warning about layer names
+It is *very* unfortunate that the names we have used for the layers follow the same format (`filename_i` for integers `i`) as the names that are automatically generated by `terra::rast`. Because of this, if these two lines that re-apply layer names are omitted, it is not obvious that anything is wrong; no error will be thrown and one can go onto compute RP values, since the names are as expected.
+
+However, *the results will be wrong*, since `terra::rast` will apply _the right names in the wrong order_.
+
+Future developers are strongly recommended to fix this problem by using different layer names ([#50](https://github.com/BioDT/uc-ces-recreation/issues/50)). See Issue [#49](https://github.com/BioDT/uc-ces-recreation/issues/49) for further details.
+:::
+
+### Proximity contributions
+
+This stage applies @eq-distance and @eq-proximity to each layer of the Infrastructure and Water components.
+
+In fact @eq-distance is the most challenging computation in the whole processing pipeline, due to the fact that its memory requirements scale poorly with the size of the input raster. 
+
+Every single other processing step is entirely local; all of the information required to generate an output value for a pixel at coordinate $x$ is contained in the input pixels at coordinate $x$. This makes it trivial to process the data in chunks, and memory costs scale linearly with the area of the chunks.
+
+In contrast, calculating distance to the nearest feature is strongly non-local; the output value at $x$ is a function of the full set of input values. Naively, the entire raster must be loaded to compute the output at a single location. 
+
+<!-- It is unlikely that the underlying C++ implementation of `GDALComputeProximity`, which is called by `terra::distance`, actually loads the entire raster into memory immediately, but in practice we find that more memory is allocated than is available. -->
+
+**To do: Madda's solution**
 
 
-#### Higher memory use in distance
+## Calculation of Recreational Potential
+
+The dynamic part of the model, i.e. the part that gets updated based on user input, amounts to little more than computing the weighted sum in @eq-component to calculate each component and summing the components (@eq-rp), with a rescaling by @eq-rescale after each step. As a result, it is extremely fast.
+
+To understand why it is so quick, we will briefly look at the code implementing @eq-component (`R/recreation.R`). The important parts are:
+
+```R
+raster <- load_raster(  # <1>
+	file.path(data_dir, paste0(component, ".tif")),
+	bbox
+) # <1>
+
+scores <- persona[names(raster)]  # <2>
+
+result <- terra::app(raster, function(features) {  # <3>
+	sum(scores * features, na.rm = TRUE)
+}) # <3>
+```
+1. Lazily load the raster, cropping to a region given by `bbox`
+2. Extract the scores for this component from the `persona` dataframe
+3. Compute the weighted sum in @eq-component.
+
+`terra::app` automatically parallelises this multiply-and-sum operation across the grid; each 'pixel' is computed in a separate thread. Even better, when `terra::app` is applied to a simple operator such as `sum`, it actually calls a fast `C++` implementation rather than a pure `R` one (see the [terra documentation](https://rdrr.io/cran/terra/man/app.html)).
+
+This is also a very memory-light operation; `terra` only _has_ to load one pixel at a time per parallel thread. This means at any given instance only $N_\text{threads} \times N_\text{layers}$ values need to be loaded in memory, irrespective of how many pixels there are in total.
+
+- **TODO:** Rescaling step?
+
+## Shiny app
+
+The Shiny app is split across several files, each containing the `app_` prefix:
+
+- `app_ui.R` contains a function `make_ui` that returns the user interface (UI), i.e. the layout of the Shiny app, sliders, map, buttons etc.
+- `app_server.R` contains a function `make_server` that returns the `server` function, which defines the dynamic parts of the app, such as loading/saving/editing personas and drawing a rectangle on the map.
+- `app_theme.R` contains some custom UI elements such as the colour scheme and logo.
+- `app_text.R` contains the extended text elements of the app, such as the user guide.
+- `app_run.R` contains a convenience function `run_app` for running the app.
+
+As things stand, personas are stored in `.csv` files on the server side. This means the app requires write access to the server's filesystem. This is convenient, since users do not have to upload their own persona files. However, it is not a scalable solution. Future work should take a different approach to handling user's personas, such as providing the option to link the app to Google sheets.
+
+**To do:** I can't think of any more important details. Screenshots?
+
+
+
+
+
+
 

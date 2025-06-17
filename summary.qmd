@@ -1,5 +1,5 @@
 ---
-title: BioDT Recreational Potential Model
+title: The BioDT Recreational Potential Model
 subtitle: Summary
 authors:
   - name: Joe Marsh Rossney
@@ -55,16 +55,11 @@ The driving motivation for this work is to promote good health and connection to
 
 The RP component and the biodiversity component are distinct models that have been developed independently of each other. However, in both cases their output is simple a collection of raster layers, which can be manipulated, combined and displayed in the front-end app.
 
-Earlier on in the BioDT project, rudimentary versions of the RP and biodiversity components were combined in a single raster overlay. However, this was limited to pre-calculated 'static' raster layers covering a small region (the Cairngorms National Park) rather than all of Scotland.
+Earlier on in the BioDT project, rudimentary versions of the RP and biodiversity components were combined in a single raster overlay. However, this was limited to pre-calculated 'static' raster layers covering a small region (the Cairngorms National Park) rather than all of Scotland @Rolph2024.
 
 Since then, work has focused on improving the speed and scalability of these components, to enable the interactive and personalisable ...
 
 In this short report we will describe basic aspects of the Recreational Potential model. For a detailed account of the inner workings of the model the reader is directed to the accompanying [technical supplement](tech_supp.md).
-
-
-Test footnote^[This is a test footnote.].
-
-@knuth84 
 
 ## Model description
 
@@ -146,37 +141,38 @@ This data is currently stored on DropBox, but will be moved to Zenodo.
 
 For SLSRA and FIPS_N features, $f_{ij}(x, y)$ is either zero, indicating absence of the feature in that pixel, or one, indicating presence.
 
-Thus, for $i = 1, 2$,
+For the Landscape (`SLSRA`) and Natural Features (`FIPS_N`) components, the input rasters are binary-valued presence/absence rasters,
 
 $$
-f_{ij}(x) = \begin{cases}
-1 & \text{if feature present in pixel} \\
-0 & \text{if feature absent in pixel} 
+\mathrm{SLSRA}_j = \begin{cases}
+1 & \text{if feature} \; j \; \text{present in pixel} \\
+0 & \text{if feature} \; j \; \text{absent in pixel}  \, .
 \end{cases}
 $$
 
-and for $i = 3, 4$,
+For the Infrastructure (`FIPS_I`) and Water (`Water`) components, there is an additional 'proximity' contribution from nearby pixels containing the feature. The input rasters are therefore
+
 
 $$
-f_{ij}(x) = \begin{cases}
-1 & \text{if feature present in pixel} \\
-
-0 & \text{if feature} \gtrapprox 500\text{m away} 
+\mathrm{Water}_j = \begin{cases}
+1 & \text{if feature} \; j \; \text{present in pixel} \\
+0 & \text{if feature} \; j \;\gtrapprox 500\text{m away} \\
+u(\mathrm{distance}_j \,; \alpha, \kappa) & \text{otherwise}
 \end{cases}
 $$
 
+where $\mathrm{distance}_j$ is the distance to the nearest pixel in which the feature $j$ is present, and $u( \cdot \,; \kappa, \alpha)$ is a function that outputs values between 1 and 0, decreasing as $d$ increases. 
 
-
-Each component is 
-
-$$
-C_i(x, y) = \mathrm{normalise}\left\{ \sum_{j=1}^{N_\text{features}} \rho_{ij} \, f_{ij}(x, y)\right\}
-$$
-
-
+Each component is calculated by multiplying the item/feature layers by the corresponding persona score, summing, and normalising the result so that it lies between 0 and 1,
 
 $$
-\mathrm{RP}(x,y) = \mathrm{normalise} \left\{ \sum_{i=1}^4 C_i(x,y) \right\}
+\mathrm{SLSRA} = \mathrm{normalise}\left\{ \sum_j \mathrm{Score}_j \times \mathrm{SLSRA}_j \right\} \, .
+$$
+
+The final RP value is calculated by summing these four components and normalising once more,
+
+$$
+\mathrm{RP} = \mathrm{normalise} \left\{ \mathrm{SLSRA} + \mathrm{FIPS\_N} + \mathrm{FIPS\_I} + \mathrm{Water} \right\} \, .
 $$
 
 ### Interactive app
@@ -262,8 +258,22 @@ TODO
 - Digital twin?
 
 
-## Further reading
+## Further reading {.appendix}
 
+The [technical supplement](tech_supp.html) contains a much greater level of detail. This document would be useful for someone aiming to understand the full process, starting from the download of 'raw' datasets, and following through all the way to the final RP calculation.
+
+The [developers' report](dev_report.html) provides an account of the work done to rewrite the model. This includes detail on tried-and-abandoned ideas, justifications for decisions made, and recommendations for future development work. It would be useful for someone intending to continue development of the RP model.
+
+- SPEAK paper
+- Simon's paper
+
+## Correspondence {.appendix}
+
+- `{jand,chan}@ceh.ac.uk` for enquiries related to the BioDT or SPEAK projects, or ongoing and future work.
+
+- `chan@ceh.ac.uk` for enquiries related to the production of input data using QGIS.
+
+- `{joemar,madtig}@ceh.ac.uk` for enquiries related to the code and anything else appearing in the technical supplement and/or developer's report.
 
 ## CRediT statement {.appendix}
 
@@ -277,3 +287,4 @@ To do: https://www.elsevier.com/en-gb/researcher/author/policies-and-guidelines/
 - SPEAK
 - Will Bolton contributed to the first version of the code.
 - Megan Williams?
+

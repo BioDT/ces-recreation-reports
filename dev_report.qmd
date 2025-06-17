@@ -1,5 +1,5 @@
 ---
-title: BioDT Recreational Potential Model
+title: The BioDT Recreational Potential Model
 subtitle: Developer Report
 authors:
   - name: "Joe Marsh Rossney <a href='https://github.com/jmarshrossney' style='color: black'><i class='bi bi-github'></i></a>"
@@ -14,7 +14,7 @@ abstract: >
 citation:
   title: "BioDT Recreational Potential Model: Developer Report"
 ---
-
+ 
 ## Background
 
 ### Existing code
@@ -193,36 +193,36 @@ These integers are really labels for different categories corresponding to the 
 
 These values are then supposed to be remapped to user scores, which involves an indexing operation for each layer, effectively `values(layer) <- mapping[values(layer)]`. This isn't particularly inefficient or problematic in and of itself, but it requires serious due diligence with the input data. For example, one may not perform any operation on the input data that assumes continuous data, such as reprojecting.
 
-In order to pre-compute the proximity layers ([#21](https://github.com/BioDT/uc-ces-recreation/issues/21) ) we needed to switch to a *one-hot* representation, where each feature type gets its own layer that is boolean valued --- the feature is either present or not.
+In order to pre-compute the proximity layers ([#21](https://github.com/BioDT/uc-ces-recreation/issues/21) ) we needed to switch to a *one-hot* representation, where each feature type gets its own layer that is binary-valued --- the feature is either present or not.
 
 $$
-C_i \overset{\text{one hot}}{\longrightarrow} ( C_{i0}, C_{i1}, C_{i2}, C_{i3}, \ldots)
+C_i \overset{\text{one hot}}{\longrightarrow} ( I_{i0}, I_{i1}, I_{i2}, I_{i3}, \ldots)
 $$
 
 $$
 \begin{align}
-C_{i0} &= \begin{bmatrix}
+I_{i0} &= \begin{bmatrix}
 \ddots \\
 & 0 & 1 & 1 \\
 & 0 & 0 & 1 \\
 & 0 & 0 & 0 & \\
 & & & & \ddots
 \end{bmatrix} \, , \quad
-C_{i1} = \begin{bmatrix}
+I_{i1} = \begin{bmatrix}
 \ddots \\
 & 1 & 0 & 0 \\
 & 0 & 1 & 0 \\
 & 0 & 1 & 0 & \\
 & & & & \ddots
 \end{bmatrix} \, , \\
-C_{i2} &= \begin{bmatrix}
+I_{i2} &= \begin{bmatrix}
 \ddots \\
 & 0 & 0 & 0 \\
 & 1 & 0 & 0 \\
 & 1 & 0 & 0 & \\
 & & & & \ddots
 \end{bmatrix} \, , \quad
-C_{i3} = \begin{bmatrix}
+I_{i3} = \begin{bmatrix}
 \ddots \\
 & 0 & 0 & 0 \\
 & 0 & 0 & 0 \\
@@ -243,7 +243,11 @@ This has a number of advantages:
 
 :::
 
-This decomposition into a one-time pre-processing stage and a dynamical stage, which would be rendered transparent by any good definition of the model, is the essential reason for the multiple orders of magnitude improvement in speed and memory use. Further gains resulted from a number of factors made possible through the rewrite:
+This decomposition into a one-time pre-processing stage and a dynamical stage, which would be rendered transparent by any good definition of the model, is the essential reason for the multiple orders of magnitude improvement in speed and memory use. 
+
+<!-- This is the number one reason for the dramatic improvement in the speed at which RP can be computed, and the ability to compute RP over much larger areas without exhausting the available memory ([#4](https://github.com/BioDT/uc-ces-recreation/issues/4)). -->
+
+Further gains resulted from a number of factors made possible through the rewrite:
 
 - Eliminated intermediate raster i/o operations that were previously required to keep the peak memory requirements within the total amount of memory available.
 - Replaced indexing operations with multiply operations, made possible by using a one-hot representation for the input rasters, instead of integer-valued categorical rasters.
@@ -288,7 +292,9 @@ Part of the reason that Generative AI works well here is that R Shiny is extreme
 
 The rewritten app was released to SPEAK study participants in the second week of February. Several issues and possible UI improvements were identified by users in the early period (see list of Issues below). These were addressed and the app redeployed.
 
-As an example, it is important to inform users if there is something wrong with the area selected, e.g. it is too big, too small, or does not overlap with an area in which there is data. However, some initial naive mechanisms for checking these properties were quite inefficient, so as to be noticeable from the user perspective. [#79](https://github.com/BioDT/uc-ces-recreation/pull/79) improves the way bounding boxes are checked for validity (size, location within Scotland) using `terra::relate`. 
+In particular, we draw attention to issue [#49](https://github.com/BioDT/uc-ces-recreation/issues/49), which was a serious issue in which layers in the input rasters were jumbled up, effectively mislabelled. The origins of this issue were multiple and quite subtle, involving undocumented and unexpected behaviour in `terra::rast`. We discuss this in more detail in @sec-layernames, as well as recommending some changes to ensure that this cannot happen undetected in future.
+
+<!-- As an example, it is important to inform users if there is something wrong with the area selected, e.g. it is too big, too small, or does not overlap with an area in which there is data. However, some initial naive mechanisms for checking these properties were quite inefficient, so as to be noticeable from the user perspective. [#79](https://github.com/BioDT/uc-ces-recreation/pull/79) improves the way bounding boxes are checked for validity (size, location within Scotland) using `terra::relate`. -->
 
 To ensure that the specific version of the app used in this study could be identified in future, the final deployment (February 25th) was tagged [`SPEAK-prerelease`](https://github.com/BioDT/uc-ces-recreation/tree/SPEAK-prerelease) on GitHub.
 
@@ -416,7 +422,7 @@ In the case of linear features such as roads, paths and rivers, it would have be
 
 #### Attempt 3: Replace with convolution
 
-The outputs of `terra::distance` (distances in metres) are passed through a logistic function to map them to the unit interval. There is nothing particularly important about computing distances accurately; it just matters that the outputs of the composition of the distance and logistic function fall monotically from 1 to 0 over the right range. It seemed reasonable, therefore, to swap this pair of functions for a single convolution, e.g. with a Gaussian kernel. This would reduce memory requirements for the same reason as computing the buffer using a sliding window reduces memory requirements; only small chunks of the raster need to be loaded into memory at any given time.
+The outputs of `terra::distance` (distances in metres) are passed through a logistic function to map them to the unit interval. There is nothing particularly important about computing distances accurately; it just matters that the outputs of the composition of the distance and logistic function fall monotonically from 1 to 0 over the right range. It seemed reasonable, therefore, to swap this pair of functions for a single convolution, e.g. with a Gaussian kernel. This would reduce memory requirements for the same reason as computing the buffer using a sliding window reduces memory requirements; only small chunks of the raster need to be loaded into memory at any given time.
 
 However, the outputs of a convolution were qualitatively different from the distance + logistic. This is most obvious when one considers extended bodies such as lakes; the output of the convolution in the centre of the lake will be different than at the borders, whereas the output of distance + logistic is constant over the lake surface. The result is also different when two features are present in the convolutional window.
 
@@ -467,9 +473,158 @@ At the time of writing there are around 20 open issues on the GitHub repository.
 
 Some issues are relatively obvious bug fixes or quality-of-life improvements which need not be discussed.
 
-Instead, we will focus on more 
+Instead, we will focus on a more
 
-### Making the model more interpretable
+### Re-engineering the data production process
+
+
+
+- Should reproject to a consistent grid at the earliest possible time, I think
+- Skip the creation of categorical rasters altogether?
+- Proximity stuff
+
+
+Use descriptive names for the features / layers {#sec-layernames}
+
+https://github.com/BioDT/uc-ces-recreation/issues/49
+
+#### Part 1
+
+Here is the function that recasts a single-layer categorical-valued raster to a `N_categories`-layered boolean-valued raster.
+
+```r
+one_hot_layer <- function(infile, outfile, feature_mapping) {
+    layer <- terra::rast(infile)
+    stopifnot(terra::nlyr(layer) == 1)
+
+    raster_vals <- names(feature_mapping)
+
+    one_hot_pixel <- function(x) {
+        out <- matrix(0, nrow = length(x), ncol = length(raster_vals))
+        for (i in seq_along(raster_vals)) {
+            out[, i] <- ifelse(x == as.numeric(raster_vals[i]), 1, 0)
+        }
+        return(out)
+    }
+
+    layer <- terra::lapp(
+        layer,
+        fun = one_hot_pixel,
+        filename = outfile,
+        # datatype = "INT1U",
+        overwrite = TRUE
+    )
+
+    names(layer) <- feature_mapping  # This is the problem
+}
+```
+
+I was very happy to find that `lapp` lets you write chunks directly to the filesystem, rather than trying to keep them in memory. However, I still needed to apply the layer names to the saved raster.
+
+Chat-GPT has been a fairly good friend to me for learning R over the last few weeks, but in this case it confidently assured me that setting the names of `layer` would set the names of the saved raster. I really should have assumed that this would not work, but I still find R [quite spooky](https://stackoverflow.com/questions/70773297/what-is-non-standard-evaluation-and-how-can-you-pass-an-undefined-variable-to) and `terra` is all about not loading your data until absolutely necessary, so I gave it a go.
+
+In fact it did not write these layer names - the layers took on their default names `lyr1, lyr2, ...`, but I did not check this until now.
+
+#### Part 2
+
+One might assume that missing layer names would produce a bug somewhere down the line. Unfortunately this did not happen.
+
+In the next step, the one-hot encoded rasters are stacked into a single raster per component using the following function:
+
+```r
+stack_all <- function(indir, outdir) {
+    for (component in c("SLSRA", "FIPS_N", "FIPS_I", "Water")) {
+        infiles <- get_files(file.path(indir, component))
+
+        outfile <- file.path(outdir, paste0(component, ".tif"))
+        dir.create(dirname(outfile), recursive = TRUE, showWarnings = FALSE)
+
+        message(paste("Stacking", component, "into a single raster:", indir, "->", outfile))
+
+        stacked <- terra::rast(lapply(infiles, terra::rast))
+
+        terra::writeRaster(stacked, outfile, datatype = "INT1U", overwrite = TRUE)
+    }
+}
+```
+
+Now, it turns out that the default behaviour of `terra::rast` is to use existing layer names _if they are provided_, and otherwise _assign layer names based on the file name_.
+
+So, because the layer names were not set in the one-hot encoding step, the layer names are _reassigned_ during this stacking step, _based on the order in which those layers appear in the raster._
+
+As a specific example, the `FIPS_I_RoadsTracks` features are _reassigned_ the names `FIPS_I_RoadsTracks_1`, `FIPS_I_RoadsTracks_2`, and so on.
+
+So now we see why this did not caused anything to crash down the line - these are precisely the same layer names that I _thought_ I was setting in the one-hot encoding step, but the numbers 1, 2, 3, ... are actually the order in which these layers appear in the stack, _not_ their layer name as defined in `config.csv`. I.e. **these are the correct layer names, but in the wrong order!**
+
+#### Fix
+
+So, how _should_ I have changed the layer names after one-hot-encoding?
+
+I want to keep writing chunks straight to disk in the `lapp` step, obviously.
+
+I had hoped that the solution would be to do something like
+
+```r
+    # Note that layer is essentially set to rast(outfile)
+    layer <- terra::lapp(
+        layer,
+        fun = one_hot_pixel,
+        filename = outfile,
+        overwrite = TRUE
+    )
+
+    names(layer) <- feature_mapping
+    writeRaster(layer, outfile, overwrite = TRUE)  # This throws an error
+```
+
+but this results in an error
+
+```
+[writeRaster] source and target filename cannot be the same
+```
+
+The reason is that `terra` refuses to write to the same file that it is reading from, which is quite reasonable except that _all I want to write is some metadata_.
+
+I have not so far been able to find a way to modify metadata without creating a copy of the data, which is very annoying. Ideally I would set the name inside `one_hot_pixel` but this is not possible.
+
+The solution is to use the `wopt` argument to `lapp`, which is a list of args to pass to `writeRaster`, and includes the `names` argument.
+
+```r
+    layer <- terra::lapp(
+        layer,
+        fun = one_hot_pixel,
+        filename = outfile,
+        overwrite = TRUE,
+        wopt = list(names = feature_mapping)
+    )
+```
+
+Horay.
+
+Essentially `terra::rast(list_of_rasters)` does not seem to preserve the layer names, and once again generated default layer names that were (heavy sigh) the same as the names we have been using, but in a different order..
+
+#### Conclusion / lessons
+
+Now I understand this behaviour of `terra`, I can see that it was a terrible idea to use these layer names. It would have been better to have used the `Description` as the layer name instead.
+
+#### Reducing the size of input rasters
+
+The four input rasters are currently between 100MB and 1GB each. This is probably fine, but it's worth making a note of some possible ways to reduce their size in case any of the following are desired in future:
+
+- Scaling up to a larger area than Scotland
+- Better support for users running the app/model locally (4GB might be a lot for some users)
+- Distributing a containerised application containing the input data
+- Storing multiple sets of input data (e.g. one dataset per year)
+
+The presence/absence rasters (SLSRA, FIPS_N) need only a single bit per pixel (0 or 1). Currently these are being written as unsigned 1 byte (8-bit) integers (with the option `datatype=INT1U` in `writeRaster`) since this is the smallest available according to the [documentation](https://rspatial.github.io/terra/reference/writeRaster.html), although [this site](https://rspatial.org/raster/pkg/appendix2.html) seems to imply `LOG1S` should be an option.. The `INT1U` format contains 7x more bits than needed but I'm not sure it massively matters. It could however be worth playing with the compression algorithm - it may be that certain algorithms are particularly good for sparse integer rasters (mostly zeros).
+
+The distance-modified input rasters (FIPS_I, Water) are currently signed floats `datatype=FLT4S`. Again we could play with the compression algorithm, but there are two other options that might be fruitful.
+
+1. **Discretise** - there is no real point in differentiating 0.5243 and 0.5244 here. Frankly it is plenty good enough to just round to the nearest 0.1. In practice we would just multiply by 10, round to the nearest integer, and store the result as an `INT1U`.
+    
+2. **Truncate** - [#92](https://github.com/BioDT/uc-ces-recreation/pull/92) demonstrated that the file size is massively reduced by setting pixels for which the distance to the nearest feature is >500m to `NA`, although 500m is still probably more than we need. This should be automatically satisfied by 1. since anything <0.5 will be rounded to 0.
+
+### Make the model more interpretable
 
 It is important to be up front about the fact that the RP model is ill-defined from a mathematical perspective, in the sense that it constructs a continuous scale using operations on ordinal (persona scores) and nominal (feature presence/absence) data. The common refrain in situations like this is to say that "values are relative, not absolute". However, this is not correct. There is no scale, therefore there is nothing to which values can be relative. 
 
@@ -499,7 +654,9 @@ When the RP value is just a simple weighted sum, these confusing outcomes are av
 
 This is reason enough to remove the rescaling step, but there is another angle to this, which is that most pixels only have a handful of features 'present' within them. One does not often find roads overlapping lakes overlapping lowlands --- they are mutually exclusive. If one wanted to rescale or normalise the RP values, the maximum number of overlapping features is a far more relevant quantity than the number of features within a component.
 
-### Changes to the UI
+### Changes to the app
+
+#### UI changes
 
 Anecdotal evidence suggests that participants in the SPEAK study found the individual components more useful than their aggregate, the RP layer. It would not be difficult to provide them with the option to toggle individual _items_ (e.g. cycle paths) on the map, as well as their persona-weighted sum. Some users may prefer to omit items by deselecting a checkbox rather than navigating to the persona tab and giving them a score of 0.
 
@@ -508,6 +665,18 @@ As well as providing control at the item level, the app should also contain info
 Linear features should be vector layers rather than rasters. This would avoid pixelation of roads, cycle paths etc.
 
 The UI may also display the latitude-longitude coordinate or [what3words](https://what3words.com/) based on the cursor position. This would help users look up the relevant area on another service such as Komoot or Alltrails.
+
+#### Storage of personas
+
+**To do:**
+
+As things stand, personas are stored in `.csv` files on the server side. This means the app requires write access to the server's filesystem. 
+
+This is convenient, since users do not have to upload their own persona files. However, it is not a scalable solution.
+
+Future work should take a different approach to handling user's personas, such as providing the option to link the app to Google sheets.
+
+On services such as DataLabs this is not permitted...
 
 ### Towards a Digital Twin
 
