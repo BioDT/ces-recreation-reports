@@ -32,12 +32,6 @@ format:
     #toccolor: blue
     #linkcolor: purple
 
-affiliations:
-  - id: ukceh
-    name: UK Centre for Ecology & Hydrology
-    city: Edinburgh
-    url: https://www.ceh.ac.uk/
-
 # Website config
 website:
   title: The BioDT Recreational Potential Model

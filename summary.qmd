@@ -4,20 +4,12 @@ subtitle: Summary
 authors:
   - name: Joe Marsh Rossney
     orcid: 0000-0002-8082-8566
-    affiliation:
-      - ref: ukceh
+    affiliation: UK Centre for Ecology & Hydrology
   - name: Maddalena Tigli
-    affiliation:
-      - ref: ukceh
+    orcid: 0000-0001-8083-0589
   - name: Christopher Andrews
-    affiliation:
-      - ref: ukceh
   - name: Jan Dick
-    affiliation:
-      - ref: ukceh
   - name: Simon Rolph
-    affiliation:
-      - ref: ukceh
 
 date: today
 date-format: long
@@ -260,9 +252,9 @@ TODO
 
 ## Further reading {.appendix}
 
-The [technical supplement](tech_supp.html) contains a much greater level of detail. This document would be useful for someone aiming to understand the full process, starting from the download of 'raw' datasets, and following through all the way to the final RP calculation.
+The [Technical Supplement](tech_supp.html) contains a much greater level of detail. This document would be useful for someone aiming to understand the full process, starting from the download of 'raw' datasets, and following through all the way to the final RP calculation.
 
-The [developers' report](dev_report.html) provides an account of the work done to rewrite the model. This includes detail on tried-and-abandoned ideas, justifications for decisions made, and recommendations for future development work. It would be useful for someone intending to continue development of the RP model.
+The [Developers' Report](dev_report.html) provides an account of the work done to rewrite the model. This includes detail on tried-and-abandoned ideas, justifications for decisions made, and recommendations for future development work. It would be useful for someone intending to continue development of the RP model.
 
 - SPEAK paper
 - Simon's paper

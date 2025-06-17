@@ -6,6 +6,7 @@ authors:
     affiliations: UK Centre for Ecology & Hydrology
     orcid: 0000-0002-8082-8566
   - name: "Maddalena Tigli <a href='https://github.com/madtig' style='color: black'><i class='bi bi-github'></i></a>"
+    orcid: 0000-0001-8083-0589
 
 date: last-modified
 date-format: long
