@@ -241,7 +241,7 @@ The repository is organised in the following way, as shown using the `tree` comm
 │   └── utils.R           # <17>
 ├── README.md
 ├── renv.lock  # <18>
-├── scripts
+├── dev
 │   ├── cli_test.sh  # <19>
 │   ├── dev.sh  # <20>
 │   ├── pre-commit.R  # <21>

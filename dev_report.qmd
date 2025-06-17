@@ -436,8 +436,9 @@ Since `terra::distance` is a global function, it cannot be decomposed into indep
 **Pull Requests merged:**
 
 - [Fix data production #46](https://github.com/BioDT/uc-ces-recreation/pull/46) (note - this PR tried several approaches to reducing the memory requirements, but did not reach a satisfactory solution.)
-- https://github.com/BioDT/uc-ces-recreation/pull/92
-- https://github.com/BioDT/uc-ces-recreation/pull/95
+- [adding tiling example #92](https://github.com/BioDT/uc-ces-recreation/pull/92)
+- [Running scotland #95](https://github.com/BioDT/uc-ces-recreation/pull/95)
+- [Updated rasters bush #96](https://github.com/BioDT/uc-ces-recreation/pull/96)
 
 **Issues closed:**
 
