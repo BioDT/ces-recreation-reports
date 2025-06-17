@@ -1,3 +1,5 @@
+.Rprofile
+
 *.html
 *.pdf
 *.quarto_ipynb
@@ -6,7 +8,7 @@
 _freeze/
 _project
 *_files/
+renv/
 
 .obsidian/
 
-/.quarto/

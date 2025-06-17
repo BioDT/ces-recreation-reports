@@ -37,6 +37,8 @@ website:
   title: The BioDT Recreational Potential Model
   navbar:
     left:
+      - href: report_recreational_model.qmd
+        text: Madda
       - href: summary.qmd
         text: Summary
       - href: tech_supp.qmd
