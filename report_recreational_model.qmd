@@ -14,15 +14,15 @@ format:
 library(magrittr)
 library(biodt.recreation)
 
-source(here::here("functions_report.R"))
+source("functions_report.R")
 
-water <- terra::rast(here::here("bush_example", "original", "Water.tif"))
+water <- terra::rast(system.file("extdata", "rasters", "Bush", "original", "Water.tif", package="biodt.recreation"))
 
-slsra <- terra::rast(here::here("bush_example", "SLSRA.tif"))
+slsra <- terra::rast(system.file("extdata", "rasters", "Bush", "SLSRA.tif", package="biodt.recreation"))
 
-fips_n <- terra::rast(here::here("bush_example", "FIPS_N.tif"))
+fips_n <- terra::rast(system.file("extdata", "rasters", "Bush", "FIPS_N.tif", package="biodt.recreation"))
 
-fips_i <- terra::rast(here::here("bush_example","original", "FIPS_I.tif"))
+fips_i <- terra::rast(system.file("extdata", "rasters", "Bush", "original", "FIPS_I.tif", package="biodt.recreation"))
 
 
 
@@ -206,7 +206,7 @@ Here we show a model run the Bush Estate area using a "soft recreationalist" exa
 ```{r, echo=FALSE}
 
 soft_recr <- 
-  read.csv(here::here("bush_example", "presets.csv"))%>%
+  read.csv(system.file("extdata", "personas", "presets.csv", package="biodt.recreation")) %>%
   dplyr::select(Name = index,
                 Score = Soft_Recreationalist)
 
@@ -294,7 +294,7 @@ print(paste("fips_i:", length(names(fips_i))))
 
 ```{r, echo=FALSE}
 slsra_variables <- 
-  read.csv(here::here("bush_example", "config.csv"))%>%
+  read.csv(system.file("extdata", "config", "config.csv", package="biodt.recreation"))%>%
   dplyr::filter(Component == "SLSRA")
 
 slsra_variables <- slsra_variables %>%
@@ -361,7 +361,7 @@ Each of these features categories was composed as follows:
 
 ```{r, echo=FALSE}
 fips_n_variables <- 
-  read.csv(here::here("bush_example", "config.csv"))%>%
+  read.csv(system.file("extdata", "config", "config.csv", package="biodt.recreation"))%>%
   dplyr::filter(Component == "FIPS_N")
 
 fips_n_variables <- fips_n_variables %>%
@@ -413,7 +413,7 @@ The infrastructure component (FIPS_I.tiff) is derived from a raster indicating t
 
 ```{r, echo=FALSE}
 fips_i_variables <- 
-  read.csv(here::here("bush_example", "config.csv"))%>%
+  read.csv(system.file("extdata", "config", "config.csv", package="biodt.recreation"))%>%
   dplyr::filter(Component == "FIPS_I")
 
 fips_i_variables <- fips_i_variables %>%
@@ -427,8 +427,8 @@ knitr::kable(fips_i_variables,format = "html",  caption = "Infrastructure compon
 
 fips_i_rstack <- list(
   "original" = fips_i,
-  "distance" = terra::rast(here::here("bush_example", "dist", "FIPS_I_dist.tif")),
-  "scored" = terra::rast(here::here("bush_example", "FIPS_I.tif"))
+  "distance" = terra::rast(system.file("extdata", "rasters", "Bush", "dist", "FIPS_I_dist.tif", package="biodt.recreation")),
+  "scored" = terra::rast(system.file("extdata", "rasters", "Bush", "FIPS_I.tif", package="biodt.recreation"))
   )
 
 make_layer_map_dist(rstack = fips_i_rstack, base_map,
@@ -491,7 +491,8 @@ Then, using the same methodology applied to the infrastructure component's raste
 The "scored" raster is what it is utilized by the RP model.
 
 ```{r, echo=FALSE}
-water_variables <- read.csv(here::here("bush_example", "config.csv")) %>%
+water_variables <- 
+  read.csv(system.file("extdata", "config", "config.csv", package="biodt.recreation"))%>%
   dplyr::filter(Component == "Water")
 
 water_variables <- water_variables %>%
@@ -504,8 +505,8 @@ knitr::kable(water_variables,format = "html",  caption = "Water component featur
 ```{r, echo=FALSE, out.height = 650}
 water_rstack <- list(
   "original" = water,
-  "distance" = terra::rast(here::here("bush_example", "dist", "Water_dist.tif")),
-  "scored" = terra::rast(here::here("bush_example", "Water.tif"))
+  "distance" = terra::rast(system.file("extdata", "rasters", "Bush", "dist", "Water_dist.tif", package="biodt.recreation")),
+  "scored" = terra::rast(system.file("extdata", "rasters", "Bush", "Water.tif", package="biodt.recreation"))
   )
 
 make_layer_map_dist(rstack = water_rstack, base_map,
