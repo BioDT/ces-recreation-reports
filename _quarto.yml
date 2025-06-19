@@ -25,6 +25,7 @@ format:
     code-overflow: wrap
     highlight-style: github
     html-math-method: mathjax
+    code-annotations: hover
 
   #pdf:
     #colorlinks: true
@@ -37,8 +38,6 @@ website:
   title: The BioDT Recreational Potential Model
   navbar:
     left:
-      - href: report_recreational_model.qmd
-        text: Madda
       - href: summary.qmd
         text: Summary
       - href: tech_supp.qmd

@@ -136,6 +136,48 @@ slsra_variables <- slsra_variables %>%
 knitr::kable(slsra_variables,format = "html",  caption = "Landscape component features")
 ```
 
+### List of items / features
+
+```{r, echo=FALSE}
+config <- biodt.recreation::load_config()
+
+config_by_component <- split(config, as.factor(config[["Component"]]))
+```
+
+```{r, echo=FALSE}
+#| label: tbl-slsra
+#| tbl-cap: Description of items/features in the _Landscape_ component.
+
+dplyr::select(config_by_component$SLSRA, Name, Description) |>
+	knitr::kable(format = "html")
+```
+
+```{r, echo=FALSE}
+#| label: tbl-fipsn
+#| tbl-cap: Description of items/features in the _Natural Features_ component.
+
+dplyr::select(config_by_component$FIPS_N, Name, Description) |> 
+	knitr::kable(format = "html")
+```
+
+```{r, echo=FALSE}
+#| label: tbl-fipsi
+#| tbl-cap: Description of items/features in the _Infrastructure Features_ component.
+
+dplyr::select(config_by_component$FIPS_I, Name, Description) |> 
+	knitr::kable(format = "html")
+```
+
+```{r, echo=FALSE}
+#| label: tbl-water
+#| tbl-cap: Description of items/features in the _Water_ component.
+
+dplyr::select(config_by_component$Water, Name, Description) |> 
+	knitr::kable(format = "html")
+```
+
+### Not sure
+
 ```{r, echo=FALSE}
 
 make_layer_map(rstack = slsra,  base_map = base_map,
@@ -349,9 +391,9 @@ make_layer_map_dist(rstack = water_rstack, base_map,
 
 
 
-## Description of the model
+## Technical description of the model
 
-While there have been several publications citing the RP model, none so far have included a mathematical description of the model itself.
+While there have been several publications citing the RP model, none so far have included an unambiguous technical description of the model itself.
 
 In fact the mathematical basis of the RP model is extremely simple. Nevertheless, it is worth being fully explicit. 
 
@@ -495,144 +537,7 @@ $$ {#eq-rp}
 and rescaled $F_{\text{RP}} \longrightarrow \hat{F}_\text{RP}$ using @eq-rescale once more (with the same $\mathcal{R}$) so that the result falls in the interval $[0, 1]$.
 
 
-## Overview of the repository
 
-The repository can be found at [github.com/BioDT/uc-ces-recreation](https://github.com/BioDT/uc-ces-recreation).
-
-The repository is organised in the following way, as shown using the `tree` command:
-
-```txt
-├── CONTRIBUTING.md  # <1>
-├── DESCRIPTION  # <2>
-├── inst
-│   ├── examples
-│   │   ├── capture_messages.R # <3>
-│   │   ├── compute_component.R
-|   |   ...
-│   │   └── save_persona.R  # <3>
-│   ├── extdata
-│   │   ├── config
-│   │   │   └── config.csv  # <4>
-│   │   ├── personas
-│   │   │   └── presets.csv  # <5>
-│   │   ├── rasters
-│   │   │   ├── Bush
-│   │   │   │   ├── FIPS_I.tif  # <6>
-│   │   │   │   ├── FIPS_N.tif
-│   │   │   │   ├── SLSRA.tif
-│   │   │   │   └── Water.tif   # <6>
-│   │   │   └── Scotland
-│   │   │       ├── FIPS_I.tif  # <7>
-│   │   │       ├── FIPS_N.tif
-│   │   │       ├── SLSRA.tif
-│   │   │       └── Water.tif   # <7>
-│   │   └── shapefiles
-│   │       ├── Bush
-│   │       │   ├── Bush.cpg  # <8>
-│   │       │   ├── Bush.dbf
-│   │       │   ├── Bush.prj
-│   │       │   ├── Bush.shp
-│   │       │   └── Bush.shx  # <8>
-│   │       └── Scotland
-│   │           ├── Scotland.cpg  # <9>
-│   │           ├── Scotland.dbf
-│   │           ├── Scotland.prj
-│   │           ├── Scotland.shp
-│   │           └── Scotland.shx  # <9>
-│   └── scripts
-│       ├── cli
-│       │   ├── app.sif  # <10>
-│       │   ├── main.R  # <11>
-│       │   └── README.md
-│       └── data_production
-│           ├── app.sif  # <12>
-│           ├── main.R  # <13>
-│           └── README.md
-├── LICENSE  # <14>
-├── LICENSE.md  # <14>
-├── man
-│   ├── assert_to_bool.Rd  # <15>
-│   ├── assert_valid_bbox.Rd
-│   ...
-│   └── timed.Rd  # <15>
-├── NAMESPACE  # <16>
-├── R
-│   ├── app_run.R         # <17>
-│   ├── app_server.R
-│   ├── app_text.R
-│   ├── app_theme.R
-│   ├── app_ui.R
-│   ├── bbox.R
-│   ├── config.R
-│   ├── data_download.R
-│   ├── data_input.R
-│   ├── data_production.R
-│   ├── example.R
-│   ├── legacy.R
-│   ├── persona.R
-│   ├── recreation.R
-│   └── utils.R           # <17>
-├── README.md
-├── renv.lock  # <18>
-├── dev
-│   ├── cli_test.sh  # <19>
-│   ├── dev.sh  # <20>
-│   ├── pre-commit.R  # <21>
-│   ├── README.md
-│   └── run_app.sh  # <22>
-├── tests
-│   └── testthat
-│       └── test_io.R  # <23>
-└── vignettes
-    ├── compute_potential.qmd  # <24>
-    ├── personas.qmd
-    └── run_app.qmd  # <24>
-```
-
-1. Instructions for potential contributors.
-2. The standard [`DESCRIPTION` file](https://r-pkgs.org/description.html) for R packages, containing metadata about the package.
-3. Simple examples using the package functions, which get included in the generated documentation.
-4. Configuration file, mapping layer names to raster values (for the pre-processing step) and descriptions (used in the Shiny app).
-5. File containing two 'preset' personas: the 'hard' and 'soft' recreationalists described in @Rolph2024.
-6. Dataset covering a small area, for use in examples and vignettes.
-7. Dataset for all of Scotland. This is not included in the package and is instead downloaded separately.
-8. Shapefile and auxiliary data for the example dataset.
-9. Shapefile and auxiliary data for the full Scotland-wide dataset.
-10. Container definition file used to build a Singularity container for `cli/main.R`.
-11. Command-line script for the model taking a persona and bounding box as input. This is expected to be called from the main BioDT app.
-12. Container definition file used to build a Singularity container for `data_production/main.R`.
-13. Script that executes all steps of the data pre-processing pipeline.
-14. MIT licenses (`.md` for the repository, no extension for the package).
-15. Compiled documentation for the package, generated using [roxygen2](https://roxygen2.r-lib.org/).
-16. The standard [`NAMESPACE`](https://r-pkgs.org/namespace.html) file for R packages, containing a list of functions provided by the package.
-17. Source code for the package.
-18. [`renv`](https://rstudio.github.io/renv/) lockfile used (in theory) to install packages deterministically. Used when deploying app to Posit Connect.
-19. Bash script that runs `Rscript inst/scripts/cli/main.R` with example data.
-20. Bash script that runs `pre-commit` if available, or else `Rscript scripts/pre-commit.R`, as well as the tests.
-21. R script that emulates the behaviour of `pre-commit` when run, in case the latter is not installed.
-22. Bash script that loads the local version of the package and runs the Shiny app, for convenience during development.
-23. A file containing [unit tests](https://testthat.r-lib.org/). Essentially tokenistic, but provides a template for more unit tests to be added in future.
-24. Some bare-bones [vignettes](https://r-pkgs.org/vignettes.html) demonstrating simple use of the package.
-
-:::{.callout-note}
-#### A note on the `inst/` directory
-
-Apparently it has become standard practice to use the `inst/` directory to distribute additional elements such as scripts and Shiny apps along with the package. This is the practice we have adopted here. There are really just two important things to know about the `inst/` directory:
-
-First, that its contents are copied to the top-level of the package when the package is built. Hence, the top level of the built package will contain `examples/`, `extdata/` and `scripts/` (the directory containing shell scripts is not included in the package).
-
-Hence, in order for file paths to work when the package is installed, one must omit `inst/` from the path. But this means the path will not work during development.
-
-The way to regain consistency between the two situations (installed versus not installed) is to use[`system.file`](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/system.file). There are several examples of this in the code, including the one below, where paths to files or directories under `inst/` needed to be constructed.
-
-```R
-get_preset_persona_file <- function() {
-    system.file("extdata", "personas", "presets.csv",
-        package = "biodt.recreation", mustWork = TRUE
-    )
-}
-```
-:::
 
 ## Production of input data
 
@@ -872,3 +777,44 @@ As things stand, personas are stored in `.csv` files on the server side. This me
 
 
 
+## To sort {.appendix}
+
+#### RP model processing steps
+
+1.  **Cropping the raster files**
+
+The model first crops each of the four component rasters to the specified area of interest. Using the terra package in R, the bounding box is converted to a vector polygon with terra::vect(), and then used to crop the raster via terra::crop().
+
+2.  **Calculating each components contribution**
+
+For each cell (20m x 20m), the model extracts values from all relevant layers (features), multiplies them by the corresponding persona score, and computes a weighted sum across layers. This results in one new raster per component that reflects the component’s contribution based on the persona preferences.
+
+3.  **Re-scale to unit interval**
+
+Each of the components contribution rasters is re-scaled using "min-max normalization":
+
+$$
+scaled.value = (x-min)/mix-min
+$$
+
+Minimum values are mapped as 0, maximum values are mapped as 1, and all the intermediate values are proportionally scaled.
+
+4.  **Combining the components RP**
+
+The four normalized component rasters are summed cell by cell. The resulting raster is then re-scaled again (min-max normalization) to produce the final Recreational Potential raster.
+
+The model's output is a SpatRaster object (that can be saved as a .tif) with five layers:
+
+1.  "SLSRA": the RP of the landscape component
+
+2.  "FIPS_N": the RP of the natural features component
+
+3.  "FIPS_I": the RP of the infrastructure component
+
+4.  "Water": the RP of the water component
+
+5.  "Recreational_Potential": the combined RP
+
+In all layers, values range from 0 to 1, where higher values (closer to 1) indicate greater recreational potential.
+
+Because the model output is a result of the normalization of recreational potential of a specific area of interest, the values are relative within that area. This means that running the model with a different geographic extent will yield to different scores for the same features, even if the underlying data is unchanged.
