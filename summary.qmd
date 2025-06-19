@@ -8,17 +8,16 @@ authors:
   - name: Maddalena Tigli
     orcid: 0000-0001-8083-0589
   - name: Chris Andrews
+    orcid: 0000-0003-2428-272X
   - name: Jan Dick
+    orcid: 0000-0002-4180-9338
   - name: Simon Rolph
+    orcid: 0000-0001-6755-9456
 
 date: today
 date-format: long
 abstract: >
   These documents collectively describe the xyz.
-
-citation: true
-license: CC BY
-funding: This work was funded by BioDT
 ---
 
 ## Background

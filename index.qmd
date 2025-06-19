@@ -7,8 +7,11 @@ authors:
   - name: Maddalena Tigli
     orcid: 0000-0001-8083-0589
   - name: Chris Andrews
+    orcid: 0000-0003-2428-272X
   - name: Jan Dick
+    orcid: 0000-0002-4180-9338
   - name: Simon Rolph
+    orcid: 0000-0001-6755-9456
 
 date: today
 date-format: long
@@ -19,7 +22,7 @@ toc: false
 number-sections: false
 
 nocite: |
-  @Dick2025
+  @Rolph2024, @Dick2025, @Dick2025b
 ---
 
 ### Contents
@@ -32,10 +35,9 @@ The [Developers' Report](dev_report.html) provides a high-level, chronological o
 
 The [Code Demonstration](demo.html) ...
 
-
 ### Code and data
 
-Code for the Recreational Potential model is available as an R Package hosted on GitHub at https://github.com/BioDT/uc-ces-recreation.
+Code for the Recreational Potential model is available as an R Package hosted on GitHub at [https://github.com/BioDT/uc-ces-recreation](https://github.com/BioDT/uc-ces-recreation).
 
 The model requires some input data, which has been deposited on Zenodo **HERE**.
 
@@ -47,6 +49,4 @@ The model requires some input data, which has been deposited on Zenodo **HERE**.
 :::
 
 - SPEAK paper
-- BioDT paper
 - Simon's paper
-- Code/data DOI

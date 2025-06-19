@@ -11,9 +11,7 @@ authors:
 date: last-modified
 date-format: long
 abstract: >
-  This report provides a high-level, chronological overview of development work carried out between November 2024 and June 2025. The intention is to provide some context and explanation for posterity. We also make several recommendations for further development work. Most items are accompanied by one or more links to issues and/or pull requests on GitHub, which often contain further details and references to specific lines of code.
-citation:
-  title: "BioDT Recreational Potential Model: Developer Report"
+  This report provides a high-level, chronological overview of development work carried out by the authors between November 2024 and June 2025. The intention is to provide some context and explanation for posterity. We also make several recommendations for further development work. Most items are accompanied by one or more links to issues and/or pull requests on GitHub, which often contain further details and references to specific lines of code.
 ---
  
 ## Background
