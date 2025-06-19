@@ -24,7 +24,7 @@ nocite: |
 
 ### Contents
 
-The [Summary](summary.html) provides an overview of the model ...
+The main [Summary](summary.html) provides a high-level overview of the Recreational Model and the research context in which it came about. 
 
 The [Technical Supplement](tech_supp.html) covers technical details about the BioDT Recreational Potential model (LINK TO SPECIFIC RELEASE). This includes a mathematical description of the model and aspects of the code. This document would be useful for someone aiming to understand the full process, starting from the download of ‘raw’ datasets, and following through all the way to the final RP calculation.
 

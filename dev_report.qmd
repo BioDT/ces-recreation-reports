@@ -75,9 +75,11 @@ Hence, the original development objectives were:
 3. Provide a means for users to choose the region of interest.
 4. Disaggregate the RP computation from the Shiny app, and reformulate it so that it could be run on LUMI via the BioDT app.
 
-Initially, a total of five weeks (split 3:2 between JMR:MT) were allocated for this work. However, more time was made available as the scope of the work increased as described below.
+Initially, a total of five weeks (split 3:2 between JMR:MT) were allocated for this work. However, more time (X weeks split Y:Z) was made available as the scope of the work increased as described below.
 
 ### Expanded scope & revised development objectives
+
+Initially, the two of us were working independently. In particular, MT worked on removing dependence on the legacy `raster` package and replacing it with a dependence on the [`terra`](https://rspatial.github.io/terra/) package, which is significantly faster, has better memory management, and supports lazy loading of large rasters. This led to tangible improvements in speed.
 
 After gaining familiarity with the codebase and a better understanding of the objectives and the way the model was intended to function, it became clear that the most straightforward way to meet all of the objectives simultaneously was to fully rewrite the code from scratch. Some outstanding issues required substantial work to fix within the existing framework, but could be neatly circumvented in a full rewrite. In addition, a full rewrite would be the most effective way to improve the speed and scalability (objective 2) and the flexibility to add or modify functionality (including objective 3).
 
@@ -431,7 +433,7 @@ However, the outputs of a convolution were qualitatively different from the dist
 
 Since `terra::distance` is a global function, it cannot be decomposed into independent subdomains to be computed sequentially. However, since we only care about distances under 500m, domain decomposition is possible provided the domains overlap by at least this distance.
 
-==Madda to write up==
+The original Scotland-wide raster was divided into 20 overlapping spatial windows with 500m overlapping buffers. After the distance step was complete within each window, the windows were stitched together, discarding the overlaps. The distance raster was also truncated at 500m, setting any values above this to `NA` which simply passes through the logistic function and ensures that we don't waste disk space storing high-precision floats that are functionally equivalent to zero.
 
 **Pull Requests merged:**
 
@@ -702,6 +704,7 @@ From the author's perspective, there are two planned enhancements that will move
 However, meeting this definition of Digital Twin cannot be an objective in and of itself; it must be an outcome that is realised in pursuit of other objectives. The availability of near real-time data does not justify real-time updates to the RP model. Rather, the frequency with which to update these datasets should be determined by trading off the needs of users with the monetary and environmental cost of the data acquisition and processing pipeline.
 
 In cases where the utility of real-time data updates is clear, it may be worth considering whether integrating the BioDT app with third party data services may be more efficient. For example, providing users with a link to a local weather forecast is perfectly sufficient; there would be no need to embed real-time weather forecasts in the app itself. Third-party services could provide information as to the availability of parking, toilets, places to eat, and other things that people may need to plan their activity.
+
 
 ## Concluding remarks
 

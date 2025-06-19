@@ -16,15 +16,59 @@ abstract: >
 code-annotations: hover
 ---
 
-## Description of the model
+```{r, echo=FALSE}
+library(magrittr)
+library(biodt.recreation)
 
-While there have been several publications citing the RP model, none so far have included a mathematical description of the model itself.
+source("functions_report.R")
+
+water <- terra::rast(system.file("extdata", "rasters", "Bush", "original", "Water.tif", package="biodt.recreation"))
+
+slsra <- terra::rast(system.file("extdata", "rasters", "Bush", "SLSRA.tif", package="biodt.recreation"))
+
+fips_n <- terra::rast(system.file("extdata", "rasters", "Bush", "FIPS_N.tif", package="biodt.recreation"))
+
+fips_i <- terra::rast(system.file("extdata", "rasters", "Bush", "original", "FIPS_I.tif", package="biodt.recreation"))
+
+# the box of bush estate
+e <- terra::ext(water)
+coords <- matrix(c(
+  e$xmin, e$ymin,
+  e$xmax, e$ymin,
+  e$xmax, e$ymax,
+  e$xmin, e$ymax,
+  e$xmin, e$ymin # close polygon
+), ncol = 2, byrow = TRUE)
+bbox_poly <- terra::vect(coords,
+  type = "polygons",
+  crs = terra::crs(water)
+) %>%
+  sf::st_as_sf() %>%
+  sf::st_transform(crs = 4326)
+
+base_map <- 
+  leaflet::leaflet() %>%
+  leaflet::addProviderTiles("OpenStreetMap.Mapnik", options = leaflet::providerTileOptions(zIndex = 0, noWrap = TRUE), group = "Streets") %>%
+  leaflet::addProviderTiles("Esri.WorldImagery", options = leaflet::providerTileOptions(zIndex = 0, noWrap = TRUE), group = "Satellite") %>%
+  leaflet::addPolygons(
+    data = bbox_poly,
+    color = "black",
+    weight = 3,
+    fill = FALSE
+  ) 
+```
+
+## Technical description of the model
+
+While there have been several publications citing the RP model, none so far have included an unambiguous technical description of the model itself.
 
 In fact the mathematical basis of the RP model is extremely simple. Nevertheless, it is worth being fully explicit. 
 
 <!-- Were it not for an area-dependent rescaling step it would be nothing more than a linear combination (i.e. a weighted sum) at each 20 metre squared pixel.-->
 
 ### Inputs
+
+All 87 layers listed in @sec-listitems.
 
 The RP model takes three inputs:
 
@@ -162,153 +206,14 @@ $$ {#eq-rp}
 and rescaled $F_{\text{RP}} \longrightarrow \hat{F}_\text{RP}$ using @eq-rescale once more (with the same $\mathcal{R}$) so that the result falls in the interval $[0, 1]$.
 
 
-## Overview of the repository
-
-The repository can be found at [github.com/BioDT/uc-ces-recreation](https://github.com/BioDT/uc-ces-recreation).
-
-The repository is organised in the following way, as shown using the `tree` command:
-
-```txt
-├── CONTRIBUTING.md  # <1>
-├── DESCRIPTION  # <2>
-├── inst
-│   ├── examples
-│   │   ├── capture_messages.R # <3>
-│   │   ├── compute_component.R
-|   |   ...
-│   │   └── save_persona.R  # <3>
-│   ├── extdata
-│   │   ├── config
-│   │   │   └── config.csv  # <4>
-│   │   ├── personas
-│   │   │   └── presets.csv  # <5>
-│   │   ├── rasters
-│   │   │   ├── Bush
-│   │   │   │   ├── FIPS_I.tif  # <6>
-│   │   │   │   ├── FIPS_N.tif
-│   │   │   │   ├── SLSRA.tif
-│   │   │   │   └── Water.tif   # <6>
-│   │   │   └── Scotland
-│   │   │       ├── FIPS_I.tif  # <7>
-│   │   │       ├── FIPS_N.tif
-│   │   │       ├── SLSRA.tif
-│   │   │       └── Water.tif   # <7>
-│   │   └── shapefiles
-│   │       ├── Bush
-│   │       │   ├── Bush.cpg  # <8>
-│   │       │   ├── Bush.dbf
-│   │       │   ├── Bush.prj
-│   │       │   ├── Bush.shp
-│   │       │   └── Bush.shx  # <8>
-│   │       └── Scotland
-│   │           ├── Scotland.cpg  # <9>
-│   │           ├── Scotland.dbf
-│   │           ├── Scotland.prj
-│   │           ├── Scotland.shp
-│   │           └── Scotland.shx  # <9>
-│   └── scripts
-│       ├── cli
-│       │   ├── app.sif  # <10>
-│       │   ├── main.R  # <11>
-│       │   └── README.md
-│       └── data_production
-│           ├── app.sif  # <12>
-│           ├── main.R  # <13>
-│           └── README.md
-├── LICENSE  # <14>
-├── LICENSE.md  # <14>
-├── man
-│   ├── assert_to_bool.Rd  # <15>
-│   ├── assert_valid_bbox.Rd
-│   ...
-│   └── timed.Rd  # <15>
-├── NAMESPACE  # <16>
-├── R
-│   ├── app_run.R         # <17>
-│   ├── app_server.R
-│   ├── app_text.R
-│   ├── app_theme.R
-│   ├── app_ui.R
-│   ├── bbox.R
-│   ├── config.R
-│   ├── data_download.R
-│   ├── data_input.R
-│   ├── data_production.R
-│   ├── example.R
-│   ├── legacy.R
-│   ├── persona.R
-│   ├── recreation.R
-│   └── utils.R           # <17>
-├── README.md
-├── renv.lock  # <18>
-├── dev
-│   ├── cli_test.sh  # <19>
-│   ├── dev.sh  # <20>
-│   ├── pre-commit.R  # <21>
-│   ├── README.md
-│   └── run_app.sh  # <22>
-├── tests
-│   └── testthat
-│       └── test_io.R  # <23>
-└── vignettes
-    ├── compute_potential.qmd  # <24>
-    ├── personas.qmd
-    └── run_app.qmd  # <24>
-```
-
-1. Instructions for potential contributors.
-2. The standard [`DESCRIPTION` file](https://r-pkgs.org/description.html) for R packages, containing metadata about the package.
-3. Simple examples using the package functions, which get included in the generated documentation.
-4. Configuration file, mapping layer names to raster values (for the pre-processing step) and descriptions (used in the Shiny app).
-5. File containing two 'preset' personas: the 'hard' and 'soft' recreationalists described in @Rolph2024.
-6. Dataset covering a small area, for use in examples and vignettes.
-7. Dataset for all of Scotland. This is not included in the package and is instead downloaded separately.
-8. Shapefile and auxiliary data for the example dataset.
-9. Shapefile and auxiliary data for the full Scotland-wide dataset.
-10. Container definition file used to build a Singularity container for `cli/main.R`.
-11. Command-line script for the model taking a persona and bounding box as input. This is expected to be called from the main BioDT app.
-12. Container definition file used to build a Singularity container for `data_production/main.R`.
-13. Script that executes all steps of the data pre-processing pipeline.
-14. MIT licenses (`.md` for the repository, no extension for the package).
-15. Compiled documentation for the package, generated using [roxygen2](https://roxygen2.r-lib.org/).
-16. The standard [`NAMESPACE`](https://r-pkgs.org/namespace.html) file for R packages, containing a list of functions provided by the package.
-17. Source code for the package.
-18. [`renv`](https://rstudio.github.io/renv/) lockfile used (in theory) to install packages deterministically. Used when deploying app to Posit Connect.
-19. Bash script that runs `Rscript inst/scripts/cli/main.R` with example data.
-20. Bash script that runs `pre-commit` if available, or else `Rscript scripts/pre-commit.R`, as well as the tests.
-21. R script that emulates the behaviour of `pre-commit` when run, in case the latter is not installed.
-22. Bash script that loads the local version of the package and runs the Shiny app, for convenience during development.
-23. A file containing [unit tests](https://testthat.r-lib.org/). Essentially tokenistic, but provides a template for more unit tests to be added in future.
-24. Some bare-bones [vignettes](https://r-pkgs.org/vignettes.html) demonstrating simple use of the package.
-
-:::{.callout-note}
-#### A note on the `inst/` directory
-
-Apparently it has become standard practice to use the `inst/` directory to distribute additional elements such as scripts and Shiny apps along with the package. This is the practice we have adopted here. There are really just two important things to know about the `inst/` directory:
-
-First, that its contents are copied to the top-level of the package when the package is built. Hence, the top level of the built package will contain `examples/`, `extdata/` and `scripts/` (the directory containing shell scripts is not included in the package).
-
-Hence, in order for file paths to work when the package is installed, one must omit `inst/` from the path. But this means the path will not work during development.
-
-The way to regain consistency between the two situations (installed versus not installed) is to use[`system.file`](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/system.file). There are several examples of this in the code, including the one below, where paths to files or directories under `inst/` needed to be constructed.
-
-```R
-get_preset_persona_file <- function() {
-    system.file("extdata", "personas", "presets.csv",
-        package = "biodt.recreation", mustWork = TRUE
-    )
-}
-```
-:::
-
-## Production of input data
+## Production of input rasters
 
 The data production, or raster pre-processing stage refers to the production of the rasters that are directly multiplied by the persona scores in the dynamic part of the model. That is, the output of this stage is four multi-layered rasters $(f_1, f_2, f_3, f_4)$ corresponding to the four components, where $f_i := (f_{i1}, f_{i2}, \ldots, f_{i n_i})$, whose individual layers $f_{ij}$ are defined by @eq-raster12 (for $i = 1, 2$) and @eq-raster23 (for $i=2,3$).
 
 The process of producing these rasters is currently split into two distinct parts:
 
-1. A manual part in which categorical rasters are constructed from raw downloaded datasets using QGIS
-2. A scripted part in which these categorical rasters are converted into the form required by the model, using `R`.
+1. A **manual part** in which categorical rasters are constructed from raw downloaded datasets using QGIS
+2. A **scripted part** in which these categorical rasters are converted into the form required by the model, using `R`.
 
 The scripted part is executed by running `inst/scripts/data_production/main.R` (or the containerised version) with the manually-produced categorical rasters already present. This script essentially boils down to calling four functions which are found in `R/data_production.R`:
 
@@ -319,10 +224,142 @@ stack_all(indir = "Stage_2", outdir = "Stage_3")
 compute_proximity_rasters(indir = "Stage_3", outdir = "Stage_4")
 ```
 
+### Data sources
 
-### Manual part
+```{r, echo=FALSE, display=FALSE}
+# Read table
+table <- readr::read_csv("data_sources.csv", show_col_types = FALSE)
 
-**Chris' work.**
+# Drop first col (BES2024 number)
+table <- table[, -1]
+
+# Make the access url appear last
+table <- table[, c(1, 2, 4:ncol(table), 3)]
+
+# Display nicely
+knitr::kable(table)
+```
+
+### Manipulation in QGIS
+
+#### Landscape component
+
+#### Natural Features component
+
+The 24 features in this component are grouped into three main categories: Landform (16 features), Slope (6 features), and Soil (2 features)
+
+##### Landform features
+
+The landform data was extracted from the Scotland 250K Soils Map (**CHRIS add APA citation**). The following methodologies were applied:
+
+1.  Initial dissolve: the dataset was "dissolved" in QGIS using the Landform field, reducing it to 334 unique polygon features.
+
+2.  Grouping: the 334 landform types were manually grouped into 16 broader categories based on descriptive keywords (e.g. "hills", "foothills" etc...). (**Chris can you confirm they were 16 and not 17? For transparency and reprodcucibility, a table in the appending mapping the original attributes to the grouped category would be ideal)**
+
+3.  Final dissolve and resterization: The grouped dataset was dissolved again to generate one polygon per broad category. Finally, the data-sets was converted into raster format at a 20 m x 20 m resolution, with each layer corresponding to one of the 16 landform categories.
+
+##### Slope features
+
+Slope data were derived from the Copernicus GLO-30 Digital Elevation Model (DEM), a global 30 m resolution dataset (**CHRIS add APA citation and confirm resolution**). The following methodologies were applied:
+
+1.  Slope calculation: the DEM the elevation data were converted into slopes using QGIS (**chris, was this using GDAL in its default setting?**).
+
+2.  Reclassification: The continuous slope values were re-classified into six slopes classes (which form the six slope features) (see Table X). (**Chris were this category picked by you or do they come from somewhere? I think we need to specify this**)
+
+| Slope (%) | Slope description     |
+|-----------|-----------------------|
+| \<3       | easy                  |
+| 3-5       | gentle slope          |
+| 5-10      | medium slope          |
+| 10-20     | steep slope           |
+| 20-30     | very steep slope      |
+| \>30      | extremely steep slope |
+
+: Slopes categories used to reclassify the Copernicus GLO-30 Digital Elevation Model (DEM) data into the 6 "slope" features of the Natural Features component of the RP model.
+
+3.  Upsampling: The slope raster was upsampled to a 20m x 20m resolution in QGIS.\
+        (**do you know which method was used to interpolate?**) (**was the raster first up-sampled to 20m x 20 m and then the slope calculated or the opposite?**)
+
+##### Soil features
+
+The ==landform data was extracted from the Scotland 250K Soils Map== (**APA citation**). The following methodologies were applied:
+
+1.  Initial dissolve: The dataset was "dissolved" by field “genSoilTyp” in QGIS, reducing it to 12 unique attribute values (12 soil types).
+
+2.  Grouping: These were manually grouped into 2 soil categories: orgnaic (peat) and mineral. (**chris, table with what soil type was assigned to each group**).
+
+3.  Final dissolve and rasterization: The grouped dataset was dissolved again to the new soil type. Finally, the data-sets was converted into raster format at a 20 m x 20 m resolution.
+
+#### Infrastructure Features component
+
+The infrastructure component (FIPS_I.tif) is derived from a raster indicating the presence/absence or vicinity to 10 infrastructure features. The file for this component is derived through a three-step process:
+
+To begin with, a raster with a value of 1 for cells where the features is present, and 0 or NAs for the cells where the feature is absent. The 10 features are grouped into three main categories: "Roads Tracks" (5 features), "Cycle Network" (4 features), and Local Path Network" (1 feature):
+
+##### Roads and Tracks
+
+Road Tracks data was sourced from the OS OpenRoads dataset (**add citation**). The following methodologies were applied:
+
+1.  Initial dissolve: the dataset was "dissolved" in QGIS using the by the “Road type” field, reducing it to XX unique polygon features (.
+
+2.    “Tracks” were extracted from OSM_Roads datasets then merged with the attribute field “Access Roads” in the OpenRoads dataset to create the attribute value “Access roads / Tracks”.
+
+##### Cycle network
+
+Sustrans National Cycle Network dataset were initially dissolved by two attribute fields  “Desc\_” & “Surface” in QGIS.  A new attribute field was created taking the attribute value from “Desc\_” (on road / off road) and suffixing with grouped surface types (paved or unpaved).
+
+#### Water component
+
+The water component is derived from a raster indicating the presence or absence of infrastructure features. This original raster, labeled **"original"** in the Easter Bush example map, contains: 1 for cells where the feature is present, and 0 or NAs for cells where the feature is absent.
+
+The water copmonent is derived from:
+
+##### Rivers
+
+ Os Open Rivers dataset was reduced from 74997 features, by dissolved by attribute fields “name” and “Region” so that all river segments were joined by a common name. To avoid rivers with the same name but located in different areas being incorrectly joined, “Region” from the OS Boundaries dataset was merged with the OS Open Rivers prior to this step. To reduce the dataset into something scoreable at a national scale, it was decided to use a proxy for river size/regional importance.  This is a subjective process, decided on by the research team.  Seven classes were created and dataset features classified based on either the attribute “form” which was a descriptor for water type, or keywords in the attribute “name” (see table for examples), or researcher knowledge of major rivers of national and regional importance.
+
+    +--------------------------------------+-------------------------------------+
+    | class                                | example search terms/or process     |
+    +======================================+=====================================+
+    | Major river or tributary             | Specific e.g. "Tay", "Spey" etc…    |
+    +--------------------------------------+-------------------------------------+
+    | Tidal river or estuary               | taken from dataset attribute "form" |
+    +--------------------------------------+-------------------------------------+
+    | Minor river or tributary             | e.g. "River", "Abhainn",            |
+    +--------------------------------------+-------------------------------------+
+    | "Uisge"                              |                                     |
+    +--------------------------------------+-------------------------------------+
+    | Named minor stream or tributary      | e.g. "Allt", "Alltan",              |
+    +--------------------------------------+-------------------------------------+
+    | "Burn", "Feadan", "Sruth", "Caochan" |                                     |
+    +--------------------------------------+-------------------------------------+
+    | Unnamed minor stream or tributary    | e.g. "Allt", "Alltan",              |
+    +--------------------------------------+-------------------------------------+
+    | "Burn", "Feadan", "Sruth", "Caochan" |                                     |
+    +--------------------------------------+-------------------------------------+
+    | Canal                                | taken from dataset attribute "form" |
+    +--------------------------------------+-------------------------------------+
+    | Lake                                 | taken from dataset attribute "form" |
+    +--------------------------------------+-------------------------------------+
+
+    : water rivers classification
+
+
+##### Lakes
+
+The Spatial inventory of UK waterbodies dataset contained 25404 features for Scotland.  To make it into a relevant and scorable dataset it was reduced to six features based on the given size (in hectares) of a waterbody using the attribute “Poly_Area_Ha”.  Classification was as follows:
+
+| Class        | size (ha) |
+| ------------ | --------- |
+| Pond         | $<0.2$    |
+| Lochan       | $0.2-2$   |
+| Small loch   | $2-10$    |
+| Mediun loch | $10-100$  |
+| Large loch  | $100-500$ |
+| Major loch  | $>500$    | 
+
+: watre lakes
+
 
 ### Quantising the slope raster
 
@@ -343,6 +380,7 @@ $$ {#eq-slopequant}
 
 The origin of these intervals is another historical artefact for which we have precedent albeit not a deeper justification.
 
+
 ### Reprojection
 
 The categorical rasters produced in the previous stage do not necessarily share the exact same coordinate grid. They can be coerced to share the same grid using `terra::project`.
@@ -351,7 +389,7 @@ We projected all rasters onto a reference raster with the following properties:
 
 - **Coordinate reference system** (CRS): [EPSG:27700](https://epsg.io/27700) (British National Grid)
 - **Resolution**: 20 metres x 20 metres
-- **Extent**: $(x_\text{min}, x_\text{max}, y_\text{min}, y_\text{max}) = (-10000, 660000, 460000, 1220000)$.
+- **Extent**: $(x_\text{min}, x_\text{max}, y_\text{min}, y_\text{max}) = (-10000, 660000, 460000, 1220000)$ (a rectangular box around Scotland).
 
 We used the 'nearest' interpolation mode (`method="near"`) since the data is categorical. The resulting rasters therefore contain the same set of integer values.
 
@@ -486,12 +524,46 @@ Every single other processing step is entirely local; all of the information req
 
 In contrast, calculating distance to the nearest feature is strongly non-local; the output value at $x$ is a function of the full set of input values. Naively, the entire raster must be loaded to compute the output at a single location. 
 
-<!-- It is unlikely that the underlying C++ implementation of `GDALComputeProximity`, which is called by `terra::distance`, actually loads the entire raster into memory immediately, but in practice we find that more memory is allocated than is available. -->
+To perform this calculation we used [`terra::distance`](https://rspatial.github.io/terra/reference/distance.html). It is not necessarily true that the underlying C++ implementation of `GDALComputeProximity`, which is called by `terra::distance`, actually loads the entire raster into memory immediately. However, for Scotland at 20 metre resolution, we found that the memory requirements for this distance calculation (several 10s of GB) surpass the typical memory available on a standard personal computer by an order of magnitude.
 
-**To do: Madda's solution**
+To get around this issue, the original Scotland-wide raster was divided into 20 overlapping spatial 'windows'. Note that the size of the overlap needed to be at least as large as the effective cutoff distance of 500m. After the distance step was complete within each window, the windows were stitched together, discarding the overlaps. 
 
+The distance raster was also truncated at 500m, setting any values above this to `NA` which simply passes through the function applying @eq-proximity and ensures that we don't waste disk space storing high-precision floats that are functionally equivalent to zero.
 
-## Calculation of Recreational Potential
+==To account for proximity effects, the distance from each cell to the nearest infrastructure feature was calculated using the terra::distance() function in R. The resulting raster, labeled **"distance"** in the example map, contains the distance in meters from the center of each cell to the nearest feature.
+This raster is named "**scored**" in the example map, using the distance decay function.==
+
+==TODO: make this figure static?==
+
+```{r, echo=FALSE, out.height = 650}
+fips_i_rstack <- list(
+  "original" = fips_i,
+  "distance" = terra::rast(system.file("extdata", "rasters", "Bush", "dist", "FIPS_I_dist.tif", package="biodt.recreation")),
+  "scored" = terra::rast(system.file("extdata", "rasters", "Bush", "FIPS_I.tif", package="biodt.recreation"))
+  )
+
+make_layer_map_dist(rstack = fips_i_rstack, base_map,
+                    show_index = 2,
+                    color_original = "#DA627D")
+```
+
+## Efficiency
+
+terra vs raster
+
+Pre-processing component rasters at the national (Scotland-wide) scale, rather than performing these operations at run-time for each user-defined area. Pre-processing included:
+
+-   Standardizing spatial properties (extent, resolution, projection) across all four component rasters to ensure seamless overlay and computation.
+-   Pre-computing distance rasters, to avoid repeated and costly distance calculations during model runs.
+-   Pre-calculating scored rasters using predefined thresholds and decay functions, making them immediately usable for user-defined queries.
+
+Overall, the use of this approach has reduced computational overhead significantly (see report "Optimizing BioDT Recreational Potential (RT) model run-time").
+
+### Pre-processing
+
+todo
+
+### Calculation of Recreational Potential
 
 The dynamic part of the model, i.e. the part that gets updated based on user input, amounts to little more than computing the weighted sum in @eq-component to calculate each component and summing the components (@eq-rp), with a rescaling by @eq-rescale after each step. As a result, it is extremely fast.
 
@@ -519,23 +591,94 @@ This is also a very memory-light operation; `terra` only _has_ to load one pixel
 
 - **TODO:** Rescaling step?
 
-## Shiny app
 
-The Shiny app is split across several files, each containing the `app_` prefix:
+## List of items/features {#sec-listitems}
 
-- `app_ui.R` contains a function `make_ui` that returns the user interface (UI), i.e. the layout of the Shiny app, sliders, map, buttons etc.
-- `app_server.R` contains a function `make_server` that returns the `server` function, which defines the dynamic parts of the app, such as loading/saving/editing personas and drawing a rectangle on the map.
-- `app_theme.R` contains some custom UI elements such as the colour scheme and logo.
-- `app_text.R` contains the extended text elements of the app, such as the user guide.
-- `app_run.R` contains a convenience function `run_app` for running the app.
+Here we list the full set of 87 items/features that make up the layers of the input rasters, and must be scored by the user to construct a persona.
 
-As things stand, personas are stored in `.csv` files on the server side. This means the app requires write access to the server's filesystem. This is convenient, since users do not have to upload their own persona files. However, it is not a scalable solution. Future work should take a different approach to handling user's personas, such as providing the option to link the app to Google sheets.
+:::{.callout-tip}
+The interactive version of this document contains maps that allow you to toggle individual layers.
+:::
 
-**To do:** I can't think of any more important details. Screenshots?
+| Component        | Short code | Num. layers | Description                                                                                  |
+| ---------------- | ---------- | ----------- | -------------------------------------------------------------------------------------------- |
+| Landscape        | `SLSRA`    | 40          | Land cover type, landscape designations and conservation, and farmland of high nature value. |
+| Natural Features | `FIPS_N`   | 24          | Landform types, soil types and slope.                                                        |
+| Infrastructure   | `FIPS_I`   | 10          | Roads, tracks, footpaths and cycle networks.                                                 |
+| Water            | `Water`    | 13          | Lakes and rivers.                                                                            |
+
+```{r, echo=FALSE}
+config <- biodt.recreation::load_config()
+
+config_by_component <- split(config, as.factor(config[["Component"]]))
+```
+
+### Landscape component
+
+```{r, echo=FALSE}
+#| label: tbl-slsra
+#| tbl-cap: Description of items/features in the _Landscape_ component.
+
+dplyr::select(config_by_component$SLSRA, Name, Description) |>
+	knitr::kable(format = "html")
+```
+
+```{r, echo=FALSE}
+make_layer_map(rstack = slsra,  base_map = base_map,
+               show_index = 5, #start with SLSRA_LCM_6 selected as example
+               color = "#386641")
+```
+
+### Natural Features component
+
+```{r, echo=FALSE}
+#| label: tbl-fipsn
+#| tbl-cap: Description of items/features in the _Natural Features_ component.
+
+dplyr::select(config_by_component$FIPS_N, Name, Description) |> 
+	knitr::kable(format = "html")
+```
 
 
+```{r, echo=FALSE}
+make_layer_map(rstack = fips_n,  base_map = base_map,
+               show_index = 5, #start with FIPS_N_Landform_16 selected as example
+               color = "#CBA340")
+
+```
 
 
+### Infrastructure Features component
 
+```{r, echo=FALSE}
+#| label: tbl-fipsi
+#| tbl-cap: Description of items/features in the _Infrastructure Features_ component.
+
+dplyr::select(config_by_component$FIPS_I, Name, Description) |> 
+	knitr::kable(format = "html")
+```
+
+
+### Water component
+
+```{r, echo=FALSE}
+#| label: tbl-water
+#| tbl-cap: Description of items/features in the _Water_ component.
+
+dplyr::select(config_by_component$Water, Name, Description) |> 
+	knitr::kable(format = "html")
+```
+
+```{r, echo=FALSE, out.height = 650}
+water_rstack <- list(
+  "original" = water,
+  "distance" = terra::rast(system.file("extdata", "rasters", "Bush", "dist", "Water_dist.tif", package="biodt.recreation")),
+  "scored" = terra::rast(system.file("extdata", "rasters", "Bush", "Water.tif", package="biodt.recreation"))
+  )
+
+make_layer_map_dist(rstack = water_rstack, base_map,
+                    show_index = 6, # "water rivers 3 distance"
+                    color_original = "#4E6766")
+```
 
 

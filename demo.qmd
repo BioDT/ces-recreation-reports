@@ -12,7 +12,7 @@ date: last-modified
 date-format: long
 ---
 
-## Basic usage
+### Basic usage
 
 These instructions cover setup and basic usage of the RP model.
 
@@ -79,21 +79,21 @@ hr_persona
 data_dir <- get_example_data_dir()
 ```
 
-## Load/create a persona
+### Load/create a persona
 
 ```{r}
 persona <- get_example_persona()
 persona
 ```
 
-## Select an area of interest
+### Select an area of interest
 
 ```{r}
 bbox <- get_example_bbox()
 bbox
 ```
 
-## Compute a single component
+### Compute a single component
 
 ```{r}
 fips_n <- compute_fips_n(persona, bbox, data_dir)
@@ -105,7 +105,7 @@ water <- compute_component("Water", persona, bbox, data_dir)
 terra::plet(water)
 ```
 
-## Compute all layers
+### Compute all layers
 
 ```{r}
 layers <- compute_potential(persona, bbox, data_dir)
@@ -115,6 +115,128 @@ terra::plot(layers[["Recreational_Potential"]])
 ```
 
 
-### Documentation
 
-TODO
+
+We demonstrate the RP Model applied to the Bush Estate area (nearby Edinburgh) using two contrasting personas:
+
+1. **_Hard Recreationalist_**: this persona values remote, challenging environments and avoids built-up or highly managed areas.
+2. **_Soft Recreationalist_**: this persona values tranquil, accessible landscapes and natural water features, and avoids steep or harsh terrain.
+
+==TODO: when/how where these personas created?==
+These personas are provided in the model as 'presets'; users may customise them or simply use them out-of-the-box.
+
+The resulting maps illustrate how different preferences lead to different areas being highlighted for recreational value.
+
+The source code used to produce these maps can be found in the [demo notebook](demo.html).
+
+```{r, echo=FALSE}
+library(magrittr)
+library(biodt.recreation)
+
+source("functions_report.R")
+
+water <- terra::rast(system.file("extdata", "rasters", "Bush", "original", "Water.tif", package="biodt.recreation"))
+
+slsra <- terra::rast(system.file("extdata", "rasters", "Bush", "SLSRA.tif", package="biodt.recreation"))
+
+fips_n <- terra::rast(system.file("extdata", "rasters", "Bush", "FIPS_N.tif", package="biodt.recreation"))
+
+fips_i <- terra::rast(system.file("extdata", "rasters", "Bush", "original", "FIPS_I.tif", package="biodt.recreation"))
+
+
+
+# the box of bush estate
+e <- terra::ext(water)
+coords <- matrix(c(
+  e$xmin, e$ymin,
+  e$xmax, e$ymin,
+  e$xmax, e$ymax,
+  e$xmin, e$ymax,
+  e$xmin, e$ymin # close polygon
+), ncol = 2, byrow = TRUE)
+bbox_poly <- terra::vect(coords,
+  type = "polygons",
+  crs = terra::crs(water)
+) %>%
+  sf::st_as_sf() %>%
+  sf::st_transform(crs = 4326)
+
+base_map <- 
+  leaflet::leaflet() %>%
+  leaflet::addProviderTiles("OpenStreetMap.Mapnik", options = leaflet::providerTileOptions(zIndex = 0, noWrap = TRUE), group = "Streets") %>%
+  leaflet::addProviderTiles("Esri.WorldImagery", options = leaflet::providerTileOptions(zIndex = 0, noWrap = TRUE), group = "Satellite") %>%
+  leaflet::addPolygons(
+    data = bbox_poly,
+    color = "black",
+    weight = 3,
+    fill = FALSE
+  ) 
+
+```
+
+### Hard Recreationalist
+
+The strongest preferences of the *Hard Recreationalist* persona are highlighted in ==TABLE==
+
+```{r, echo=FALSE, message=FALSE}
+
+hard_recr <- 
+  data.frame(get_example_persona())%>%
+  tibble::rownames_to_column(var = "Name")%>%
+  dplyr::select(Name,
+                Score = `get_example_persona..`)
+
+meaningful_scores <- summarise_persona_scores(hard_recr)
+  
+knitr::kable(meaningful_scores,format = "html",
+             caption = "Features scored the highest and the lowest in the hard recreationalist persona")
+```
+
+
+
+```{r, echo=FALSE, warning=FALSE, results='hide', message = FALSE}
+hard_recreationalist <- get_example_persona()
+bush_estate <- get_example_bbox()
+data_dir <- get_example_data_dir()
+
+# Compute all layers
+layers_HR <- compute_potential(hard_recreationalist,
+                            bush_estate,
+                            data_dir)
+```
+
+```{r, echo=FALSE }
+build_rp_map(base_map, RP_output = layers_HR)
+```
+
+### Soft Recreationalist
+
+The strongest preferences of the *Soft Recreationalist* persona are highlighted in ==TABLE==
+
+```{r, echo=FALSE}
+
+soft_recr <- 
+  read.csv(system.file("extdata", "personas", "presets.csv", package="biodt.recreation")) %>%
+  dplyr::select(Name = index,
+                Score = Soft_Recreationalist)
+
+meaningful_scores <- summarise_persona_scores(soft_recr)
+  
+knitr::kable(meaningful_scores,format = "html",
+             caption = "Features scored the highest and the lowest in the soft recreationalist persona")
+```
+
+
+```{r, echo=FALSE, warning=FALSE, results='hide', message = FALSE}
+soft_recreationalist <- 
+  load_persona(get_preset_persona_file(), "Soft_Recreationalist")
+  
+# Compute all layers
+layers_SR <- compute_potential(soft_recreationalist,
+                            bush_estate,
+                            data_dir)
+```
+
+```{r, echo=FALSE}
+build_rp_map(base_map, RP_output = layers_SR)
+```
