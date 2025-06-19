@@ -473,141 +473,41 @@ At the time of writing there are around 20 open issues on the GitHub repository.
 | [terra::distance throwing error for large, sparse raster during write to disk #91](https://github.com/BioDT/uc-ces-recreation/issues/91)                 | Bug (circumvented by [#92](https://github.com/BioDT/uc-ces-recreation/pull/92)) | Possible upstream (terra) bug, worth reporting |
 | [Reduce size of input rasters #93](https://github.com/BioDT/uc-ces-recreation/issues/93)                                                                 | User experience                                                                 |                                                |
 
-Some issues are relatively obvious bug fixes or quality-of-life improvements which need not be discussed.
-
-Instead, we will focus on a more
+Some issues are relatively obvious bug fixes or quality-of-life improvements which need not be discussed. 
 
 ### Re-engineering the data production process
 
+The data production process is not engineered for robustness..
 
-
-- Should reproject to a consistent grid at the earliest possible time, I think
-- Skip the creation of categorical rasters altogether?
-- Proximity stuff
-
+1. Data should be reprojected onto a consistent grid at the earliest possible opportunity.
+2. The projection CRS should be the same as for Leaflet maps, since that is where all raster data is eventually destined. This would avoid additional coordinate transformations during rendering and prevent the smearing of linear features and edges as described in [#61](https://github.com/BioDT/uc-ces-recreation/issues/61).
+3. Layers containing linear features such as roads and rivers should not be rasterised until the last step, if at all. If nothing else, the proximity step would benefit from these layers remaining as vectors.
+4. Layers should be constructed as binary presence/absence rasters from the beginning; one can skip the creation of categorical rasters altogether.
+5. Layer names should be descriptive.
 
 #### Use descriptive names for the features / layers {#sec-layernames}
 
-https://github.com/BioDT/uc-ces-recreation/issues/49
+The last recommendation is something we are duty bound to elaborate on, since it relates to a very subtle and serious issue that we encountered. This discussion closely follows that in [#49](https://github.com/BioDT/uc-ces-recreation/issues/49) and [#50](https://github.com/BioDT/uc-ces-recreation/issues/50).
 
-#### Part 1
+Currently the feature/layer names are in the format `{Component}_{Dataset}_{i}`.
 
-Here is the function that recasts a single-layer categorical-valued raster to a `N_categories`-layered boolean-valued raster.
+These names appear in the `Name` column of `config.csv`. Through the mapping `Name <-> Raster_Val`, these names are assigned to the layers of the one-hot-encoded rasters in the `one_hot_layer` function. After this point, the layer names are propagated through each operation. In `app.R` they are essentially used to index rows of `config.csv`, e.g. to get the `Description` out to put next to the sliders.
 
-```r
-one_hot_layer <- function(infile, outfile, feature_mapping) {
-    layer <- terra::rast(infile)
-    stopifnot(terra::nlyr(layer) == 1)
+The main problem which gave rise to [#49](https://github.com/BioDT/uc-ces-recreation/issues/49) is that this naming convention mirrors the default names assigned by `terra` at various points in the data production, except we have no guarantee on what the trailing index `{i}` will be. Essentially, the _fallback behaviour_ of `terra` is to assign layers the correct names, but not necessarily in the correct order.
 
-    raster_vals <- names(feature_mapping)
+This means that if, for whatever reason, layer names are not being preserved by `terra` operations, or the assignment of names to a raster is not working as expected, we will not see any error raised. Rather, we will see (if we are looking closely) that the layer names have been scrambled once we go to run the model.
 
-    one_hot_pixel <- function(x) {
-        out <- matrix(0, nrow = length(x), ncol = length(raster_vals))
-        for (i in seq_along(raster_vals)) {
-            out[, i] <- ifelse(x == as.numeric(raster_vals[i]), 1, 0)
-        }
-        return(out)
-    }
+To give a concrete example that caused a headache, `terra::rast(list_of_rasters)` appears to silently drop the layer names of the `list_of_rasters`, and instead generate default layer names that, in our case, were the same as the names we expected to see, but in a different order.
 
-    layer <- terra::lapp(
-        layer,
-        fun = one_hot_pixel,
-        filename = outfile,
-        # datatype = "INT1U",
-        overwrite = TRUE
-    )
+In another example, we failed to notice that layer names were not being set correctly in the one-hot encoding step. Later on, the same layer names were _reassigned_ during this stacking step, based on the order in which those layers appear in the raster, which implied a different order from the one we expected. This meant that `FIPS_I_RoadsTracks` features were reassigned the names `FIPS_I_RoadsTracks_1`, `FIPS_I_RoadsTracks_2`, and so on.
 
-    names(layer) <- feature_mapping  # This is the problem
-}
-```
+To be clear, this is (mostly) our fault, not the fault of `terra` --- we could and should use different layer names! However, the fact that layer names sometimes do and sometimes don't propagate, and names are silently dropped and regenerated with no warning message, seems like asking for trouble.
 
-I was very happy to find that `lapp` lets you write chunks directly to the filesystem, rather than trying to keep them in memory. However, I still needed to apply the layer names to the saved raster.
+Changing the naming convention would not require much effort. Indeed, if we just edited `config.csv` before running the data production script everything should sort itself out, with the exception of some particular logic in `app.R` that assumes the layer name starts with `{Component}_{Dataset}`. 
 
-Chat-GPT has been a fairly good friend to me for learning R over the last few weeks, but in this case it confidently assured me that setting the names of `layer` would set the names of the saved raster. I really should have assumed that this would not work, but I still find R [quite spooky](https://stackoverflow.com/questions/70773297/what-is-non-standard-evaluation-and-how-can-you-pass-an-undefined-variable-to) and `terra` is all about not loading your data until absolutely necessary, so I gave it a go.
+A simple fix would be to do nothing more than replace the integers `{i}` with a descriptor. For example, `FIPS_I_RoadsTracks_1` could become `FIPS_I_RoadsTracks_Motorway`, and `Water_Lakes_1` could become `Water_Lakes_Pond`.
 
-In fact it did not write these layer names - the layers took on their default names `lyr1, lyr2, ...`, but I did not check this until now.
-
-#### Part 2
-
-One might assume that missing layer names would produce a bug somewhere down the line. Unfortunately this did not happen.
-
-In the next step, the one-hot encoded rasters are stacked into a single raster per component using the following function:
-
-```r
-stack_all <- function(indir, outdir) {
-    for (component in c("SLSRA", "FIPS_N", "FIPS_I", "Water")) {
-        infiles <- get_files(file.path(indir, component))
-
-        outfile <- file.path(outdir, paste0(component, ".tif"))
-        dir.create(dirname(outfile), recursive = TRUE, showWarnings = FALSE)
-
-        message(paste("Stacking", component, "into a single raster:", indir, "->", outfile))
-
-        stacked <- terra::rast(lapply(infiles, terra::rast))
-
-        terra::writeRaster(stacked, outfile, datatype = "INT1U", overwrite = TRUE)
-    }
-}
-```
-
-Now, it turns out that the default behaviour of `terra::rast` is to use existing layer names _if they are provided_, and otherwise _assign layer names based on the file name_.
-
-So, because the layer names were not set in the one-hot encoding step, the layer names are _reassigned_ during this stacking step, _based on the order in which those layers appear in the raster._
-
-As a specific example, the `FIPS_I_RoadsTracks` features are _reassigned_ the names `FIPS_I_RoadsTracks_1`, `FIPS_I_RoadsTracks_2`, and so on.
-
-So now we see why this did not caused anything to crash down the line - these are precisely the same layer names that I _thought_ I was setting in the one-hot encoding step, but the numbers 1, 2, 3, ... are actually the order in which these layers appear in the stack, _not_ their layer name as defined in `config.csv`. I.e. **these are the correct layer names, but in the wrong order!**
-
-#### Fix
-
-So, how _should_ I have changed the layer names after one-hot-encoding?
-
-I want to keep writing chunks straight to disk in the `lapp` step, obviously.
-
-I had hoped that the solution would be to do something like
-
-```r
-    # Note that layer is essentially set to rast(outfile)
-    layer <- terra::lapp(
-        layer,
-        fun = one_hot_pixel,
-        filename = outfile,
-        overwrite = TRUE
-    )
-
-    names(layer) <- feature_mapping
-    writeRaster(layer, outfile, overwrite = TRUE)  # This throws an error
-```
-
-but this results in an error
-
-```
-[writeRaster] source and target filename cannot be the same
-```
-
-The reason is that `terra` refuses to write to the same file that it is reading from, which is quite reasonable except that _all I want to write is some metadata_.
-
-I have not so far been able to find a way to modify metadata without creating a copy of the data, which is very annoying. Ideally I would set the name inside `one_hot_pixel` but this is not possible.
-
-The solution is to use the `wopt` argument to `lapp`, which is a list of args to pass to `writeRaster`, and includes the `names` argument.
-
-```r
-    layer <- terra::lapp(
-        layer,
-        fun = one_hot_pixel,
-        filename = outfile,
-        overwrite = TRUE,
-        wopt = list(names = feature_mapping)
-    )
-```
-
-Horay.
-
-Essentially `terra::rast(list_of_rasters)` does not seem to preserve the layer names, and once again generated default layer names that were (heavy sigh) the same as the names we have been using, but in a different order..
-
-#### Conclusion / lessons
-
-Now I understand this behaviour of `terra`, I can see that it was a terrible idea to use these layer names. It would have been better to have used the `Description` as the layer name instead.
+If nothing else, this would cause an error if ever these names were not propagated and instead replaced by default names, which is extremely important.
 
 #### Reducing the size of input rasters
 
