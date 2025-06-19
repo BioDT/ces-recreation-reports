@@ -158,7 +158,7 @@ make_layer_map_dist <- function(rstack, base_map, show_index = 1, color_original
 #' @title summarise_persona_scores
 #' @description summarise persona preferences
 summarise_persona_scores <- function(persona) {
-  description <- read.csv(here::here("bush_example", "config.csv"))
+  description <- read.csv(system.file("extdata", "config", "config.csv", package="biodt.recreation"))
   
   persona %>%
     merge(description, by = "Name", all.x = TRUE) %>%
