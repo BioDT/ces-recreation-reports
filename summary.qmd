@@ -60,6 +60,18 @@ Since then, work has focused on improving the speed and scalability of these com
 
 In this short report we will describe basic aspects of the Recreational Potential model. For a detailed account of the inner workings of the model the reader is directed to the accompanying [technical supplement](tech_supp.html).
 
+### 1. Scope of the Model
+
+The **recreational potential model** (RP Model) was developed as part of the *Cultural Ecosystem Services prototype Digital Twin (CES-pDT)* workpackage within the [BioDT](https://biodt.eu/) project. The *([CES-pDT](https://app.biodt.lifewatch.eu/app_proxy/b6d219cf-f46c-4ef5-a517-e9a7289f81fa/?_inputs_&app-navbar=%22CES%22#tab-6956-4))* has two [independent]{.underline} core models:
+
+-   the Biodiversity model (developed by Simon Rolph and Dylan Carbone, UK Centre for Ecology & Hydrology, Wallingford, United Kingdom): aims *at estimating biodiversity levels across mammals, birds, plant and insects.*
+
+-   the Recreational Potential model (developed by Jan Dick, Chris Andrews, Maddalena Tigli, Megan Williams and Joe Marsh Rossney, UK Centre for Ecology & Hydrology, Edinburgh, United Kingdom): aims at *estimating the landscapes' capacity to provide opportunities for outdoor recreation based on varying user interests.*
+
+This report specifically documents the Recreational Potential (RP) Model, detailing its methodology, data sources, operational mechanisms, and outlining areas for future refinement and development.
+
+**CHRISTOPHER TO ADD MORE INFO? MAYBE THERE ARE SOME LIT SOURCES USED?**
+
 ## Model description
 
 The output of the Recreational Potential (RP) model is an two-dimensional array of numbers (a _raster_) representing an RP value for each 20x20 metre square area of land (_pixel_) within a given area.
@@ -89,6 +101,215 @@ The input data for the RP model are a collection of 87 raster layers for each of
 For items belonging to the *Landscape* component or the *Natural Features* component, these rasters contain just ones and zeros, with $1$ indicating presence of the feature in that pixel and $0$ indicating absence.
 
 For items belonging to the _Infrastructure_ component or the _Water_ component, the input rasters contain values _between_ zero and one. Here, $1$ still indicates presence of the feature in that pixel, but $0$ instead indicates that the feature is not only absent in that pixel, but all surrounding pixels within a certain distance. The range of values between zero and one are used to signify that the feature is nearby, but not present in this pixel itself. Higher values correspond to the feature being closer.
+
+### 2.1. Model description
+
+```{mermaid}
+flowchart LR
+ subgraph s1["compute recreational potential"]
+        C[("cropping of the 4<br>components file to the<br>extent of interest")]
+        E["Compute each component's<br>contribution"]
+        F["Rescale to unit interval"]
+  end
+    A("Definition of the<br><i>persona preferences</i>") ---> E
+    B("Definition of the<br><i>area of interest</i>") --> C
+    C --> E
+    E --> F
+    F --> G["recreational potential spatRast"]
+    style s1 fill:#FFF9C4
+    style A color:#000000
+    style B color:#000000
+    style C color:#000000
+    style E color:#000000
+    style F color:#000000
+    style G color:#000000
+```
+
+The Recreational Potential (RP) Model estimates the recreational value of landscapes using four key components, each represented by a raster file:
+
+1.  Landscape Component (SLSRA.tif)
+
+2.  Natural Features Component (FIPS_N.tif)
+
+3.  Infrastructure Component (FIPS_I.tif)
+
+4.  Water Component (Water.tif)
+
+Each of the four component raster files contains multiple layers, with each layer representing a specific feature. Each raster covers the entire domain of the model (with a 20mx20m resolution), currently Scotland (see [2.3. The underlying data]).
+
+The values in these raster layers range from 0 to 1, interpreted as follows:
+
+-   1 indicates that the feature is present in that cell.
+
+-   0 or NAs indicates that the feature is absent from that cell
+
+-   Values between 0 and 1 are present in the features/layers of the Infrastructure and Water components rasters, and reflect the proximity from nearby features. This continuous scale allows the RP model to incorporate how areas near e.g., a loch, can still contribute to the recreational potential, even if they do not directly contain the feature
+
+The four rasters form the basis for calculating the Recreational Potential (RP) across the landscape.
+
+To run the RP model the user must define:
+
+-   Area of interest: defined using a bounding box ([terra::ext()](https://www.rdocumentation.org/packages/terra/versions/0.8-6/topics/extent) in R).
+
+-   Persona preferences: a CSV file assigning a score (0–10) to each of the 87 features (see [2.3. The underlying data]), reflecting the persona's interest in each (see example persona file "presets.csv" ).
+
+#### RP model processing steps
+
+1.  **Cropping the raster files**
+
+The model first crops each of the four component rasters to the specified area of interest. Using the terra package in R, the bounding box is converted to a vector polygon with terra::vect(), and then used to crop the raster via terra::crop().
+
+2.  **Calculating each components contribution**
+
+For each cell (20m x 20m), the model extracts values from all relevant layers (features), multiplies them by the corresponding persona score, and computes a weighted sum across layers. This results in one new raster per component that reflects the component’s contribution based on the persona preferences.
+
+3.  **Re-scale to unit interval**
+
+Each of the components contribution rasters is re-scaled using "min-max normalization":
+
+$$
+scaled.value = (x-min)/mix-min
+$$
+
+Minimum values are mapped as 0, maximum values are mapped as 1, and all the intermediate values are proportionally scaled.
+
+4.  **Combining the components RP**
+
+The four normalized component rasters are summed cell by cell. The resulting raster is then re-scaled again (min-max normalization) to produce the final Recreational Potential raster.
+
+The model's output is a SpatRaster object (that can be saved as a .tif) with five layers:
+
+1.  "SLSRA": the RP of the landscape component
+
+2.  "FIPS_N": the RP of the natural features component
+
+3.  "FIPS_I": the RP of the infrastructure component
+
+4.  "Water": the RP of the water component
+
+5.  "Recreational_Potential": the combined RP
+
+In all layers, values range from 0 to 1, where higher values (closer to 1) indicate greater recreational potential.
+
+Because the model output is a result of the normalization of recreational potential of a specific area of interest, the values are relative within that area. This means that running the model with a different geographic extent will yield to different scores for the same features, even if the underlying data is unchanged.
+
+### 2.2. Example run
+
+```{r, echo=FALSE}
+library(magrittr)
+library(biodt.recreation)
+
+source("functions_report.R")
+
+water <- terra::rast(system.file("extdata", "rasters", "Bush", "original", "Water.tif", package="biodt.recreation"))
+
+slsra <- terra::rast(system.file("extdata", "rasters", "Bush", "SLSRA.tif", package="biodt.recreation"))
+
+fips_n <- terra::rast(system.file("extdata", "rasters", "Bush", "FIPS_N.tif", package="biodt.recreation"))
+
+fips_i <- terra::rast(system.file("extdata", "rasters", "Bush", "original", "FIPS_I.tif", package="biodt.recreation"))
+
+
+
+# the box of bush estate
+e <- terra::ext(water)
+coords <- matrix(c(
+  e$xmin, e$ymin,
+  e$xmax, e$ymin,
+  e$xmax, e$ymax,
+  e$xmin, e$ymax,
+  e$xmin, e$ymin # close polygon
+), ncol = 2, byrow = TRUE)
+bbox_poly <- terra::vect(coords,
+  type = "polygons",
+  crs = terra::crs(water)
+) %>%
+  sf::st_as_sf() %>%
+  sf::st_transform(crs = 4326)
+
+base_map <- 
+  leaflet::leaflet() %>%
+  leaflet::addProviderTiles("OpenStreetMap.Mapnik", options = leaflet::providerTileOptions(zIndex = 0, noWrap = TRUE), group = "Streets") %>%
+  leaflet::addProviderTiles("Esri.WorldImagery", options = leaflet::providerTileOptions(zIndex = 0, noWrap = TRUE), group = "Satellite") %>%
+  leaflet::addPolygons(
+    data = bbox_poly,
+    color = "black",
+    weight = 3,
+    fill = FALSE
+  ) 
+
+```
+
+We demonstrate the RP Model applied to the Bush Estate area (nearby Edinburgh) using two contrasting personas: a hard recreationalist and a soft recreationalist. The resulting maps illustrate how different preferences lead to different areas being highlighted for recreational value.
+
+1.  **Hard recreationalist exmaple**
+
+Here we show a model run the Bush Estate area using a "hard recreationalist" example of persona (saved as "Hard_Recreationalist" in "presets.csv" ). Key features preferences for this persona are:
+
+```{r, echo=FALSE, message=FALSE}
+
+hard_recr <- 
+  data.frame(get_example_persona())%>%
+  tibble::rownames_to_column(var = "Name")%>%
+  dplyr::select(Name,
+                Score = `get_example_persona..`)
+
+meaningful_scores <- summarise_persona_scores(hard_recr)
+  
+knitr::kable(meaningful_scores,format = "html",
+             caption = "Features scored the highest and the lowest in the hard recreationalist persona")
+```
+
+This persona highly values remote, challenging environments and avoids built-up or highly managed areas.
+
+```{r, echo=FALSE, warning=FALSE, results='hide', message = FALSE}
+hard_recreationalist <- get_example_persona()
+bush_estate <- get_example_bbox()
+data_dir <- get_example_data_dir()
+
+# Compute all layers
+layers_HR <- compute_potential(hard_recreationalist,
+                            bush_estate,
+                            data_dir)
+```
+
+```{r, echo=FALSE }
+build_rp_map(base_map, RP_output = layers_HR)
+```
+
+2.  **Soft recreationalist example**
+
+Here we show a model run the Bush Estate area using a "soft recreationalist" example of persona (saved as "Soft_Recreationalist" in "presets.csv"). Key features preferences for this persona are:
+
+```{r, echo=FALSE}
+
+soft_recr <- 
+  read.csv(system.file("extdata", "personas", "presets.csv", package="biodt.recreation")) %>%
+  dplyr::select(Name = index,
+                Score = Soft_Recreationalist)
+
+meaningful_scores <- summarise_persona_scores(soft_recr)
+  
+knitr::kable(meaningful_scores,format = "html",
+             caption = "Features scored the highest and the lowest in the soft recreationalist persona")
+```
+
+Soft recreationalists are drawn to tranquil, accessible landscapes and natural water features, avoiding steep or harsh terrain.
+
+```{r, echo=FALSE, warning=FALSE, results='hide', message = FALSE}
+soft_recreationalist <- 
+  load_persona(get_preset_persona_file(), "Soft_Recreationalist")
+  
+# Compute all layers
+layers_SR <- compute_potential(soft_recreationalist,
+                            bush_estate,
+                            data_dir)
+```
+
+```{r, echo=FALSE}
+build_rp_map(base_map, RP_output = layers_SR)
+```
+
 
 ## Overview of the code
 
