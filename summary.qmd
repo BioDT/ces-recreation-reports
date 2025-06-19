@@ -425,15 +425,15 @@ Detailed instructions for using the app are contained within the app itself, in 
 2. Draw a box on the map by clicking the square orange button and dragging your mouse over the map.
 3. Click the 'Update Map' button to compute the Recreational Potential value.
 
-==TODO: move this to technical supp or dev report==
-As things stand, personas are stored in `.csv` files on the server side. This means the app requires write access to the server's filesystem. This is convenient, since users do not have to upload their own persona files. However, it is not a scalable solution. Future work should take a different approach to handling user's personas, such as providing the option to link the app to Google sheets.
-
 
 ## Worked example
 
 <!-- {{< include demo.qmd >}} -->
 
-## Discussion & next steps
+## Known limitations
+
+==TODO: move this to technical supp or dev report==
+As things stand, personas are stored in `.csv` files on the server side. This means the app requires write access to the server's filesystem. This is convenient, since users do not have to upload their own persona files. However, it is not a scalable solution. Future work should take a different approach to handling user's personas, such as providing the option to link the app to Google sheets.
 
 - The model is very fast and embarrassingly parallel - therefore can scale very well, to large areas and/or high resolutions.
 - However, the use-case for large areas is unclear, and the resolution depends on the datasets being used.
@@ -446,41 +446,10 @@ As things stand, personas are stored in `.csv` files on the server side. This me
 	 - Use vector layers for linear features and distance
 	 - This would also make data production easier
 
+
+## Future directions
+
 - Digital twin?
-
-### 6. Lessons learned
-
-1.  **Transitioning to terra::SpatRaster Improved Performance**
-
-One of the most significant improvements came from switching from the legacy raster::Raster to the more modern and efficient terra::SpatRaster format. This change brought several key benefits:
-
--   Faster processing of raster operations such as cropping, masking, and mathematical transformations.
-
--   Better memory management, particularly for large datasets covering all of Scotland with a high resolutions.
-
--   Improved integration with spatial vector formats and compatibility with modern spatial workflows in R.
-
-Overall, the use of the package terra reduced computational overhead significantly (see report "Optimizing BioDT Recreational Potential (RT) model run-time").
-
-2.  **Pre-processing at the National Scale Greatly Reduces Run-time**
-
-Pre-processing component rasters at the national (Scotland-wide) scale, rather than performing these operations at run-time for each user-defined area. Pre-processing included:
-
--   Standardizing spatial properties (extent, resolution, projection) across all four component rasters to ensure seamless overlay and computation.
-
--   Pre-computing distance rasters, to avoid repeated and costly distance calculations during model runs.
-
--   Pre-calculating scored rasters using predefined thresholds and decay functions, making them immediately usable for user-defined queries.
-
-Overall, the use of this approach has reduced computational overhead significantly (see report "Optimizing BioDT Recreational Potential (RT) model run-time").
-
-3.  **JOE to add lessons on shiny/compartmentalization if any**
-4.  **CHRIS to add any other lessons if he has any**
-
-
-
-
-As the RP Model was developed as a prototype, several enhancements could improve its usability, accuracy, and performance. The following areas have been identified for future development:
 
 1.  **Simplifying feature scoring**
 
@@ -526,8 +495,6 @@ As the RP Model was developed as a prototype, several enhancements could improve
     -   allow for direct comparison on how the two (or more) scenarios differ (provide the user with a decrease or increase of Recreational Potential raster.
 
 7.  **JOE and CHRIS to add something if you have other ideas**
-
-## Conclusions
 
 
 ## Funding {.appendix}

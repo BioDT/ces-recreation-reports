@@ -530,13 +530,12 @@ To get around this issue, the original Scotland-wide raster was divided into 20 
 
 The distance raster was also truncated at 500m, setting any values above this to `NA` which simply passes through the function applying @eq-proximity and ensures that we don't waste disk space storing high-precision floats that are functionally equivalent to zero.
 
+==To account for proximity effects, the distance from each cell to the nearest infrastructure feature was calculated using the terra::distance() function in R. The resulting raster, labeled **"distance"** in the example map, contains the distance in meters from the center of each cell to the nearest feature.
+This raster is named "**scored**" in the example map, using the distance decay function.==
 
-
-To account for proximity effects, the distance from each cell to the nearest infrastructure feature was calculated using the terra::distance() function in R. The resulting raster, labeled **"distance"** in the example map, contains the distance in meters from the center of each cell to the nearest feature.
-This raster is named "**scored**" in the example map, using the distance decay function.
+==TODO: make this figure static?==
 
 ```{r, echo=FALSE, out.height = 650}
-
 fips_i_rstack <- list(
   "original" = fips_i,
   "distance" = terra::rast(system.file("extdata", "rasters", "Bush", "dist", "FIPS_I_dist.tif", package="biodt.recreation")),
@@ -548,8 +547,21 @@ make_layer_map_dist(rstack = fips_i_rstack, base_map,
                     color_original = "#DA627D")
 ```
 
-
 ## Efficiency
+
+terra vs raster
+
+Pre-processing component rasters at the national (Scotland-wide) scale, rather than performing these operations at run-time for each user-defined area. Pre-processing included:
+
+-   Standardizing spatial properties (extent, resolution, projection) across all four component rasters to ensure seamless overlay and computation.
+-   Pre-computing distance rasters, to avoid repeated and costly distance calculations during model runs.
+-   Pre-calculating scored rasters using predefined thresholds and decay functions, making them immediately usable for user-defined queries.
+
+Overall, the use of this approach has reduced computational overhead significantly (see report "Optimizing BioDT Recreational Potential (RT) model run-time").
+
+### Pre-processing
+
+todo
 
 ### Calculation of Recreational Potential
 
