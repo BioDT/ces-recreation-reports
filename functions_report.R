@@ -1,3 +1,4 @@
+library(magrittr)
 
 #' @title is_all_na
 #' @description checking if all NAs in spatraster
@@ -160,7 +161,9 @@ make_layer_map_dist <- function(rstack, base_map, show_index = 1, color_original
 summarise_persona_scores <- function(persona) {
   description <- read.csv(system.file("extdata", "config", "config.csv", package="biodt.recreation"))
   
-  persona %>%
+  data.frame(Score = persona) %>%
+    tibble::rownames_to_column(var = "Name") %>%
+    #dplyr::select(Name, Score)
     merge(description, by = "Name", all.x = TRUE) %>%
     dplyr::select(Score, Name, Description, Component) %>%
     dplyr::arrange(desc(Score)) %>%

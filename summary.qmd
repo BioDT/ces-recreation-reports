@@ -2,10 +2,10 @@
 title: The BioDT Recreational Potential Model
 subtitle: Summary
 authors:
-  - name: Joe Marsh Rossney
+  - name: "Joe Marsh Rossney <a href='https://github.com/jmarshrossney' style='color: black'><i class='bi bi-github'></i></a>"
     orcid: 0000-0002-8082-8566
     affiliation: UK Centre for Ecology & Hydrology
-  - name: Maddalena Tigli
+  - name: "Maddalena Tigli <a href='https://github.com/madtig' style='color: black'><i class='bi bi-github'></i></a>"
     orcid: 0000-0001-8083-0589
   - name: Chris Andrews
     orcid: 0000-0003-2428-272X
@@ -159,7 +159,7 @@ Thus, $1$ still indicates presence of the feature in that pixel, but $0$ instead
 
 This continuous scale allows the RP model to incorporate how areas near e.g., a loch, can still contribute to the recreational potential, even if they do not directly contain the feature.
 
-### Recreational Potential calculation
+### Recreational Potential calculation {#sec-rpcalc}
 
 Each of the four components is calculated by multiplying the item/features by the corresponding persona score, summing, and normalising the result,
 
@@ -179,7 +179,7 @@ $$
 \mathrm{RP} = \mathrm{normalise} \left( \mathrm{SLSRA} + \mathrm{FIPS\_N} + \mathrm{FIPS\_I} + \mathrm{Water} \right) \, .
 $$
 
-:::{.note}
+:::{.callout-note}
 #### The effect of changing the region of interest
 An important detail is that the normalisation step depends on the minimum and maximum values *within the chosen region of interest*. This means that running the model with a different region of interest (e.g. over a larger area) will generally yield different values for the same locations, even if both the persona and the underlying data are unchanged.
 :::
@@ -322,26 +322,6 @@ The repository is organised in the following way:
 23. A file containing [unit tests](https://testthat.r-lib.org/). Essentially tokenistic, but provides a template for more unit tests to be added in future.
 24. Some [vignettes](https://r-pkgs.org/vignettes.html) demonstrating simple use of the package.
 
-:::{.callout-note}
-#### A note on the `inst/` directory
-
-Apparently it has become standard practice to use the `inst/` directory to distribute additional elements such as scripts and Shiny apps along with the package. This is the practice we have adopted here. There are really just two important things to know about the `inst/` directory:
-
-First, that its contents are copied to the top-level of the package when the package is built. Hence, the top level of the built package will contain `examples/`, `extdata/` and `scripts/` (the directory containing shell scripts is not included in the package).
-
-Hence, in order for file paths to work when the package is installed, one must omit `inst/` from the path. But this means the path will not work during development.
-
-The way to regain consistency between the two situations (installed versus not installed) is to use[`system.file`](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/system.file). There are several examples of this in the code, including the one below, where paths to files or directories under `inst/` needed to be constructed.
-
-```R
-get_preset_persona_file <- function() {
-    system.file("extdata", "personas", "presets.csv",
-        package = "biodt.recreation", mustWork = TRUE
-    )
-}
-```
-:::
-
 ### Package structure
 
 The code is bundled as an `R` _package_. This has a number of advantages compared with a stand-alone script, since the standardised setup allows us to leverage tools for _installing_, _documenting_ and _testing_ the code, and managing its dependencies on other packages.
@@ -377,13 +357,12 @@ biodt.recreation::download_data()
 
 In an ideal world this data production 'pipeline' would be entirely automated through one or more scripts. This would enable the input data to be more easily regenerated and updated in future.
 
+
 ### Calculation of RP values
 
 As stated earlier, the RP model requires two user inputs to run: a persona and a region of interest.
 
-A persona is represented by a very specific type of object in `R` (a _named vector_ with 87 elements and specific names). It is therefore unlikely that users will want to create one from scratch without using the Shiny app interface. For this demonstration, we will use one of the 'preset' personas, which is loaded using the function `get_example_persona()`.
-
-A region of interest may be given by a path to a shapefile, but the main supported format is a set of four coordinates defining a rectangular area, or 'bounding box'. These can be easily constructed using [`terra::ext`](https://rspatial.github.io/terra/reference/ext.html) by passing a vector `(xmin, xmax, ymin, ymax)` as its first argument. Here we will load an example bounding box which covers an area just south of Edinburgh.
+For this demonstration, we will use one of the 'preset' personas, which is loaded using the function `get_example_persona()`. We will also load an example bounding box which covers an area just south of Edinburgh.
 
 The following snippet of code demonstrates how to compute Recreational Potential. The function also returns each component individually.
 
@@ -396,9 +375,91 @@ bbox <- get_example_bbox()
 layers <- compute_potential(persona, bbox)
 ```
 
-The output of this function, `layers`, is a named vector containing five elements: the four components and the full RP layer.
+The output of this function, `layers`, is a five-layered raster, whose layers are the four component layers plus the RP layer, as described in @sec-rpcalc.
 
-### Interactive Shiny app {#sec-shinyapp}
+### 'Preset' personas
+
+The code snippet above made use of two convenience functions for constructing a persona and a bounding box.
+
+A persona is represented by a very specific type of object in `R` (a _named vector_ with 87 elements and specific names). It is therefore unlikely that users will want to create one from scratch without using the Shiny app interface.
+
+We provide two 'preset' personas along with the package. These are
+
+1. **_Hard Recreationalist_**: this persona values remote, challenging environments and avoids built-up or highly managed areas.
+2. **_Soft Recreationalist_**: this persona values tranquil, accessible landscapes and natural water features, and avoids steep or harsh terrain.
+
+==TODO: some detail about these. When/how where these personas created?==
+
+Preset personas can be loaded into an `R` session as follows:
+
+```R
+# Get the path to the preset persona file
+persona_file <- get_preset_persona_file()
+
+# Load the Hard Recreationalist persona
+hard_recreationalist <- load_persona(persona_file, "Hard_Recreationalist")
+
+# Load the Soft Recreationalist persona
+soft_recreationalist <- load_persona(persona_file, "Soft_Recreationalist")
+```
+
+In fact the function `get_example_persona()` loads the _Hard Recreationalist_ persona.
+
+:::{.callout-note}
+#### A note on the `inst/` directory
+
+Apparently it has become standard practice to use the `inst/` directory to distribute additional elements such as scripts and Shiny apps along with the package. This is the practice we have adopted here. There are really just two important things to know about the `inst/` directory:
+
+First, that its contents are copied to the top-level of the package when the package is built. Hence, the top level of the built package will contain `examples/`, `extdata/` and `scripts/` (the directory containing shell scripts is not included in the package).
+
+Hence, in order for file paths to work when the package is installed, one must omit `inst/` from the path. But this means the path will not work during development.
+
+The way to regain consistency between the two situations (installed versus not installed) is to use[`system.file`](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/system.file). There are several examples of this in the code, including the one below, where paths to files or directories under `inst/` needed to be constructed.
+
+```R
+get_preset_persona_file <- function() {
+    system.file("extdata", "personas", "presets.csv",
+        package = "biodt.recreation", mustWork = TRUE
+    )
+}
+```
+:::
+
+
+The strongest preferences of the *Hard Recreationalist* persona are highlighted in @tbl-hard.
+
+```{r, echo=FALSE}
+library("biodt.recreation")
+source("functions_report.R")
+```
+
+```{r, echo=FALSE}
+#| label: tbl-hard
+#| tbl-cap: Highest and lowest scores in the _Hard Recreationalist_ persona.
+
+persona_file <- get_preset_persona_file()
+hard_recreationalist <- load_persona(persona_file, "Hard_Recreationalist")
+
+meaningful_scores <- summarise_persona_scores(hard_recreationalist)
+  
+knitr::kable(meaningful_scores, format = "html")
+```
+
+The strongest preferences of the *Soft Recreationalist* persona are highlighted in @tbl-hard.
+
+```{r, echo=FALSE}
+#| label: tbl-soft
+#| tbl-cap: Highest and lowest scores in the _Soft Recreationalist_ persona.
+
+persona_file <- get_preset_persona_file()
+soft_recreationalist <- load_persona(persona_file, "Soft_Recreationalist")
+
+meaningful_scores <- summarise_persona_scores(soft_recreationalist)
+  
+knitr::kable(meaningful_scores, format = "html")
+```
+
+### Shiny app {#sec-shinyapp}
 
 As part of the SPEAK study an R Shiny app was developed that focused exclusively on the Recreational Potential model. This is provided alongside the main package, since it provides a convenient, dynamic interface for testing and visualising outputs.
 
@@ -425,17 +486,75 @@ Detailed instructions for using the app are contained within the app itself, in 
 3. Click the 'Update Map' button to compute the Recreational Potential value.
 
 
-## Worked example
+:::{.content-visible when-format="html"}
+## Interactive example
 
-<!-- {{< include demo.qmd >}} -->
+<!-- The source code used to produce these maps can be found in the [demo notebook](demo.html). -->
 
-## Known limitations
+```{r, echo=FALSE}
+library(magrittr)
+library(biodt.recreation)
 
-==TODO: move this to technical supp or dev report==
+source("functions_report.R")
+
+water <- terra::rast(system.file("extdata", "rasters", "Bush", "original", "Water.tif", package="biodt.recreation"))
+
+slsra <- terra::rast(system.file("extdata", "rasters", "Bush", "SLSRA.tif", package="biodt.recreation"))
+
+fips_n <- terra::rast(system.file("extdata", "rasters", "Bush", "FIPS_N.tif", package="biodt.recreation"))
+
+fips_i <- terra::rast(system.file("extdata", "rasters", "Bush", "original", "FIPS_I.tif", package="biodt.recreation"))
+
+
+# the box of bush estate
+e <- terra::ext(water)
+coords <- matrix(c(
+  e$xmin, e$ymin,
+  e$xmax, e$ymin,
+  e$xmax, e$ymax,
+  e$xmin, e$ymax,
+  e$xmin, e$ymin # close polygon
+), ncol = 2, byrow = TRUE)
+bbox_poly <- terra::vect(coords,
+  type = "polygons",
+  crs = terra::crs(water)
+) %>%
+  sf::st_as_sf() %>%
+  sf::st_transform(crs = 4326)
+
+base_map <- 
+  leaflet::leaflet() %>%
+  leaflet::addProviderTiles("OpenStreetMap.Mapnik", options = leaflet::providerTileOptions(zIndex = 0, noWrap = TRUE), group = "Streets") %>%
+  leaflet::addProviderTiles("Esri.WorldImagery", options = leaflet::providerTileOptions(zIndex = 0, noWrap = TRUE), group = "Satellite") %>%
+  leaflet::addPolygons(
+    data = bbox_poly,
+    color = "black",
+    weight = 3,
+    fill = FALSE
+  ) 
+
+```
+
+```{r, echo=FALSE, warning=FALSE, results='hide', message = FALSE}
+persona <- get_example_persona()
+bbox <- get_example_bbox()
+data_dir <- get_example_data_dir()
+
+# Compute all layers
+layers <- compute_potential(persona, bbox, data_dir)
+```
+
+```{r, warning=FALSE, results='hide', message = FALSE}
+build_rp_map(base_map, RP_output = layers)
+```
+:::
+
+## Known limitations (to do)
+
 As things stand, personas are stored in `.csv` files on the server side. This means the app requires write access to the server's filesystem. This is convenient, since users do not have to upload their own persona files. However, it is not a scalable solution. Future work should take a different approach to handling user's personas, such as providing the option to link the app to Google sheets.
 
 - The model is very fast and embarrassingly parallel - therefore can scale very well, to large areas and/or high resolutions.
-- However, the use-case for large areas is unclear, and the resolution depends on the datasets being used.
+	- However, the use-case for large areas is unclear, and the resolution depends on the datasets being used.
 
 - The data production pipeline could be improved:
 	- Fully automated / scripted would allow easier updating with more / updated datasets
@@ -446,7 +565,9 @@ As things stand, personas are stored in `.csv` files on the server side. This me
 	 - This would also make data production easier
 
 
-## Future directions
+Certain limitations, caveats and suggestions of a more technical nature are discussed in the [developer's report](dev_report.html).
+
+## Future directions (to do)
 
 - Digital twin?
 
@@ -510,57 +631,22 @@ Funding for SPEAK came from the Natural Environment Research Council – Growing
 
 ## Acknowledgements {.appendix}
 
-- Will Bolton contributed to the first version of the code.
-- Megan Williams?
+We wish to acknowledge contributors to previous versions of the Recreational Potential model. Will Bolton contributed substantially to the first version of the code written in `R`. ==Megan Williams?==
 
-We are very grateful to all the partipcants of the SPEAK project which this output is based on including: Alastair Leaver, Alice MacSporran, Brian Cassidy, Chris Pollock, David Giles, Jean Cowie, Joanna Gilliatt, Justyna Olszewska, Laura Taylor, Maddi Bunker, Rebecca MacLennan, S Mayes, Shaila Rao, Steve MacKinnon and Tom Gebbie, Active Stirling. We are equally grateful to an additional 18 partipcants who preferred to remain anonymous. ​
+JMR would like to thank Tomáš Martinovič for assisting with understanding the requirements BioDT.
+
+We are very grateful to all the participants of the SPEAK project which this output is based on including: Alastair Leaver, Alice MacSporran, Brian Cassidy, Chris Pollock, David Giles, Jean Cowie, Joanna Gilliatt, Justyna Olszewska, Laura Taylor, Maddi Bunker, Rebecca MacLennan, S Mayes, Shaila Rao, Steve MacKinnon and Tom Gebbie, Active Stirling. We are equally grateful to an additional 18 participants who preferred to remain anonymous. ​
 
 
 ## Correspondence {.appendix}
 
-- `{jand,chan}@ceh.ac.uk` for enquiries related to the BioDT or SPEAK projects, or ongoing and future work.
 
-- `chan@ceh.ac.uk` for enquiries related to the production of input data using QGIS.
+- `{jand,chan}@ceh.ac.uk` for enquiries relating to the BioDT or SPEAK projects, or ongoing and future work.
 
-- `{joemar,madtig}@ceh.ac.uk` for enquiries related to the code and anything else appearing in the technical supplement and/or developer's report.
+- `chan@ceh.ac.uk` for enquiries relating to the data sources and QGIS processing.
+
+- `{joemar,madtig}@ceh.ac.uk` for enquiries relating to the code and anything else appearing in the technical supplement and/or developer's report.
+
+- `simrol@ceh.ac.uk` for enquiries relating to the biodiversity component of the BioDT project.
 
 ​
-## To sort {.appendix}
-
-#### RP model processing steps
-
-1.  **Cropping the raster files**
-
-The model first crops each of the four component rasters to the specified area of interest. Using the terra package in R, the bounding box is converted to a vector polygon with terra::vect(), and then used to crop the raster via terra::crop().
-
-2.  **Calculating each components contribution**
-
-For each cell (20m x 20m), the model extracts values from all relevant layers (features), multiplies them by the corresponding persona score, and computes a weighted sum across layers. This results in one new raster per component that reflects the component’s contribution based on the persona preferences.
-
-3.  **Re-scale to unit interval**
-
-Each of the components contribution rasters is re-scaled using "min-max normalization":
-
-$$
-scaled.value = (x-min)/mix-min
-$$
-
-Minimum values are mapped as 0, maximum values are mapped as 1, and all the intermediate values are proportionally scaled.
-
-4.  **Combining the components RP**
-
-The four normalized component rasters are summed cell by cell. The resulting raster is then re-scaled again (min-max normalization) to produce the final Recreational Potential raster.
-
-The model's output is a SpatRaster object (that can be saved as a .tif) with five layers:
-
-1.  "SLSRA": the RP of the landscape component
-
-2.  "FIPS_N": the RP of the natural features component
-
-3.  "FIPS_I": the RP of the infrastructure component
-
-4.  "Water": the RP of the water component
-
-5.  "Recreational_Potential": the combined RP
-
-In all layers, values range from 0 to 1, where higher values (closer to 1) indicate greater recreational potential.

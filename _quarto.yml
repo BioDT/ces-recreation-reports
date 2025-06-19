@@ -3,6 +3,25 @@ project:
   output-dir: _project
 
 # Shared config for all documents
+bibliography: references.bib
+number-sections: true
+number-depth: 3
+tbl-cap-location: bottom
+toc: true
+toc-depth: 3
+format:
+  html:
+    embed-resources: true
+    toc-location: right
+    code-overflow: wrap
+    highlight-style: github
+    html-math-method: mathjax
+    code-annotations: hover
+  #pdf:
+    #colorlinks: true
+    #documentclass: scrartcl
+    #toccolor: blue
+    #linkcolor: purple
 
 # Metadata in CSL format
 # See https://docs.citationstyles.org/en/stable/specification.html
@@ -22,27 +41,6 @@ doi: to-do
 license: CC BY
 copyright: UK Centre for Ecology & Hydrology, 2025
 
-bibliography: references.bib
-number-sections: true
-number-depth: 3
-toc: true
-toc-depth: 3
-
-format:
-  html:
-    embed-resources: true
-    toc-location: right
-    code-overflow: wrap
-    highlight-style: github
-    html-math-method: mathjax
-    code-annotations: hover
-
-  #pdf:
-    #colorlinks: true
-    #documentclass: scrartcl
-    #toccolor: blue
-    #linkcolor: purple
-
 # Website config
 website:
   title: The BioDT Recreational Potential Model
@@ -54,8 +52,8 @@ website:
         text: Technical Supplement
       - href: dev_report.qmd
         text: Developers' Report
-      - href: demo.qmd
-        text: Code Demo
+      - href: example.qmd
+        text: Worked Example
     tools:
       - text: R Package
         icon: github
