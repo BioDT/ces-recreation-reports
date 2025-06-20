@@ -2,6 +2,15 @@
 number-sections: false
 ---
 
+## Access to code & data {.appendix}
+
+Code for the Recreational Potential model is available as an R Package hosted on GitHub at [https://github.com/BioDT/uc-ces-recreation](https://github.com/BioDT/uc-ces-recreation).
+
+The model requires some input data, which has been deposited on Zenodo **HERE**.
+
+The source for these documents and this website can be found at [https://github.com/BioDT/ces-recreation-reports](https://github.com/BioDT/ces-recreation-reports).
+
+
 ## Funding {.appendix}
 
 Funding for OpenNESS came from the European Community's Seventh Framework Programme (FP7/2007-2013) under grant agreement no 308428, OpenNESS Project (Operationalisation of Natural Capital and Ecosystem Services: From Concepts to Real-world Applications.)
