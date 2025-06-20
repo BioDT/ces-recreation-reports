@@ -130,7 +130,7 @@ u(\mathrm{distance}_j) & \text{otherwise}
 \end{cases}
 $$
 
-where $\mathrm{distance}_j$ is the distance to the nearest pixel in which the feature $j$ is present, and $u(d)$ is a function that takes distances $d$ as input, and outputs values between $0$ and $1$, decreasing as $d$ increases, and falling to zero at a distance of approximately 500m (see Eq. (==X==) in the Technical Supplement for details). 
+where $\mathrm{distance}_j$ is the distance to the nearest pixel in which the feature $j$ is present, and $u(d)$ is a function that takes distances $d$ as input, and outputs values between $0$ and $1$, decreasing as $d$ increases, and falling to zero at a distance of approximately 500m (see [Section 1, Technical Supplement](tech_supp.html#sec-techdesc) for details). 
 
 ==TODO: screenshot of  a layer with/without the proximity part==
 

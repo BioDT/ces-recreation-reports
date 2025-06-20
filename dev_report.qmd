@@ -452,6 +452,8 @@ The original Scotland-wide raster was divided into 20 overlapping spatial window
 
 ## Discussion and recommendations
 
+### Outstanding issues
+
 At the time of writing there are around 20 open issues on the GitHub repository.
 
 | Issue                                                                                                                                                    | Theme                                                                           | Comments                                       |
@@ -560,15 +562,13 @@ The UI may also display the latitude-longitude coordinate or [what3words](https:
 
 #### Storage of personas
 
-**To do:**
-
 As things stand, personas are stored in `.csv` files on the server side. This means the app requires write access to the server's filesystem. 
 
 This is convenient, since users do not have to upload their own persona files. However, it is not a scalable solution.
 
 Future work should take a different approach to handling user's personas, such as providing the option to link the app to Google sheets.
 
-On services such as DataLabs this is not permitted...
+Removing the requirement for write access would also allow UKCEH to publish the app on the in-house DataLabs service, which may be preferable to Posit Connect.
 
 ### Towards a Digital Twin {#sec-dt}
 
@@ -596,7 +596,7 @@ In cases where the utility of real-time data updates is clear, it may be worth c
 
 ## Concluding remarks
 
-In the author's opinion, one of the key contributions from this period of development work was to write down a concrete, unambiguous definition of the RP model (==Link==). From this flowed the substantial improvements to the design and efficiency of the code, and the ability to verify that it is working as expected.
+In the author's opinion, one of the key contributions from this period of development work was to write down a concrete, unambiguous definition of the RP model ([Technical Supplement, Section 1](tech_supp.html#sec-techdesc)). From this flowed the substantial improvements to the design and efficiency of the code, and the ability to verify that it is working as expected.
 
 This also exposed the simplicity at the heart of the RP model --- that it is essentially a weighted sum of 87 items representing presence/absence/proximity to a landscape feature. This is a very good thing! It turns out that we do not need to expend vast amounts of energy, water and money to compute Recreational Potential. Considering the objective is for users to be able to easily run the model many, many times, the (business and environmental) case for a small computational footprint is high. Were I to take this project forward I would lean into the simplicity and aim to provide users with the most relevant information in a transparent manner. 
 
