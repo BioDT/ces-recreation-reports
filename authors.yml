@@ -1,0 +1,24 @@
+authors:
+  - name: "Joe Marsh Rossney <a href='https://github.com/jmarshrossney' style='color: black'><i class='bi bi-github'></i></a>"
+    orcid: 0000-0002-8082-8566
+    affiliation:
+      - ref: ukceh
+
+  - name: "Maddalena Tigli <a href='https://github.com/madtig' style='color: black'><i class='bi bi-github'></i></a>"
+    orcid: 0000-0001-8083-0589
+
+  - name: Chris Andrews
+    orcid: 0000-0003-2428-272X
+
+  - name: Jan Dick
+    orcid: 0000-0002-4180-9338
+
+  - name: Simon Rolph
+    orcid: 0000-0001-6755-9456
+
+affiliations:
+  - id: ukceh
+    name: UK Centre for Ecology & Hydrology
+    city: Edinburgh
+    country: UK
+    url: https://www.ceh.ac.uk/

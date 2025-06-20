@@ -1,21 +1,6 @@
 ---
 title: The BioDT Recreational Potential Model
 subtitle: Summary
-authors:
-  - name: "Joe Marsh Rossney <a href='https://github.com/jmarshrossney' style='color: black'><i class='bi bi-github'></i></a>"
-    orcid: 0000-0002-8082-8566
-    affiliation: UK Centre for Ecology & Hydrology
-  - name: "Maddalena Tigli <a href='https://github.com/madtig' style='color: black'><i class='bi bi-github'></i></a>"
-    orcid: 0000-0001-8083-0589
-  - name: Chris Andrews
-    orcid: 0000-0003-2428-272X
-  - name: Jan Dick
-    orcid: 0000-0002-4180-9338
-  - name: Simon Rolph
-    orcid: 0000-0001-6755-9456
-
-date: today
-date-format: long
 abstract: >
   These documents collectively describe the xyz.
 ---
@@ -617,36 +602,4 @@ Certain limitations, caveats and suggestions of a more technical nature are disc
 7.  **JOE and CHRIS to add something if you have other ideas**
 
 
-## Funding {.appendix}
-
-Funding for OpenNESS came from the European Community's Seventh Framework Programme (FP7/2007-2013) under grant agreement no 308428, OpenNESS Project (Operationalisation of Natural Capital and Ecosystem Services: From Concepts to Real-world Applications.)
-
-Funding for BioDT came from the European Union's Horizon Europe Research and Innovation Programme under grant agreement No 101057437 (BioDT project, [https://doi.org/10.3030/101057437](https://doi.org/10.3030/101057437))
-
-Funding for SPEAK came from the Natural Environment Research Council – Growing Shoots Partnership and application co-creation bursary. NE/Y005805/1 _Growing Shoots​
-
-## CRediT statement {.appendix}
-
-**To do**: https://www.elsevier.com/en-gb/researcher/author/policies-and-guidelines/credit-author-statement
-
-## Acknowledgements {.appendix}
-
-We wish to acknowledge contributors to previous versions of the Recreational Potential model. Will Bolton contributed substantially to the first version of the code written in `R`. ==Megan Williams?==
-
-JMR would like to thank Tomáš Martinovič for assisting with understanding the requirements BioDT.
-
-We are very grateful to all the participants of the SPEAK project which this output is based on including: Alastair Leaver, Alice MacSporran, Brian Cassidy, Chris Pollock, David Giles, Jean Cowie, Joanna Gilliatt, Justyna Olszewska, Laura Taylor, Maddi Bunker, Rebecca MacLennan, S Mayes, Shaila Rao, Steve MacKinnon and Tom Gebbie, Active Stirling. We are equally grateful to an additional 18 participants who preferred to remain anonymous. ​
-
-
-## Correspondence {.appendix}
-
-
-- `{jand,chan}@ceh.ac.uk` for enquiries relating to the BioDT or SPEAK projects, or ongoing and future work.
-
-- `chan@ceh.ac.uk` for enquiries relating to the data sources and QGIS processing.
-
-- `{joemar,madtig}@ceh.ac.uk` for enquiries relating to the code and anything else appearing in the technical supplement and/or developer's report.
-
-- `simrol@ceh.ac.uk` for enquiries relating to the biodiversity component of the BioDT project.
-
-​
+{{< include _endmatter.qmd >}}

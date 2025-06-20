@@ -2,8 +2,15 @@ project:
   type: website
   output-dir: _project
 
-# Shared config for all documents
+# Metadata shared by all documents
+date: 2025-06-19
+date-format: long
+date-modified: last-modified
+copyright: UK Centre for Ecology & Hydrology, 2025
+license: CC BY
 bibliography: references.bib
+
+# Format config shared by all documents
 number-sections: true
 number-depth: 3
 tbl-cap-location: bottom
@@ -22,24 +29,6 @@ format:
     #documentclass: scrartcl
     #toccolor: blue
     #linkcolor: purple
-
-# Metadata in CSL format
-# See https://docs.citationstyles.org/en/stable/specification.html
-citation:
-  id: ukceh2025
-  author: 
-    - Joe Marsh Rossney
-    - Maddalena Tigli
-    - Chris Andrews
-    - Jan Dick
-    - Simon Rolph
-  title: The BioDT Recreational Potential Model
-  issued: 2025-06
-  abstract: |
-    These documents describe the BioDT Recreational Potential model at the close of the BioDT project in 2025. Something something.
-doi: to-do
-license: CC BY
-copyright: UK Centre for Ecology & Hydrology, 2025
 
 # Website config
 website:
@@ -64,11 +53,11 @@ website:
         icon: git
         href: "https://github.com/BioDT/ces-recreation-reports"
 
-  page-footer: 
-    right: "© Footer"
-    border: false
-    background: light
-
 # Re-compute only when source changes
 execute:
   freeze: auto
+
+# Source author and citation info from these files
+metadata-files:
+  - authors.yml
+  - citation.yml

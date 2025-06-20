@@ -1,15 +1,6 @@
 ---
 title: The BioDT Recreational Potential Model
 subtitle: Worked example
-authors:
-  - name: "Joe Marsh Rossney <a href='https://github.com/jmarshrossney' style='color: black'><i class='bi bi-github'></i></a>"
-    affiliations: UK Centre for Ecology & Hydrology
-    orcid: 0000-0002-8082-8566
-  - name: "Maddalena Tigli <a href='https://github.com/madtig' style='color: black'><i class='bi bi-github'></i></a>"
-    orcid: 0000-0001-8083-0589
-
-date: last-modified
-date-format: long
 abstract: >
   This notebook demonstrates basic usage of the Recreational Potential model. It is assumed that the user is familiar with installing `R` packages, executing lines of `R` code in interactive sessions, and running `R` scripts. Detailed instructions can be found in the `README.md` files in the [GitHub repository](https://github.com/BioDT/uc-ces-recreation).
 ---
@@ -120,3 +111,6 @@ terra::plot(layers[["Recreational_Potential"]])
 - Create persona and bbox from modification / scratch
 
 A region of interest may be given by a path to a shapefile, but the main supported format is a set of four coordinates defining a rectangular area, or 'bounding box'. These can be easily constructed using [`terra::ext`](https://rspatial.github.io/terra/reference/ext.html) by passing a vector `(xmin, xmax, ymin, ymax)` as its first argument. 
+
+
+{{< include _endmatter.qmd >}}

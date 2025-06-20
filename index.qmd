@@ -1,22 +1,6 @@
 ---
 title: The BioDT Recreational Potential Model
-authors:
-  - name: "Joe Marsh Rossney <a href='https://github.com/jmarshrossney' style='color: black'><i class='bi bi-github'></i></a>"
-    orcid: 0000-0002-8082-8566
-    affiliation: UK Centre for Ecology & Hydrology
-  - name: "Maddalena Tigli <a href='https://github.com/madtig' style='color: black'><i class='bi bi-github'></i></a>"
-    orcid: 0000-0001-8083-0589
-  - name: Chris Andrews
-    orcid: 0000-0003-2428-272X
-  - name: Jan Dick
-    orcid: 0000-0002-4180-9338
-  - name: Simon Rolph
-    orcid: 0000-0001-6755-9456
 
-date: today
-date-format: long
-abstract: >
-  These documents collectively describe the xyz.
 
 toc: false
 number-sections: false
@@ -25,7 +9,19 @@ nocite: |
   @Rolph2024, @Dick2025, @Dick2025b
 ---
 
-### Contents
+- Summary
+
+- Technical Supplement
+
+- Developers' Report
+
+- Worked Example
+
+Also
+
+- Code repository
+
+- Data
 
 The main [Summary](summary.html) provides a high-level overview of the Recreational Model and the research context in which it came about. 
 
@@ -35,7 +31,6 @@ The [Developers' Report](dev_report.html) provides a high-level, chronological o
 
 The [Worked Example](example.html) demonstrates basic usage of the code.
 
-### Code and data
 
 Code for the Recreational Potential model is available as an R Package hosted on GitHub at [https://github.com/BioDT/uc-ces-recreation](https://github.com/BioDT/uc-ces-recreation).
 
@@ -43,10 +38,13 @@ The model requires some input data, which has been deposited on Zenodo **HERE**.
 
 **To do:** specific version of code on Zenodo?
 
-### Associated publications
+## Associated publications {.appendix}
 
 :::{#refs}
 :::
 
 - SPEAK paper
 - Simon's paper
+
+
+{{< include _endmatter.qmd >}}

@@ -1,15 +1,6 @@
 ---
 title: The BioDT Recreational Potential Model
 subtitle: Developers' Report
-authors:
-  - name: "Joe Marsh Rossney <a href='https://github.com/jmarshrossney' style='color: black'><i class='bi bi-github'></i></a>"
-    affiliations: UK Centre for Ecology & Hydrology
-    orcid: 0000-0002-8082-8566
-  - name: "Maddalena Tigli <a href='https://github.com/madtig' style='color: black'><i class='bi bi-github'></i></a>"
-    orcid: 0000-0001-8083-0589
-
-date: last-modified
-date-format: long
 abstract: >
   This report provides a high-level, chronological overview of development work carried out by the authors between November 2024 and June 2025. The intention is to provide some context and explanation for posterity. We also make several recommendations for further development work. Most items are accompanied by one or more links to issues and/or pull requests on GitHub, which often contain further details and references to specific lines of code.
 ---
@@ -613,3 +604,6 @@ This also exposed the simplicity at the heart of the RP model --- that it is ess
 If the intention is to scale up the BioDT app, or the CES component, to make it widely available to members of the public, it may be wise to clearly demarcate the role of researchers --- i.e. the science content, stakeholder engagement --- and to then outsource development work to professional app developers. It may be fruitful to look for possible integrations with popular apps used by recreationalists, and perhaps consider presenting the CES app as an 'add-on' to existing apps rather than a competitor.
 
 On a personal note, this was a valuable opportunity to learn to code in `R`.
+
+
+{{< include _endmatter.qmd >}}

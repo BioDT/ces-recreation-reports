@@ -1,17 +1,6 @@
 ---
 title: The BioDT Recreational Potential Model
 subtitle: Technical Supplement
-authors:
-  - name: "Joe Marsh Rossney <a href='https://github.com/jmarshrossney' style='color: black'><i class='bi bi-github'></i></a>"
-    affiliations: UK Centre for Ecology & Hydrology
-    orcid: 0000-0002-8082-8566
-  - name: "Maddalena Tigli <a href='https://github.com/madtig' style='color: black'><i class='bi bi-github'></i></a>"
-    orcid: 0000-0001-8083-0589
-  - name: Chris Andrews
-    orcid: 0000-0003-2428-272X
-
-date: last-modified
-date-format: long
 abstract: >
   This supplement provides technical details about the BioDT Recreational Potential model (LINK TO SPECIFIC RELEASE). This includes a mathematical description of the model, and aspects of the code.
 ---
@@ -700,3 +689,5 @@ This is also a very memory-light operation; `terra` only _has_ to load one pixel
 
 - **TODO:** Rescaling step?
 
+
+{{< include _endmatter.qmd >}}

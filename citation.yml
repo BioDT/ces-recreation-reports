@@ -1,0 +1,18 @@
+# Citation metadata in CSL format
+# See https://docs.citationstyles.org/en/stable/specification.html
+citation:
+  id: ukceh2025
+  type: report
+  author: 
+    - Joe Marsh Rossney
+    - Maddalena Tigli
+    - Chris Andrews
+    - Jan Dick
+    - Simon Rolph
+  title: The BioDT Recreational Potential Model
+  container-title: NERC Open Research Archive
+  issued: 2025-06
+  doi: nora-doi
+  url: https://biodt.github.io/ces-recreation-reports
+  abstract: |
+    These documents describe the BioDT Recreational Potential model at the close of the BioDT project in 2025. Something something.
