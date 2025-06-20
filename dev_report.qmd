@@ -143,11 +143,11 @@ Satisfying these requirements is straightforward with Shiny apps especially, whe
 
 ### Full rewrite of the RP model
 
-The original aim of [#18](https://github.com/BioDT/uc-ces-recreation/pull/18) was to _refactor_ the existing code to make it possible to run the RP model via a script, independently of the Shiny app. As explained earlier, however, the decision was taken to rewrite the code from scratch.
+The original aim of [#18](https://github.com/BioDT/uc-ces-recreation/pull/18) was to _refactor_ the existing code to make it possible to run the RP model via a script, independently of the Shiny app. As explained earlier, however, the decision was taken to rewrite the code from scratch. A number of subtle bugs in the original code that led to incorrect outputs ([#22](https://github.com/BioDT/uc-ces-recreation/issues/22), [#23](https://github.com/BioDT/uc-ces-recreation/issues/23)) were also fixed during the rewrite.
 
 The model itself --- i.e. the mapping of persona scores, area of interest and raster data to Recreational Potential scores --- has never (to our knowledge) been defined unambiguously. Most aspects of the model could be figured out by tracing through the existing code, but there were some examples where the intended behaviour was unclear and plausibly different from the actual behaviour. Thus in order to construct the definition given in the Technical Supplement required some inference.
 
-In the process of arriving at a mathematical definition of the RP model (==TODO, link to Tech Supp==), it became transparent that the 'dynamical' part --- i.e. the calculations involving user-provided inputs --- was little more than a sum of pre-computed raster layers weighted by the persona scores. The 'non-dynamical' part dealt with quantities that only needed to be computed _once_, ahead of time, and stored for later use.
+In the process of arriving at a mathematical definition of the RP model ([Section 1, Technical Supplement](tech_supp.html#sec-techdesc)), it became transparent that the 'dynamical' part --- i.e. the calculations involving user-provided inputs --- was little more than a sum of pre-computed raster layers weighted by the persona scores. The 'non-dynamical' part dealt with quantities that only needed to be computed _once_, ahead of time, and stored for later use.
 
 Hence, the revised design split the code into three independent parts:
 
@@ -225,17 +225,9 @@ I_{i3} = \begin{bmatrix}
 $$
 
 If we run with this and give all 87 feature types their own layer, the recreational potential can be computed in a single vectorised step as a weighted sum of layers.
-
-This has a number of advantages:
-
-- Avoids indexing step - just multiplication and addition
-- By representing present/absent as 1/0, interpolations (e.g. due to a reprojection) can be meaningfully interpreted
-- Reflects how we should conceptualise the recreation potential - nothing more complicated than a linear combination
-- Allows for more efficient memory management - only needs to hold 2 layers in memory at any time (the accumulated sum + the next layer to be added to the sum)
-
 :::
 
-This decomposition into a one-time pre-processing stage and a dynamical stage, which would be rendered transparent by any good definition of the model, is the essential reason for the multiple orders of magnitude improvement in speed and memory use. 
+This decomposition into a one-time pre-processing stage and a dynamical stage --- which is rendered transparent by any good definition of the model --- is the essential reason for the multiple orders of magnitude improvement in speed and memory use realised by this code rewrite.
 
 <!-- This is the number one reason for the dramatic improvement in the speed at which RP can be computed, and the ability to compute RP over much larger areas without exhausting the available memory ([#4](https://github.com/BioDT/uc-ces-recreation/issues/4)). -->
 
@@ -245,7 +237,28 @@ Further gains resulted from a number of factors made possible through the rewrit
 - Replaced indexing operations with multiply operations, made possible by using a one-hot representation for the input rasters, instead of integer-valued categorical rasters.
 - Replaced loops with vectorised operations using [`terra::app`](https://rspatial.github.io/terra/reference/app.html) and related functions.
 
-There were also a number of subtle bugs in the original code that led to incorrect outputs ([#22](https://github.com/BioDT/uc-ces-recreation/issues/22), [#23](https://github.com/BioDT/uc-ces-recreation/issues/23)) and were fixed during the rewrite.
+Concretely, the main dynamic part of the model --- the calculation of components, which was previously a highly convoluted process --- is essentially reduced to the following lines of code:
+
+```R
+raster <- load_raster(  # <1>
+	file.path(data_dir, paste0(component, ".tif")),
+	bbox
+) # <1>
+
+scores <- persona[names(raster)]  # <2>
+
+result <- terra::app(raster, function(features) {  # <3>
+	sum(scores * features, na.rm = TRUE)
+}) # <3>
+```
+1. Lazily load the raster, cropping to a region given by `bbox`
+2. Extract the scores for this component from the `persona` dataframe
+3. Compute the weighted sum.
+
+`terra::app` automatically parallelises this multiply-and-sum operation across the grid; each 'pixel' is computed in a separate thread. Even better, when `terra::app` is applied to a simple operator such as `sum`, it actually calls a fast `C++` implementation rather than a pure `R` one (see the [terra documentation](https://rdrr.io/cran/terra/man/app.html)).
+
+This is also a very memory-light operation; `terra` only _has_ to load one pixel at a time per parallel thread. This means at any given instance only $N_\text{threads} \times N_\text{layers}$ values need to be loaded in memory, irrespective of how many pixels there are in total.
+
 
 **Pull Requests merged:**
 

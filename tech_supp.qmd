@@ -47,7 +47,7 @@ base_map <-
   ) 
 ```
 
-## Technical description of the model
+## Technical description of the model {#sec-techdesc}
 
 While there have been several publications citing the RP model, none so far have included an unambiguous technical description of the model itself.
 
@@ -625,51 +625,6 @@ make_layer_map_dist(rstack = water_rstack, base_map,
 ```
 
 
-## Notes and observations
-
-### Efficiency
-
-terra vs raster
-
-Pre-processing component rasters at the national (Scotland-wide) scale, rather than performing these operations at run-time for each user-defined area. Pre-processing included:
-
--   Standardizing spatial properties (extent, resolution, projection) across all four component rasters to ensure seamless overlay and computation.
--   Pre-computing distance rasters, to avoid repeated and costly distance calculations during model runs.
--   Pre-calculating scored rasters using predefined thresholds and decay functions, making them immediately usable for user-defined queries.
-
-Overall, the use of this approach has reduced computational overhead significantly (see report "Optimizing BioDT Recreational Potential (RT) model run-time").
-
-### Pre-processing
-
-todo
-
-### Calculation of Recreational Potential
-
-The dynamic part of the model, i.e. the part that gets updated based on user input, amounts to little more than computing the weighted sum in @eq-component to calculate each component and summing the components (@eq-rp), with a rescaling by @eq-rescale after each step. As a result, it is extremely fast.
-
-To understand why it is so quick, we will briefly look at the code implementing @eq-component (`R/recreation.R`). The important parts are:
-
-```R
-raster <- load_raster(  # <1>
-	file.path(data_dir, paste0(component, ".tif")),
-	bbox
-) # <1>
-
-scores <- persona[names(raster)]  # <2>
-
-result <- terra::app(raster, function(features) {  # <3>
-	sum(scores * features, na.rm = TRUE)
-}) # <3>
-```
-1. Lazily load the raster, cropping to a region given by `bbox`
-2. Extract the scores for this component from the `persona` dataframe
-3. Compute the weighted sum in @eq-component.
-
-`terra::app` automatically parallelises this multiply-and-sum operation across the grid; each 'pixel' is computed in a separate thread. Even better, when `terra::app` is applied to a simple operator such as `sum`, it actually calls a fast `C++` implementation rather than a pure `R` one (see the [terra documentation](https://rdrr.io/cran/terra/man/app.html)).
-
-This is also a very memory-light operation; `terra` only _has_ to load one pixel at a time per parallel thread. This means at any given instance only $N_\text{threads} \times N_\text{layers}$ values need to be loaded in memory, irrespective of how many pixels there are in total.
-
-- **TODO:** Rescaling step?
 
 
 {{< include _endmatter.qmd >}}
