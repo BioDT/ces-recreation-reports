@@ -2,7 +2,7 @@
 title: The BioDT Recreational Potential Model
 subtitle: Summary
 abstract: >
-  These documents collectively describe the xyz.
+  This report introduces the Recreational Potential model and describes key aspects of its functionality. 
 ---
 
 ## Background
@@ -52,14 +52,17 @@ The main model output is an two-dimensional array of numbers (a _raster_) repres
 
 ![An example of a heat map displaying Recreational Potential.](images/rp_example.png){#fig-rpexample}
 
-An RP value is constructed from a combination of **87** _items_ representing distinct attributes of the land. The 87 items are grouped into four _components_:
+An RP value is constructed from a combination of **87** _items_ representing distinct attributes of the land. The 87 items are grouped into four _components_, which are outlined in @tbl-components. RP values are calculated by weighting each item by a _score_ between $0$ and $10$ that reflects the importance of that item to the user. A full set of 87 scores is referred to as a _persona._
 
-- **_Landscape_** - the suitability of land to support recreational activity (40 items).
-- **_Natural Features_** influencing the potential (24 items).
-- **_Infrastructure_** features influencing the potential (10 items).
-- **_Water_** - rivers and lakes (13 items).
 
-RP values are calculated by weighting each item by a _score_ between $0$ and $10$ that reflects the importance of that item to the user. A full set of 87 scores is referred to as a _persona._
+| Component                                                                | Short code | \# items |
+| :------------------------------------------------------------------------ | :---------- | :-------- |
+| **Landscape** - the suitability of land to support recreational activity | `SLSRA`    | 40       |
+| **Natural Features** influencing the potential                           | `FIPS_N`   | 24       |
+| **Infrastructure** features influencing the potential                    | `FIPS_I`   | 10       |
+| **Water** - rivers and lakes                                             | `Water`    | 13       |
+
+: The four components contributing to Recreational Potential values. {#tbl-components tbl-colwidths="[70,20,10]"}
 
 The RP model thus requires two inputs from users:
 
@@ -103,15 +106,6 @@ Personas are stored in `.csv` files. However, the interactive R Shiny app provid
 
 
 ### Input data {#sec-inputs}
-
-
-| $i$ | Component        | Short code |
-| --- | ---------------- | ---------- |
-| 1   | Landscape        | `SLSRA`    |
-| 2   | Natural Features | `FIPS_N`   |
-| 3   | Infrastructure   | `FIPS_I`   |
-| 4   | Water            | `Water`    |
-
 
 There is another essential set of inputs to the model which are not specified by the user. These are a set of 87 raster layers --- one for each of the 87 items --- covering Scotland at a resolution of 20x20m.
 

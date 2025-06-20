@@ -18,12 +18,13 @@ toc: true
 toc-depth: 3
 format:
   html:
-    embed-resources: true
-    toc-location: right
+    code-annotations: hover
     code-overflow: wrap
+    embed-resources: true
     highlight-style: github
     html-math-method: mathjax
-    code-annotations: hover
+    repo-actions: source
+    toc-location: right
   #pdf:
     #colorlinks: true
     #documentclass: scrartcl
@@ -52,6 +53,13 @@ website:
       - text: Page Source
         icon: git
         href: "https://github.com/BioDT/ces-recreation-reports"
+
+  announcement:
+    content: "This site is a **work in progress** and all reports should be considered **drafts**! "
+    dismissable: false
+    icon: exclamation-circle
+    position: above-navbar
+    type: danger
 
 # Re-compute only when source changes
 execute:

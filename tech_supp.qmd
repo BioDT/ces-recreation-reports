@@ -2,7 +2,7 @@
 title: The BioDT Recreational Potential Model
 subtitle: Technical Supplement
 abstract: >
-  This supplement provides technical details about the BioDT Recreational Potential model (LINK TO SPECIFIC RELEASE). This includes a mathematical description of the model, and aspects of the code.
+  This supplement provides technical details about the BioDT Recreational Potential model. This includes a mathematical description of the model, details regarding the source data, and technical aspects of the code.
 ---
 
 ```{r, echo=FALSE}
@@ -55,32 +55,18 @@ In fact the mathematical basis of the RP model is extremely simple. Nevertheless
 
 <!-- Were it not for an area-dependent rescaling step it would be nothing more than a linear combination (i.e. a weighted sum) at each 20 metre squared pixel.-->
 
-### Inputs
-
-All 87 layers listed in @sec-listitems.
-
-The RP model takes three inputs:
-
-1. A 
-2. A _persona_, i.e. a set of 87 numbers (0--10) corresponding to the 87 unique features present in the raster data.
-3. A 'region of interest'
-
-and evaluates ...
-
 ### Presence/absence rasters
 
 We begin by defining some notation.
 
 Let $I : \mathbb{R}^2 \to \{0, 1\}$ be a binary-valued function whose domain can be interpreted as a two-dimensional spatial (e.g. lat-lon) domain, $x \in \mathbb{R}^2$. This is a mathematical representation of a single raster layer in a '[one-hot](https://en.wikipedia.org/wiki/One-hot)' representation, where a value of $I(x) = 1$ indicates presence of a feature at the coordinate $x$, and $I(x) = 0$ indicates absence. 
 
-The RP model currently includes 87 features/items grouped into four components. Each of these has its own presence/absence raster. We will therefore introduce two subscript indices and write each layer as $I_{ij}(x)$, where
+The RP model currently includes 87 features/items grouped into four components (see @sec-listitems). Each of these has its own presence/absence raster. We will therefore introduce two subscript indices and write each layer as $I_{ij}(x)$, where
 
-- $i \in \{1, 2, 3, 4\}$ labels the component to which $I_{ij}$ belongs, and
+- $i \in \{1, 2, 3, 4\}$ labels the component to which $I_{ij}$ belongs, as specified in @tbl-componentlabels, and
 - $j \in \{1, 2, \ldots, n_i\}$ labels the item/feature within that component, of which there are $n_i$.
 
-For example, if we say that $i=4$ labels the 'water' component, and $j=1$ labels the 'pond' item, then $I_{41}(x)$ takes a value of $1$ whenever there is a pond at $x$, and a value of $0$ elsewhere.
-
-Let us be explicit in labelling the components:
+As a concrete example, if $j=1$ labels the 'pond' item, then $I_{41}(x)$ takes a value of $1$ whenever there is a pond at $x$, and a value of $0$ elsewhere.
 
 | $i$ | Component        | Short code |
 | --- | ---------------- | ---------- |
@@ -88,6 +74,9 @@ Let us be explicit in labelling the components:
 | 2   | Natural Features | `FIPS_N`   |
 | 3   | Infrastructure   | `FIPS_I`   |
 | 4   | Water            | `Water`    |
+
+: Integer label and short-code for the four components of the RP model {#tbl-componentlabels}
+
 
 ### Proximity contributions
 
@@ -161,7 +150,6 @@ $$ {#eq-raster12}
 
 For the infrastructure and water components ($i=3, 4$) the features rasters contain the proximity contributions described above,
 
-
 $$
 f_{ij}(x) = u(d_{ij}(x) \,; \alpha, \kappa) \, , \qquad i = 3, 4 \, .
 $$ {#eq-raster23}
@@ -200,7 +188,6 @@ $$ {#eq-regiondependence}
 Thus, the RP value at any given pixel should be expected to change when a different area is selected, even if the persona and the input data stays the same.
 
 ### Calculation of Recreational Potential
-
 
 To compute the Recreational Potential value, the four rescaled components are summed,
 
@@ -248,6 +235,8 @@ knitr::kable(table)
 ### Manipulation in QGIS
 
 #### Landscape component
+
+**TO DO**
 
 #### Natural Features component
 
@@ -394,9 +383,9 @@ We projected all rasters onto a reference raster with the following properties:
 
 - **Coordinate reference system** (CRS): [EPSG:27700](https://epsg.io/27700) (British National Grid)
 - **Resolution**: 20 metres x 20 metres
-- **Extent**: $(x_\text{min}, x_\text{max}, y_\text{min}, y_\text{max}) = (-10000, 660000, 460000, 1220000)$ (a rectangular box around Scotland).
+- **Extent**: $(x_\text{min}, x_\text{max}, y_\text{min}, y_\text{max}) = (-10000, 660000, 460000, 1220000)$, which is a rectangular box around Scotland.
 
-We used the 'nearest' interpolation mode (`method="near"`) since the data is categorical. The resulting rasters therefore contain the same set of integer values.
+We used the 'nearest' interpolation mode (`method="near"`) since the data is categorical. The reprojected rasters therefore contain the same set of integer values as the original rasters.
 
 ### Conversion to one-hot representation
 
@@ -455,13 +444,6 @@ I_{i3} = \begin{bmatrix}
 \end{align}
 $$ {#eq-onehot}
 
-**TODO:** This has a number of advantages: (**Duplicated in dev report**)
-
-- Avoids indexing step - just multiplication and addition
-- By representing present/absent as 1/0, interpolations (e.g. due to a reprojection) can be meaningfully interpreted
-- Reflects how we should conceptualise the recreation potential - nothing more complicated than a linear combination
-- Allows for more efficient memory management - only needs to hold 2 layers in memory at any time (the accumulated sum + the next layer to be added to the sum)
-
 The implementation of this step involves the use of `terra::lapp` to parallelise the calculation over the spatial domain. In practice we use `NA` instead of `0` to denote absence.
 
 ```R
@@ -516,7 +498,7 @@ It is *very* unfortunate that the names we have used for the layers follow the s
 
 However, *the results will be wrong*, since `terra::rast` will apply _the right names in the wrong order_.
 
-Future developers are strongly recommended to fix this problem by using different layer names ([#50](https://github.com/BioDT/uc-ces-recreation/issues/50)). See Issue [#49](https://github.com/BioDT/uc-ces-recreation/issues/49) for further details.
+Future developers are strongly recommended to fix this problem by using different layer names. This issue and suggested solutions are discussed in depth in the [Developers' Report](dev_report.html#sec-layernames).
 :::
 
 ### Proximity contributions

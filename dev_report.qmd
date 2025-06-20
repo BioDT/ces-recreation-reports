@@ -2,7 +2,7 @@
 title: The BioDT Recreational Potential Model
 subtitle: Developers' Report
 abstract: >
-  This report provides a high-level, chronological overview of development work carried out by the authors between November 2024 and June 2025. The intention is to provide some context and explanation for posterity. We also make several recommendations for further development work. Most items are accompanied by one or more links to issues and/or pull requests on GitHub, which often contain further details and references to specific lines of code.
+  This report provides a high-level, chronological overview of development work carried out by two of the authors (JMR, MT) between November 2024 and June 2025. The intention is to provide some context and explanation for posterity. We also make several recommendations for further development work. Most items are accompanied by one or more links to issues and/or pull requests on GitHub, which often contain further details and references to specific lines of code.
 ---
  
 ## Background
@@ -468,17 +468,19 @@ Some issues are relatively obvious bug fixes or quality-of-life improvements whi
 
 ### Re-engineering the data production process
 
-The data production process is not engineered for robustness..
+The data production process has significant room for improvement in terms of robustness and reproducibility. Some suggested changes are:
 
-1. Data should be reprojected onto a consistent grid at the earliest possible opportunity.
-2. The projection CRS should be the same as for Leaflet maps, since that is where all raster data is eventually destined. This would avoid additional coordinate transformations during rendering and prevent the smearing of linear features and edges as described in [#61](https://github.com/BioDT/uc-ces-recreation/issues/61).
-3. Layers containing linear features such as roads and rivers should not be rasterised until the last step, if at all. If nothing else, the proximity step would benefit from these layers remaining as vectors.
-4. Layers should be constructed as binary presence/absence rasters from the beginning; one can skip the creation of categorical rasters altogether.
-5. Layer names should be descriptive.
+1. As far as is feasible, the manual manipulations in QGIS should be substituted for deterministic scripts written in (for example) `R`.
+2. Data should be reprojected onto a consistent grid at the earliest possible opportunity.
+3. The projection CRS should be the same as for Leaflet maps, since that is where all raster data is eventually destined. This would avoid additional coordinate transformations during rendering and prevent the smearing of linear features and edges as described in [#61](https://github.com/BioDT/uc-ces-recreation/issues/61).
+4. Layers containing linear features such as roads and rivers should not be rasterised until the last step, if at all. If nothing else, the proximity step would benefit from these layers remaining as vectors ([#51](https://github.com/BioDT/uc-ces-recreation/issues/51)).
+5. Layers should be constructed as binary presence/absence rasters from the beginning; one can skip the creation of categorical rasters altogether.
+6. The size of rasters should be reducible using the approaches described in [#93](https://github.com/BioDT/uc-ces-recreation/issues/93).
+7. Layer names should be changed to be more descriptive (see below).
 
 #### Use descriptive names for the features / layers {#sec-layernames}
 
-The last recommendation is something we are duty bound to elaborate on, since it relates to a very subtle and serious issue that we encountered. This discussion closely follows that in [#49](https://github.com/BioDT/uc-ces-recreation/issues/49) and [#50](https://github.com/BioDT/uc-ces-recreation/issues/50).
+The final recommendation is something we feel duty bound to elaborate on, since it relates to a very subtle and serious issue that affected earlier iterations of the code, and ultimately meant we had to re-deploy the app two weeks into the SPEAK study. This discussion closely follows that in [#49](https://github.com/BioDT/uc-ces-recreation/issues/49) and [#50](https://github.com/BioDT/uc-ces-recreation/issues/50).
 
 Currently the feature/layer names are in the format `{Component}_{Dataset}_{i}`.
 
@@ -500,22 +502,6 @@ A simple fix would be to do nothing more than replace the integers `{i}` with 
 
 If nothing else, this would cause an error if ever these names were not propagated and instead replaced by default names, which is extremely important.
 
-#### Reducing the size of input rasters
-
-The four input rasters are currently between 100MB and 1GB each. This is probably fine, but it's worth making a note of some possible ways to reduce their size in case any of the following are desired in future:
-
-- Scaling up to a larger area than Scotland
-- Better support for users running the app/model locally (4GB might be a lot for some users)
-- Distributing a containerised application containing the input data
-- Storing multiple sets of input data (e.g. one dataset per year)
-
-The presence/absence rasters (SLSRA, FIPS_N) need only a single bit per pixel (0 or 1). Currently these are being written as unsigned 1 byte (8-bit) integers (with the option `datatype=INT1U` in `writeRaster`) since this is the smallest available according to the [documentation](https://rspatial.github.io/terra/reference/writeRaster.html), although [this site](https://rspatial.org/raster/pkg/appendix2.html) seems to imply `LOG1S` should be an option.. The `INT1U` format contains 7x more bits than needed but I'm not sure it massively matters. It could however be worth playing with the compression algorithm - it may be that certain algorithms are particularly good for sparse integer rasters (mostly zeros).
-
-The distance-modified input rasters (FIPS_I, Water) are currently signed floats `datatype=FLT4S`. Again we could play with the compression algorithm, but there are two other options that might be fruitful.
-
-1. **Discretise** - there is no real point in differentiating 0.5243 and 0.5244 here. Frankly it is plenty good enough to just round to the nearest 0.1. In practice we would just multiply by 10, round to the nearest integer, and store the result as an `INT1U`.
-    
-2. **Truncate** - [#92](https://github.com/BioDT/uc-ces-recreation/pull/92) demonstrated that the file size is massively reduced by setting pixels for which the distance to the nearest feature is >500m to `NA`, although 500m is still probably more than we need. This should be automatically satisfied by 1. since anything <0.5 will be rounded to 0.
 
 ### Make the model more interpretable
 
@@ -602,8 +588,6 @@ In the author's opinion, one of the key contributions from this period of develo
 This also exposed the simplicity at the heart of the RP model --- that it is essentially a weighted sum of 87 items representing presence/absence/proximity to a landscape feature. This is a very good thing! It turns out that we do not need to expend vast amounts of energy, water and money to compute Recreational Potential. Considering the objective is for users to be able to easily run the model many, many times, the (business and environmental) case for a small computational footprint is high. Were I to take this project forward I would lean into the simplicity and aim to provide users with the most relevant information in a transparent manner. 
 
 If the intention is to scale up the BioDT app, or the CES component, to make it widely available to members of the public, it may be wise to clearly demarcate the role of researchers --- i.e. the science content, stakeholder engagement --- and to then outsource development work to professional app developers. It may be fruitful to look for possible integrations with popular apps used by recreationalists, and perhaps consider presenting the CES app as an 'add-on' to existing apps rather than a competitor.
-
-On a personal note, this was a valuable opportunity to learn to code in `R`.
 
 
 {{< include _endmatter.qmd >}}

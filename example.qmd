@@ -3,6 +3,8 @@ title: The BioDT Recreational Potential Model
 subtitle: Worked example
 abstract: >
   This notebook demonstrates basic usage of the Recreational Potential model. It is assumed that the user is familiar with installing `R` packages, executing lines of `R` code in interactive sessions, and running `R` scripts. Detailed instructions can be found in the `README.md` files in the [GitHub repository](https://github.com/BioDT/uc-ces-recreation).
+
+number-sections: false
 ---
 
 ## Getting started
@@ -53,7 +55,6 @@ We demonstrate the RP Model applied to the Bush Estate area (nearby Edinburgh) u
 
 The resulting maps will illustrate how different preferences lead to different areas being highlighted for recreational value.
 
-
 These personas are provided in the model as 'presets'; users may customise them or simply use them out-of-the-box.
 
 First, let's save ourselves some typing of `biodt.recreation::<function>` by exposing all of the functions in the `biodt.recreation` namespace.
@@ -62,51 +63,66 @@ First, let's save ourselves some typing of `biodt.recreation::<function>` by exp
 library(biodt.recreation)
 ```
 
-Now we will load the *Hard Recreationalist* persona from the presets file.
+Now we will load the *Hard Recreationalist* and *Soft Recreationalist* personas from the presets file.
 
 ```{r}
 persona_file <- get_preset_persona_file()
 
 hard_recreationalist <- load_persona(persona_file, "Hard_Recreationalist")
+soft_recreationalist <- load_persona(persona_file, "Soft_Recreationalist")
 ```
 
+Each persona contains 87 scores. It does not tell us very much, but we can view these as a histogram.
+
 ```{r}
+par(mfrow = c(1, 2))
+
 hist(hard_recreationalist, 
 	main = "Hard Recreationalist", 
-	breaks = seq(0, 10, by = 1),
+	breaks = 11,
+    xlab = "Score", 
+    ylab = "Frequency")
+
+hist(soft_recreationalist, 
+	main = "Soft Recreationalist", 
+	breaks = 11,
     xlab = "Score", 
     ylab = "Frequency")
 ```
 
 
+## Hard versus Soft Recreationalist
 
-## Visualising Recreational Potential
-
+Let us compare the two personas in the 'example' region, which is just south of Edinburgh.
 
 ```{r}
 bbox <- get_example_bbox()
 ```
 
-
-```{r}
-fips_n <- compute_fips_n(hard_recreationalist, bbox)
-terra::plot(fips_n)
-```
-
-```{r}
-water <- compute_component("Water", hard_recreationalist, bbox)
-terra::plet(water)
-```
-
+To compute Recreational Potential, as well as each individual component, we use the `compute_potential` function. This returns a raster with 5 named layers.
 
 ```{r}
 layers <- compute_potential(hard_recreationalist, bbox)
+
 names(layers)
+```
+
+To plot all layers together we can simply call `terra::plot(layers)`. However, here we will just plot the RP layer.
+
+```{r}
+terra::plot(layers[["Recreational_Potential"]])
+```
+
+For comparison, here is the RP layer for the _Soft Recreationalist_ persona.
+
+```{r}
+layers <- compute_potential(soft_recreationalist, bbox)
 
 terra::plot(layers[["Recreational_Potential"]])
 ```
 
-## More involved example
+
+## More involved example (to do)
 
 - Create persona and bbox from modification / scratch
 
