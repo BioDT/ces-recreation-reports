@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2025-06-19">
+<meta name="dcterms.date" content="2025-06-30">
 
 <title>The BioDT Recreational Potential Model for Scotland</title>
 <style>
@@ -4854,11 +4854,9 @@ window.Quarto = {
 <span class="menu-text">R Package</span></a>
   </li>  
   <li class="nav-item">
-    <span class="nav-link">
-    <i class="bi bi-database" role="img">
+    <a class="nav-link" href="https://doi.org/10.5281/zenodo.15705544" target="_blank"> <i class="bi bi-database" role="img">
 </i> 
-<span class="menu-text">Data</span>
-    </span>
+<span class="menu-text">Data</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="https://github.com/BioDT/ces-recreation-reports" target="_blank"> <i class="bi bi-git" role="img">
@@ -4953,9 +4951,7 @@ window.Quarto = {
   </div>
   <div class="quarto-title-meta-contents">
         <p class="affiliation">
-            <a href="https://www.ceh.ac.uk/">
             UK Centre for Ecology &amp; Hydrology
-            </a>
           </p>
       </div>
     <div class="quarto-title-meta-contents">
@@ -4986,7 +4982,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">June 19, 2025</p>
+      <p class="date">June 30, 2025</p>
     </div>
   </div>
   
@@ -5061,7 +5057,7 @@ window.Quarto = {
 </section>
 <section id="speak" class="level3" data-number="1.2">
 <h3 data-number="1.2" class="anchored" data-anchor-id="speak"><span class="header-section-number">1.2</span> SPEAK</h3>
-<p>The objective of the SPEAK study (REF) was to gain insights into the RP model from the perspective of users. The study recruited approximately 40 members of the public, who would be given access to the RP app to use in the planning stage of recreational activities. The participants would then go off and do an activity, and then fill out a post-activity survey. Participants would be provided with GPS-enabled <a href="https://www.garmin.com/en-GB/">Garmin</a> watches which would give the researchers the means to track participants’ paths during their recreational activities.</p>
+<p>The objective of the SPEAK study was to gain insights into the RP model from the perspective of users. The study recruited approximately 40 members of the public, who would be given access to the RP app to use in the planning stage of recreational activities. The participants would then go off and do an activity, and then fill out a post-activity survey. Participants would be provided with GPS-enabled <a href="https://www.garmin.com/en-GB/">Garmin</a> watches which would give the researchers the means to track participants’ paths during their recreational activities.</p>
 </section>
 <section id="biodt" class="level3" data-number="1.3">
 <h3 data-number="1.3" class="anchored" data-anchor-id="biodt"><span class="header-section-number">1.3</span> BioDT</h3>
@@ -5091,12 +5087,11 @@ window.Quarto = {
 <li>Provide a means for users to choose the region of interest.</li>
 <li>Disaggregate the RP computation from the Shiny app, and reformulate it so that it could be run on LUMI via the BioDT app.</li>
 </ol>
-<p>Initially, a total of five weeks (split 3:2 between JMR:MT) were allocated for this work. However, more time (X weeks split Y:Z) was made available as the scope of the work increased as described below.</p>
 </section>
 <section id="expanded-scope-revised-development-objectives" class="level3" data-number="1.5">
 <h3 data-number="1.5" class="anchored" data-anchor-id="expanded-scope-revised-development-objectives"><span class="header-section-number">1.5</span> Expanded scope &amp; revised development objectives</h3>
-<p>Initially, the two of us were working independently. In particular, MT worked on removing dependence on the legacy <code>raster</code> package and replacing it with a dependence on the <a href="https://rspatial.github.io/terra/"><code>terra</code></a> package, which is significantly faster, has better memory management, and supports lazy loading of large rasters. This led to tangible improvements in speed.</p>
-<p>After gaining familiarity with the codebase and a better understanding of the objectives and the way the model was intended to function, it became clear that the most straightforward way to meet all of the objectives simultaneously was to fully rewrite the code from scratch. Some outstanding issues required substantial work to fix within the existing framework, but could be neatly circumvented in a full rewrite. In addition, a full rewrite would be the most effective way to improve the speed and scalability (objective 2) and the flexibility to add or modify functionality (including objective 3).</p>
+<p>Initially a few weeks were allocated for this work, and the two of us worked independently on small, self-contained tasks. MT worked on removing dependence on the legacy <code>raster</code> package and replacing it with a dependence on the <a href="https://rspatial.github.io/terra/"><code>terra</code></a> package, which is significantly faster, has better memory management, and supports lazy loading of large rasters. This led to tangible improvements in speed. JMR worked on <a href="https://github.com/BioDT/uc-ces-recreation/pull/1">#1</a> which turned out to be a red herring.</p>
+<p>After gaining familiarity with the codebase and a better understanding of objective 4 it became clear that the most straightforward way to meet objectives 2–4 simultaneously was to fully rewrite the code from scratch. A full rewrite would be the most effective way to improve the speed and scalability (objective 2) and the flexibility to add or modify functionality (including objective 3). Some outstanding issues could also be neatly circumvented.</p>
 </section>
 </section>
 <section id="overview-of-work-done" class="level2" data-number="2">
@@ -5104,12 +5099,12 @@ window.Quarto = {
 <section id="reconfiguration-of-git-repository-developer-setup" class="level3" data-number="2.1">
 <h3 data-number="2.1" class="anchored" data-anchor-id="reconfiguration-of-git-repository-developer-setup"><span class="header-section-number">2.1</span> Reconfiguration of git repository &amp; developer setup</h3>
 <p>Although it is possible to give multiple users access to a DataLabs notebook, simultaneous access by multiple users is not currently supported. Furthermore, since all users share the same user space, only one user may cache their git configuration and GitHub credentials.</p>
-<p>The first task was therefore to move development off of DataLabs and use GitHub for version control in a proper multi-developer setup. The most recent (as of 22/11/2024) version of the code and data was downloaded from DataLabs and added <em>without modification</em> to a new ‘orphan’ git branch — see <a href="https://github.com/BioDT/uc-ces-recreation2/tree/a795456f38d9c9c26eb75418823adabaa67ac228">commit a795456</a>.</p>
+<p>The first task was therefore to move development off of DataLabs and use GitHub for version control in a multi-developer setup. The most recent (as of 22/11/2024) version of the code and data was downloaded from DataLabs and added <em>without modification</em> to a new ‘orphan’ git branch — see <a href="https://github.com/BioDT/uc-ces-recreation2/tree/a795456f38d9c9c26eb75418823adabaa67ac228">commit a795456</a>.</p>
 <p>After some discussion, the old <code>main</code> branch was moved to <a href="https://github.com/BioDT/uc-ces-recreation/tree/old-main"><code>old-main</code></a> to preserve the history, and tagged <a href="https://github.com/BioDT/uc-ces-recreation/tree/2024-model"><code>2024-model</code></a> to facilitate rediscovery in future.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> The new branch was renamed <code>main</code> and another branch <code>develop</code> was created by branching from <code>main</code>. <code>develop</code> was assigned as the default branch to align with a workflow where contributions are merged via Pull Requests to <code>develop</code>, which is periodically merged with <code>main</code> after ensuring that everything is functional and self-consistent.</p>
 <p>Run-time calls to <code>install.packages</code> were removed and instead the <a href="https://rstudio.github.io/renv/index.html"><code>renv</code></a> package was used to compile a list of version-pinned dependencies (see comments in <a href="https://github.com/BioDT/uc-ces-recreation/pull/1">#1</a> for further explanation).</p>
 <p><strong>Pull Requests merged:</strong></p>
 <ul>
-<li><a href="https://github.com/BioDT/uc-ces-recreation/pull/1">A working Singularity container with minimal modifications to the existing code #1</a> (this was a red herring stemming from a misunderstanding)</li>
+<li><a href="https://github.com/BioDT/uc-ces-recreation/pull/1">A working Singularity container with minimal modifications to the existing code #1</a></li>
 <li><a href="https://github.com/BioDT/uc-ces-recreation/pull/13">Introduce formatR #13</a> (later replaced by StyleR)</li>
 </ul>
 <p><strong>Issues closed:</strong></p>
@@ -5163,15 +5158,14 @@ Publishing to UKCEH’s Posit Connect server
 <section id="full-rewrite-of-the-rp-model" class="level3" data-number="2.3">
 <h3 data-number="2.3" class="anchored" data-anchor-id="full-rewrite-of-the-rp-model"><span class="header-section-number">2.3</span> Full rewrite of the RP model</h3>
 <p>The original aim of <a href="https://github.com/BioDT/uc-ces-recreation/pull/18">#18</a> was to <em>refactor</em> the existing code to make it possible to run the RP model via a script, independently of the Shiny app. As explained earlier, however, the decision was taken to rewrite the code from scratch. A number of subtle bugs in the original code that led to incorrect outputs (<a href="https://github.com/BioDT/uc-ces-recreation/issues/22">#22</a>, <a href="https://github.com/BioDT/uc-ces-recreation/issues/23">#23</a>) were also fixed during the rewrite.</p>
-<p>The model itself — i.e. the mapping of persona scores, area of interest and raster data to Recreational Potential scores — has never (to our knowledge) been defined unambiguously. Most aspects of the model could be figured out by tracing through the existing code, but there were some examples where the intended behaviour was unclear and plausibly different from the actual behaviour. Thus in order to construct the definition given in the Technical Supplement required some inference.</p>
-<p>In the process of arriving at a mathematical definition of the RP model (<a href="tech_supp.html#sec-techdesc">Section 1, Technical Supplement</a>), it became transparent that the ‘dynamical’ part — i.e. the calculations involving user-provided inputs — was little more than a sum of pre-computed raster layers weighted by the persona scores. The ‘non-dynamical’ part dealt with quantities that only needed to be computed <em>once</em>, ahead of time, and stored for later use.</p>
+<p>In the process of arriving at a mathematical definition of the RP model (<a href="tech_supp.html#sec-techdesc">Section 1, Technical Supplement</a>), it became transparent that the ‘dynamic’ part — i.e. the calculations involving user-provided inputs — could be separated from the ‘non-dynamical’ part, which dealt with quantities that only needed to be computed <em>once</em>, ahead of time, and stored for later use.</p>
 <p>Hence, the revised design split the code into three independent parts:</p>
 <ol type="1">
 <li>‘Non-dynamic’ raster pre-processing, i.e. production of input data (independent of user).</li>
 <li>‘Dynamic’ calculation of Recreational Potential (based on user-provided persona and region of interest).</li>
 <li>Implementation of the Shiny app.</li>
 </ol>
-<p>Concretely, the dynamic part consisted of reading the rasters from the disk, and then performing the following steps:</p>
+<p>The dynamic part was recast as a sum of pre-computed raster layers weighted by the persona scores. Concretely, this consisted of reading the rasters from the disk, and then performing the following steps:</p>
 <ol type="1">
 <li>For each of the four components:
 <ol type="1">
@@ -5182,7 +5176,7 @@ Publishing to UKCEH’s Posit Connect server
 <li>Sum the components.</li>
 <li>Rescale the result to the unit interval.</li>
 </ol>
-<p>Steps 1.1 and 1.2 are better treated as a single step; an independent multiply-and-sum at each spatial location. This is close to the simplest mathematical operation one can do on a computer, and is both extremely quick and highly parallelisable. All of the slower, more memory-intensive computations could be performed up-front.</p>
+<p>Steps 1.1 and 1.2 are better treated as a single step; an independent multiply-and-sum at each spatial location. This is close to the simplest mathematical operation one can do on a computer, and is both extremely quick and highly parallelisable.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -5244,15 +5238,14 @@ I_{i3} = \begin{bmatrix}
 <p>If we run with this and give all 87 feature types their own layer, the recreational potential can be computed in a single vectorised step as a weighted sum of layers.</p>
 </div>
 </div>
-<p>This decomposition into a one-time pre-processing stage and a dynamical stage — which is rendered transparent by any good definition of the model — is the essential reason for the multiple orders of magnitude improvement in speed and memory use realised by this code rewrite.</p>
-<!-- This is the number one reason for the dramatic improvement in the speed at which RP can be computed, and the ability to compute RP over much larger areas without exhausting the available memory ([#4](https://github.com/BioDT/uc-ces-recreation/issues/4)). -->
+<p>The splitting of the original model into a <em>one-time</em> pre-processing stage and a dynamical stage is the essential reason for the multiple orders of magnitude improvement in speed and memory use realised by this code rewrite. All of the slower, more memory-intensive computations could be performed up-front.</p>
 <p>Further gains resulted from a number of factors made possible through the rewrite:</p>
 <ul>
 <li>Eliminated intermediate raster i/o operations that were previously required to keep the peak memory requirements within the total amount of memory available.</li>
 <li>Replaced indexing operations with multiply operations, made possible by using a one-hot representation for the input rasters, instead of integer-valued categorical rasters.</li>
 <li>Replaced loops with vectorised operations using <a href="https://rspatial.github.io/terra/reference/app.html"><code>terra::app</code></a> and related functions.</li>
 </ul>
-<p>Concretely, the main dynamic part of the model — the calculation of components, which was previously a highly convoluted process — is essentially reduced to the following lines of code:</p>
+<p>As an example, the main dynamic part of the model — the calculation of a component — is essentially reduced to the following lines of code:</p>
 <div class="sourceCode" id="annotated-cell-1"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><button class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="1">1</button><span id="annotated-cell-1-1" class="code-annotation-target"><a href="#annotated-cell-1-1" aria-hidden="true" tabindex="-1"></a>raster <span class="ot">&lt;-</span> <span class="fu">load_raster</span>(</span>
 <span id="annotated-cell-1-2"><a href="#annotated-cell-1-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">file.path</span>(data_dir, <span class="fu">paste0</span>(component, <span class="st">&quot;.tif&quot;</span>)),</span>
 <span id="annotated-cell-1-3"><a href="#annotated-cell-1-3" aria-hidden="true" tabindex="-1"></a>    bbox</span>
@@ -5315,7 +5308,7 @@ Use of Generative AI tools
 </div>
 <div class="callout-body-container callout-body">
 <p>At this point I (JMR) wish to be transparent about my use of Generative AI tools for explaining and generating code. For a number of reasons this seemed a ‘good’ time to lean on Generative AI: the tight deadline (a few days), low stakes (the user interface cannot be ‘incorrect’ and need not be well-written), and the fact that I had never written a Shiny app before (or any <code>R</code> at all for that matter), combined to influence my decision. I used the GPT-4 Turbo model through the <a href="https://elm.edina.ac.uk/">Edinburgh Language Model (ELM)</a> interface provided by <a href="https://edina.ac.uk/">Edina</a> at the University of Edinburgh.</p>
-<p>In this case I found Generative AI to be very helpful; I was able to learn R Shiny principles and syntax ‘on the fly’ through exposure to lots of generated examples. This stands in contrast to other frustrating and unproductive experiences I have had with Generative AI in domains where I have more existing knowledge and interest in the subject.</p>
+<p>In this case I found Generative AI to be very helpful; I was able to learn R Shiny principles and syntax ‘on the fly’ through exposure to lots of generated examples. This stands in contrast to other frustrating and unproductive experiences I have had with Generative AI in domains where I have more existing knowledge.</p>
 <p>Part of the reason that Generative AI works well here is that R Shiny is extremely popular so there is an abundance of existing R Shiny code available on the internet. I wish to acknowledge the countless individuals whose work (or hobby) shared online has contributed to the generated outputs that I used during this work.</p>
 </div>
 </div>
@@ -5360,8 +5353,7 @@ Use of Generative AI tools
 <li>A full persona, given as a <code>.csv</code> file.</li>
 <li>A region in which to calculate RP, given as a quadruple of ‘bounding box’ coordinates.</li>
 </ol>
-<p>This was an almost trivial addition to the code after the full rewrite.</p>
-<p>The main substantive task was to configure parsing command line inputs. We decided against using third-party packages (<a href="https://github.com/trevorld/r-optparse/">optparse</a>, <a href="https://github.com/trevorld/r-argparse">argparse</a>) and stick with base R functionality. The result is a very simple command-line interface, lacking nice-to-have features such as argument validation, but sufficient for a ‘minimum working example’ to be handed over to the BioDT team.</p>
+<p>The main substantive task was to configure parsing command line inputs. We decided against using third-party packages (<a href="https://github.com/trevorld/r-optparse/">optparse</a>, <a href="https://github.com/trevorld/r-argparse">argparse</a>) and stick with base R functionality to reduce the future maintenance burden. The result is a very simple command-line interface, lacking nice-to-have features such as argument validation, but sufficient for a ‘minimum working example’ to be handed over to the BioDT team.</p>
 <p>We then produced a <a href="https://github.com/sylabs/singularity">Singularity</a> container <code>.def</code> file based on the <a href="https://rocker-project.org/images/versioned/r-ver.html"><code>rocker/r-ver</code></a> image (preferred over <code>r-base</code>) which is itself based on the Ubuntu image. The build stage involves (i) installing required C and C++ libraries using <code>apt-get</code>, (ii) installing the <code>biodt.recreation</code> package from GitHub, and (iii) downloading the data. Once the container is built, one can run <code>singularity run app.sif ARGS</code> in order to execute <code>Rscript scripts/cli/main.R ARGS</code> inside the container.</p>
 <p>We also created a container for the input data production script, anticipating that this would need to be run on LUMI or wherever else we could access a high-memory compute node for the calculation of distances (see <a href="#sec-proximity" class="quarto-xref">Section 2.7</a>).</p>
 <p><strong>Pull Requests merged:</strong></p>
@@ -5435,11 +5427,11 @@ A note on the <code>inst/</code> directory
 </section>
 <section id="attempt-1-cutoff-distance-parameter-in-terradistance" class="level4" data-number="2.7.2">
 <h4 data-number="2.7.2" class="anchored" data-anchor-id="attempt-1-cutoff-distance-parameter-in-terradistance"><span class="header-section-number">2.7.2</span> Attempt 1: cutoff distance parameter in <code>terra::distance</code></h4>
-<p>As of version 1.8.21, we can set a cutoff distance <code>maxdist</code> in <code>terra::distance</code>, beyond which distances are assigned <code>NA</code>, which reduces the function from being global to being dependent only on pixels within the cutoff distance. However, based on cursory look at the code for this cutoff (which was introduced into <code>terra</code> just 2 weeks earlier in <a href="https://github.com/rspatial/terra/commit/d95d4bed0c94a7c1dddde2753508dbad21cb0131">this commit</a>!) I could not see evidence of sophisticated memory management based on cutoff distances — it appears to just mask the output. Perhaps this will be improved in future.</p>
+<p>As of version 1.8.21, we can set a cutoff distance <code>maxdist</code> in <code>terra::distance</code>, beyond which distances are assigned <code>NA</code>, which reduces the function from being global to being dependent only on pixels within the cutoff distance. However, based on cursory look at the code for this cutoff (which was introduced into <code>terra</code> just 2 weeks earlier in <a href="https://github.com/rspatial/terra/commit/d95d4bed0c94a7c1dddde2753508dbad21cb0131">this commit</a>!) I could not see evidence of sophisticated memory management based on cutoff distances — it appears to just mask the output.</p>
 </section>
 <section id="attempt-2-create-a-buffer-region-around-features" class="level4" data-number="2.7.3">
 <h4 data-number="2.7.3" class="anchored" data-anchor-id="attempt-2-create-a-buffer-region-around-features"><span class="header-section-number">2.7.3</span> Attempt 2: Create a buffer region around features</h4>
-<p>Since the model is only sensitive to distances within around 400m, any pixel greater than 400m from the nearest feature may as well not be computed and just be set to <code>NA</code>. This can be achieved be computing a buffer region around each feature and restricting <code>terra::distance</code> to the buffer region only.</p>
+<p>Since the model is only sensitive to distances within around 500m, any pixel greater than 500m from the nearest feature may as well not be computed and just be set to <code>NA</code>. This can be achieved be computing a buffer region around each feature and restricting <code>terra::distance</code> to the buffer region only.</p>
 <p>We made two attempts to compute a buffer using <code>terra::focal</code> and <code>terra::buffer</code> in the notebooks <code>focal.qmd</code> and <code>buffer.qmd</code> <a href="https://github.com/BioDT/uc-ces-recreation/tree/f880edd80a294df98a810bbaa6ba54711e8f1142/data">here</a>. Unfortunately the use of <code>terra::buffer</code> on a raster runs into the exact same memory issues as the distance calculation; both <code>buffer</code> and <code>distance</code> call <code>GDALComputeProximity</code> under the hood (see <a href="https://github.com/BioDT/uc-ces-recreation/pull/46#discussion_r1959525834">this comment</a>).</p>
 <p>The use of <code>terra::focal</code>, which can be used to apply a function over a moving window (e.g. with radius 500m) over the raster, was successful at reducing memory requirements, but took an extremely long time.</p>
 <p>In the case of linear features such as roads, paths and rivers, it would have been <em>significantly</em> more efficient to compute a buffer region using the original vector layers (<a href="https://github.com/BioDT/uc-ces-recreation/issues/51">#51</a>). Unfortunately we were not able to obtain access to these layers at the time.</p>
@@ -5584,7 +5576,6 @@ A note on the <code>inst/</code> directory
 </tr>
 </tbody>
 </table>
-<p>Some issues are relatively obvious bug fixes or quality-of-life improvements which need not be discussed.</p>
 </section>
 <section id="re-engineering-the-data-production-process" class="level3" data-number="3.2">
 <h3 data-number="3.2" class="anchored" data-anchor-id="re-engineering-the-data-production-process"><span class="header-section-number">3.2</span> Re-engineering the data production process</h3>
@@ -5615,9 +5606,7 @@ A note on the <code>inst/</code> directory
 </section>
 <section id="make-the-model-more-interpretable" class="level3" data-number="3.3">
 <h3 data-number="3.3" class="anchored" data-anchor-id="make-the-model-more-interpretable"><span class="header-section-number">3.3</span> Make the model more interpretable</h3>
-<p>It is important to be up front about the fact that the RP model is ill-defined from a mathematical perspective, in the sense that it constructs a continuous scale using operations on ordinal (persona scores) and nominal (feature presence/absence) data. The common refrain in situations like this is to say that “values are relative, not absolute”. However, this is not correct. There is no scale, therefore there is nothing to which values can be relative.</p>
-<p>This is not to say that the model cannot encode useful information, but to caution against over-interpreting the RP values, and to dispute that the quantitative nature of the model is a sign of robustness and scientific rigour in and of itself.</p>
-<p>Of course, such pearl-clutching misses the point. The purpose of the model is not to quantify and understand an objective physical world, but to serve as a qualitative input in an individual’s assessment about where to recreate.</p>
+<p>It is important to appreciate that, although the RP model produces numerical outputs,<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> the purpose of the model is not to quantify, predict or even understand an objective physical world, but to serve as a qualitative input in an individual’s assessment about where to recreate.</p>
 <p>The design objectives of the model should therefore include the maximisation of a user’s ability to discern suitable locations to recreate. Thus, the mathematical construction of the model, like the user interface, is just another design choice to be iteratively refined based on user feedback from stakeholder engagement studies such as SPEAK.</p>
 <p>With this point in mind, I recommend changes to the RP model that would take it in the direction of greater simplicity, transparency and interpretability to both users and researchers.</p>
 <ol type="1">
@@ -5627,12 +5616,13 @@ A note on the <code>inst/</code> directory
 </ol>
 <section id="why-not-rescale-the-components" class="level4" data-number="3.3.1">
 <h4 data-number="3.3.1" class="anchored" data-anchor-id="why-not-rescale-the-components"><span class="header-section-number">3.3.1</span> Why not rescale the components?</h4>
-<p>Regarding point 1, the argument given for rescaling the four components before summing them was so that they “contribute equally” to the RP value, despite containing different numbers of items — the Landscape (<code>SLSRA</code>) component contains 39 items whilst the Infrastructure component (<code>FIPS_I</code>) only contains 10.</p>
+<p>Regarding point 1, the idea behind rescaling the four components before summing them was so that they “contribute equally” to the RP value, despite containing different numbers of items — the Landscape (<code>SLSRA</code>) component contains 39 items whilst the Infrastructure component (<code>FIPS_I</code>) only contains 10.</p>
 <p>The problem with this is not that the argument is wrong per se, but that the outcome is undesirable. It means that, regardless of how the user configures their persona, these four components will always contribute equally to the RP value.</p>
 <p>To illustrate the problem we can take an extreme example. Let’s say the user really loves water and scores all lakes and rivers with 10s and 9s, but they have little interest in paths and actively dislike roads, so score them 1s and 0s, respectively. They would reasonably expect rivers and lakes to appear with the highest RP values on the map, and paths and roads to be lowest. However, the paths (scored with 1s) will actually contribute more to the RP value than the rivers (scored with 9s) and therefore show up as having a higher RP value. Why is this? Ignoring the possibility that different features overlap, after rescaling paths will still be effectively scored 1, whereas rivers will be effectively scored 0.9.</p>
 <p>Put differently, this rescaling of the components means that only <em>within-component</em> differences in the scores are translated into differences in RP value. The fact that 9 (rivers) is much larger than 1 (paths) in absolute terms is irrelevant, due to the rescaling.</p>
 <p>When the RP value is just a simple weighted sum, these confusing outcomes are avoided and the relationship between the scores and the RP values becomes much more transparent.</p>
 <p>This is reason enough to remove the rescaling step, but there is another angle to this, which is that most pixels only have a handful of features ‘present’ within them. One does not often find roads overlapping lakes overlapping lowlands — they are mutually exclusive. If one wanted to rescale or normalise the RP values, the maximum number of overlapping features is a far more relevant quantity than the number of features within a component.</p>
+<p>Finally, removing the rescaling step takes the possibility of encountering a divide-by-zero off the table. Recall from the <a href="tech_supp.html#sec-rescalings">Technical Supplement</a> that this occurs when the maximum and minimum values for a component in the region of interest are equal. This is not unlikely to occur if the user selects a small region of interest, or decides to score an entire component with the same values — e.g. zero if the user intends to nullify contributions from a component. Currently the model does not crash in these situations since we defined some safe handling of <code>NA</code> values, but it is not ideal.</p>
 </section>
 </section>
 <section id="changes-to-the-app" class="level3" data-number="3.4">
@@ -5661,10 +5651,10 @@ A note on the <code>inst/</code> directory
 <p>A digital twin is a virtual representation of real-world entities and processes, synchronized at a specified frequency and fidelity.</p>
 <p>Here, fidelity refers to the level of precision captured by the DT in comparison with its physical counterpart.</p>
 </blockquote>
-<p>The RP model in its current form does not fit this definition. It would be difficult to argue that customising a persona amounts to “synchronising at a specified frequency and fidelity” a “virtual representation of real-world entities and processes.”</p>
+<p>It is difficult to make the case that the RP model in its current form fits this definition; one would have to argue that customising a persona amounts to “synchronising at a specified frequency and fidelity” a “virtual representation of real-world entities and processes.”</p>
 <p>From the author’s perspective, there are two planned enhancements that will move the RP model in the direction of a Digital Twin:</p>
 <ol type="1">
-<li>Combine the RP model with the <a href="https://github.com/BioDT/uc-ces/tree/main">biodiversity model</a> as described in <span class="citation" data-cites="Rolph2024">Rolph et al. (<a href="#ref-Rolph2024" role="doc-biblioref">2024</a>)</span>.</li>
+<li>Combine the RP model with the <a href="https://github.com/BioDT/uc-ces/tree/main">biodiversity model</a> as described in <span class="citation" data-cites="Rolph2024">(<a href="#ref-Rolph2024" role="doc-biblioref">Rolph et al. 2024</a>)</span>.</li>
 <li>Update the raster data at a “specified frequency” to “synchronise” it with the “real-world entities” it is representing.</li>
 </ol>
 <p>However, meeting this definition of Digital Twin cannot be an objective in and of itself; it must be an outcome that is realised in pursuit of other objectives. The availability of near real-time data does not justify real-time updates to the RP model. Rather, the frequency with which to update these datasets should be determined by balancing the needs of users with the monetary and environmental cost of the data acquisition and processing pipeline.</p>
@@ -5673,9 +5663,9 @@ A note on the <code>inst/</code> directory
 </section>
 <section id="concluding-remarks" class="level2" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="concluding-remarks"><span class="header-section-number">4</span> Concluding remarks</h2>
-<p>In the author’s opinion, one of the key contributions from this period of development work was to write down a concrete, unambiguous definition of the RP model (<a href="tech_supp.html#sec-techdesc">Technical Supplement, Section 1</a>). From this flowed the substantial improvements to the design and efficiency of the code, and the ability to verify that it is working as expected.</p>
-<p>This also exposed the simplicity at the heart of the RP model — that it is essentially a weighted sum of 87 items representing presence/absence/proximity to a landscape feature. This is a very good thing! It turns out that we do not need to expend vast amounts of energy, water and money to compute Recreational Potential. Considering the objective is for users to be able to easily run the model many, many times, the (business and environmental) case for a small computational footprint is high. Were I to take this project forward I would lean into the simplicity and aim to provide users with the most relevant information in a transparent manner.</p>
-<p>If the intention is to scale up the BioDT app, or the CES component, to make it widely available to members of the public, it may be wise to clearly demarcate the role of researchers — i.e. the science content, stakeholder engagement — and to then outsource development work to professional app developers. It may be fruitful to look for possible integrations with popular apps used by recreationalists, and perhaps consider presenting the CES app as an ‘add-on’ to existing apps rather than a competitor.</p>
+<p>In the author’s opinion, one of the key contributions from this period of development work was to write down a concrete definition of the RP model (<a href="tech_supp.html#sec-techdesc">Technical Supplement, Section 1</a>). From this flowed the substantial improvements to the design and efficiency of the code, and the ability to verify that it is working as expected.</p>
+<p>The kernel of the RP model is a sum of 87 items representing presence/absence/proximity to a landscape feature, weighted by the corresponding persona scores. In the author’s opinion, this simplicity is a good thing! Perhaps we do not need to expend vast amounts of energy, water and money to compute complex metrics for Recreational Potential. Considering the objective is for users to be able to easily run the model many, many times, both the business case and the environmental case for a small computational footprint are high. Were I to take this project forward I would lean into the simplicity and aim to provide users with the most relevant information in a transparent manner.</p>
+<p>If the intention is to scale up the BioDT app, or the CES component, to make it widely available to members of the public, it may be wise to clearly demarcate the role of researchers — i.e. the science content, stakeholder engagement — and to then outsource development work to professional app developers (i.e. not the author!). It may be fruitful to look for possible integrations with popular apps used by recreationalists, and perhaps consider presenting the CES app as an ‘add-on’ to existing apps rather than a competitor.</p>
 </section>
 
 
@@ -5697,11 +5687,9 @@ A note on the <code>inst/</code> directory
 </div></section><section id="credit-statement" class="level2 appendix" data-number="7"><h2 class="anchored quarto-appendix-heading"><span class="header-section-number">7</span> CRediT statement</h2><div class="quarto-appendix-contents">
 
 <p><strong>JMR</strong> and <strong>MT</strong> developed the current version of the model, and wrote the original drafts of these reports. <strong>CA</strong> obtained the input data and developed the previous version of the model. <strong>CA</strong> and <strong>JD</strong> conceptualised the SPEAK project and carried out the ananalysis. <strong>CA</strong>, <strong>JD</strong> and <strong>SR</strong> acquired funding for the project under BioDT.</p>
-<p><strong>Missing anything important?</strong> See <a href="https://www.elsevier.com/en-gb/researcher/author/policies-and-guidelines/credit-author-statement">https://www.elsevier.com/en-gb/researcher/author/policies-and-guidelines/credit-author-statement</a></p>
 </div></section><section id="acknowledgements" class="level2 appendix" data-number="8"><h2 class="anchored quarto-appendix-heading"><span class="header-section-number">8</span> Acknowledgements</h2><div class="quarto-appendix-contents">
 
 <p>We wish to acknowledge significant contributions to a previous version of the Recreational Potential model by Will Bolton. JMR would also like to thank Tomáš Martinovič for assisting with understanding the requirements of BioDT.</p>
-<p>Dylan Powell?</p>
 <p>We are very grateful to all the participants of the SPEAK project which this output is based on including: Alastair Leaver, Alice MacSporran, Brian Cassidy, Chris Pollock, David Giles, Jean Cowie, Joanna Gilliatt, Justyna Olszewska, Laura Taylor, Maddi Bunker, Rebecca MacLennan, S Mayes, Shaila Rao, Steve MacKinnon and Tom Gebbie, Active Stirling. We are equally grateful to an additional 18 participants who preferred to remain anonymous.</p>
 </div></section><section id="correspondence" class="level2 appendix" data-number="9"><h2 class="anchored quarto-appendix-heading"><span class="header-section-number">9</span> Correspondence</h2><div class="quarto-appendix-contents">
 
@@ -5723,6 +5711,7 @@ Rolph, Simon, Chris Andrews, Dylan Carbone, Julian Lopez Gordillo, Tomáš Marti
 <ol>
 <li id="fn1"><p>The <code>2024-model</code> tag on GitHub is a snapshot of all of the code that was on DataLabs. This included multiple versions of the RP model. The ‘working version’ at that time was kept under the <a href="https://github.com/BioDT/uc-ces-recreation/tree/2024-model/R_ShinyVersion_ReducedModel"><code>R_ShinyVersion_ReducedModel/</code> subdirectory</a>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn2"><p>In truth, while this was the intention, it was not quite what was being calculated - see <a href="https://github.com/BioDT/uc-ces-recreation/issues/22">#22</a>)<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>The RP model constructs a continuous scale by applying operations <span class="math inline">\((+, \times)\)</span> on ordinal (persona scores) and nominal (feature presence/absence) data. In a strict mathematical sense this is not ‘allowed’, although it is common practice in many fields, with an <em>a posteriori</em> justification based on self-consistency or simply alignment with qualitative expectations.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section><section class="quarto-appendix-contents" id="quarto-reuse"><h2 class="anchored quarto-appendix-heading">Reuse</h2><div class="quarto-appendix-contents"><div><a rel="license" href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></div></div></section><section class="quarto-appendix-contents" id="quarto-copyright"><h2 class="anchored quarto-appendix-heading">Copyright</h2><div class="quarto-appendix-contents"><div>BioDT and the UK Centre for Ecology &amp; Hydrology, 2025</div></div></section><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@report{ukceh2025,
   author = {Marsh Rossney, Joe and Tigli, Maddalena and Andrews, Chris
@@ -5734,7 +5723,8 @@ Rolph, Simon, Chris Andrews, Dylan Carbone, Julian Lopez Gordillo, Tomáš Marti
   doi = {nora-doi},
   langid = {en},
   abstract = {These reports describe the BioDT Recreational Potential
-    model at the close of the BioDT project in 2025.}
+    Model for Scotland (1.0), at the end of the BioDT project in June
+    2025.}
 }
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-ukceh2025" class="csl-entry quarto-appendix-citeas" role="listitem">
 Marsh Rossney, Joe, Maddalena Tigli, Chris Andrews, Jan Dick, and Simon
