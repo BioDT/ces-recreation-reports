@@ -164,7 +164,7 @@ Steps 1.1 and 1.2 are better treated as a single step; an independent multiply-a
 :::{.callout-note}
 #### One-hot encoding
 
-In the 2024 model, the raster layers (were supposed to, but see [#23](https://github.com/BioDT/uc-ces-recreation/issues/23)) take integer values, so a layer might look something like this:
+In the 2024 model, the raster layers took integer values, so a layer might look something like this:
 
 $$
 C_i = \begin{bmatrix}
@@ -176,9 +176,9 @@ C_i = \begin{bmatrix}
 \end{bmatrix}
 $$
 
-These integers are really labels for different categories corresponding to the features present in the layer (see the table at the top of this document).
+These integers were really labels for different categories corresponding to the features present in the layer.
 
-These values are then supposed to be remapped to user scores, which involves an indexing operation for each layer, effectively `values(layer) <- mapping[values(layer)]`. This isn't particularly inefficient or problematic in and of itself, but it requires serious due diligence with the input data. For example, one may not perform any operation on the input data that assumes continuous data, such as reprojecting.
+These values were then remapped to user scores, which involves an indexing operation for each layer, effectively `values(layer) <- mapping[values(layer)]`. This isn't particularly inefficient or problematic in and of itself, but it requires some due diligence, such as ensuring that the data is genuinely integer-typed (i.e. not float) and avoiding operations that assume continuous data, such as interpolation (e.g. as part of a reprojection).
 
 In order to pre-compute the proximity layers ([#21](https://github.com/BioDT/uc-ces-recreation/issues/21) ) we needed to switch to a *one-hot* representation, where each feature type gets its own layer that is binary-valued --- the feature is either present or not.
 
@@ -187,7 +187,7 @@ C_i \overset{\text{one hot}}{\longrightarrow} ( I_{i0}, I_{i1}, I_{i2}, I_{i3}, 
 $$
 
 $$
-\begin{align}
+\begin{aligned}
 I_{i0} &= \begin{bmatrix}
 \ddots \\
 & 0 & 1 & 1 \\
@@ -216,7 +216,7 @@ I_{i3} = \begin{bmatrix}
 & 0 & 0 & 1 & \\
 & & & & \ddots
 \end{bmatrix} \, .
-\end{align}
+\end{aligned}
 $$
 
 If we run with this and give all 87 feature types their own layer, the recreational potential can be computed in a single vectorised step as a weighted sum of layers.

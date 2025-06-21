@@ -1,4 +1,4 @@
-## Access to code & data {.appendix}
+## Access to code & data {.appendix .unnumbered}
 
 Code for the Recreational Potential model is available as an R Package hosted on GitHub at [https://github.com/BioDT/uc-ces-recreation](https://github.com/BioDT/uc-ces-recreation). These reports relate specifically to the [version 1.0 release](https://github.com/BioDT/uc-ces-recreation/releases/tag/v1.0), which is also available on Zenodo at [https://doi.org/10.5281/zenodo.15705544](https://doi.org/10.5281/zenodo.15705544).
 
@@ -7,7 +7,7 @@ The model requires some input data that is too large to be bundled in with the p
 The source for these documents and this website can be found at [https://github.com/BioDT/ces-recreation-reports](https://github.com/BioDT/ces-recreation-reports).
 
 
-## Funding {.appendix}
+## Funding {.appendix .unnumbered}
 
 Funding for OpenNESS came from the European Community's Seventh Framework Programme (FP7/2007-2013) under grant agreement no 308428, OpenNESS Project (Operationalisation of Natural Capital and Ecosystem Services: From Concepts to Real-world Applications.)
 
@@ -15,17 +15,17 @@ Funding for BioDT came from the European Union's Horizon Europe Research and Inn
 
 Funding for SPEAK came from the Natural Environment Research Council – Growing Shoots Partnership and application co-creation bursary. NE/Y005805/1 _Growing Shoots.
 
-## CRediT statement {.appendix}
+## CRediT statement {.appendix .unnumbered}
 
 **JMR** and **MT** developed the current version of the model, and wrote the original drafts of these reports. **CA** obtained the input data and developed the previous version of the model. **CA** and **JD** conceptualised the SPEAK project and carried out the ananalysis. **CA**, **JD** and **SR** acquired funding for the project under BioDT.
 
-## Acknowledgements {.appendix}
+## Acknowledgements {.appendix .unnumbered}
 
 We wish to acknowledge significant contributions to a previous version of the Recreational Potential model by Will Bolton. JMR would also like to thank Tomáš Martinovič for assisting with understanding the requirements of BioDT.
 
 We are very grateful to all the participants of the SPEAK project which this output is based on including: Alastair Leaver, Alice MacSporran, Brian Cassidy, Chris Pollock, David Giles, Jean Cowie, Joanna Gilliatt, Justyna Olszewska, Laura Taylor, Maddi Bunker, Rebecca MacLennan, S Mayes, Shaila Rao, Steve MacKinnon and Tom Gebbie, Active Stirling. We are equally grateful to an additional 18 participants who preferred to remain anonymous.
 
-## Correspondence {.appendix}
+## Correspondence {.appendix .unnumbered}
 
 - `{jand,chan}@ceh.ac.uk` for enquiries relating to the BioDT or SPEAK projects, or ongoing and future work.
 

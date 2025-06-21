@@ -455,6 +455,7 @@ The distance raster was also truncated at 500m, setting any values above this to
 
 To account for proximity effects, the distance from each cell to the nearest infrastructure feature was calculated using the `terra::distance()` function in R. The resulting raster, labeled **"distance"** in the example map, contains the distance in meters from the center of each cell to the nearest feature. This raster is named "**scored**" in the example map, using the distance decay function.
 
+:::{.content-visible when-format="html"}
 
 ```{r, echo=FALSE}
 library(magrittr)
@@ -510,7 +511,7 @@ make_layer_map_dist(rstack = fips_i_rstack, base_map,
                     color_original = "#DA627D")
 ```
 
-
+:::
 ## List of items/features {#sec-listitems}
 
 Here we list the full set of 87 items/features that make up the layers of the input rasters, and must be scored by the user to construct a persona.
@@ -538,11 +539,13 @@ dplyr::select(config_by_component$SLSRA, Name, Description) |>
 	knitr::kable(format = "html")
 ```
 
+:::{.content-visible when-format="html"}
 ```{r, echo=FALSE}
 make_layer_map(rstack = slsra,  base_map = base_map,
                show_index = 5, #start with SLSRA_LCM_6 selected as example
                color = "#386641")
 ```
+:::
 
 :::{.callout-tip}
 The interactive version of this document contains maps that allow you to toggle individual layers.
@@ -558,13 +561,14 @@ dplyr::select(config_by_component$FIPS_N, Name, Description) |>
 ```
 
 
+:::{.content-visible when-format="html"}
 ```{r, echo=FALSE}
 make_layer_map(rstack = fips_n,  base_map = base_map,
                show_index = 5, #start with FIPS_N_Landform_16 selected as example
                color = "#CBA340")
 
 ```
-
+:::
 
 ### Infrastructure Features component
 
@@ -587,6 +591,7 @@ dplyr::select(config_by_component$Water, Name, Description) |>
 	knitr::kable(format = "html")
 ```
 
+:::{.content-visible when-format="html"}
 ```{r, echo=FALSE, out.height = 650}
 water_rstack <- list(
   "original" = water,
@@ -598,7 +603,7 @@ make_layer_map_dist(rstack = water_rstack, base_map,
                     show_index = 6, # "water rivers 3 distance"
                     color_original = "#4E6766")
 ```
-
+:::
 
 
 
