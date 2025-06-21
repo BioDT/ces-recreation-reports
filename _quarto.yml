@@ -50,17 +50,17 @@ website:
       - href: example.qmd
         text: Worked Example
     right:
-      - text: R Package
-        icon: github
-        href: "https://github.com/BioDT/uc-ces-recreation"
-        target: _blank
-      - text: Data
-        icon: database
-        href: "https://doi.org/10.5281/zenodo.15705544"
-        target: _blank
-      - text: Page Source
-        icon: git
+      #- text: R Package
+      #  icon: github
+      #  href: "https://github.com/BioDT/uc-ces-recreation"
+      #  target: _blank
+      - icon: github
         href: "https://github.com/BioDT/ces-recreation-reports"
+        target: _blank
+      - text: |
+          {{< iconify simple-icons:zenodo size=huge >}}
+        aria-label: Zenodo
+        href: "https://doi.org/10.5281/zenodo.15705544"
         target: _blank
 
   favicon: /logos/biodt_circle.png
