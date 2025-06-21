@@ -11,7 +11,7 @@ The source for these documents and this website can be found at [https://github.
 
 Funding for OpenNESS came from the European Community's Seventh Framework Programme (FP7/2007-2013) under grant agreement no 308428, OpenNESS Project (Operationalisation of Natural Capital and Ecosystem Services: From Concepts to Real-world Applications.)
 
-Funding for BioDT came from the European Union's Horizon Europe Research and Innovation Programme under grant agreement No 101057437 (BioDT project, [https://doi.org/10.3030/101057437](https://doi.org/10.3030/101057437))
+Funding for BioDT came from the European Union's Horizon Europe Research and Innovation Programme under grant agreement No 101057437 (BioDT project, [https://doi.org/10.3030/101057437](https://doi.org/10.3030/101057437)). Views and opinions expressed are those of the author(s) only and do not necessarily reflect those of the European Union or the European Commission. Neither the European Union nor the European Commission can be held responsible for them.
 
 Funding for SPEAK came from the Natural Environment Research Council – Growing Shoots Partnership and application co-creation bursary. NE/Y005805/1 _Growing Shoots.
 

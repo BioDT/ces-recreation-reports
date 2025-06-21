@@ -25,6 +25,9 @@ format:
     html-math-method: mathjax
     repo-actions: source
     toc-location: right
+    theme:
+      light: flatly
+      dark: darkly
   #pdf:
     #colorlinks: true
     #documentclass: scrartcl
@@ -34,7 +37,9 @@ format:
 # Website config
 website:
   title: The BioDT Recreational Potential Model for Scotland
+
   navbar:
+    logo: /logos/biodt_circle.png
     left:
       - href: summary.qmd
         text: Summary
@@ -44,15 +49,29 @@ website:
         text: Developers' Report
       - href: example.qmd
         text: Worked Example
-    tools:
+    right:
       - text: R Package
         icon: github
         href: "https://github.com/BioDT/uc-ces-recreation"
+        target: _blank
       - text: Data
         icon: database
+        target: _blank
       - text: Page Source
         icon: git
         href: "https://github.com/BioDT/ces-recreation-reports"
+        target: _blank
+
+  favicon: /logos/biodt_circle.png
+  site-url: https://biodt.github.io/ces-recreation-reports
+  repo-url: https://github.com/BioDT/ces-recreation-reports
+  
+  page-footer:
+    left: |
+      [![](/logos/biodt.svg){fig-alt="BioDT" width=220px}](https://biodt.eu)
+    right: |
+      [![](/logos/ukceh.svg){fig-alt="UKCEH" width=250px}](https://www.ceh.ac.uk)
+
 
   announcement:
     content: "This site is a **work in progress** and all reports should be considered **drafts**! "
