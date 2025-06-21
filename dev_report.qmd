@@ -72,8 +72,6 @@ Initially, the two of us were working independently. In particular, MT worked on
 
 After gaining familiarity with the codebase and a better understanding of the objectives and the way the model was intended to function, it became clear that the most straightforward way to meet all of the objectives simultaneously was to fully rewrite the code from scratch. Some outstanding issues required substantial work to fix within the existing framework, but could be neatly circumvented in a full rewrite. In addition, a full rewrite would be the most effective way to improve the speed and scalability (objective 2) and the flexibility to add or modify functionality (including objective 3).
 
-==TODO: revised objectives==
-
 ## Overview of work done
 
 ### Reconfiguration of git repository & developer setup
@@ -360,19 +358,36 @@ We also created a container for the input data production script, anticipating t
 
 ### Packaging and repository management
 
-- Packaging in R does not feel as natural as Python
-- Started with separate directories containing model, data production, and Shiny app, since these had different dependencies, and it seemed to make sense to let the Shiny app depend on the model package as a dependency.
-- Decided to return to a single-package layout for simplicity and maintenance reasons; it was too awkward to develop the model code and the Shiny app code simultaneously.
+We adopted the increasingly common practice of organising the code into a package. This has a number of advantages compared with a stand-alone script, since the standardised setup allows us to leverage tools for _installing_, _documenting_ and _testing_ the code, and managing its dependencies on other packages.
 
-- Use of `inst/`
+Packaging in `R` is not as mature as in other languages, and there were some false starts during the process of familiarising ourselves with the setup and development workflow. In particular, we initially intended to create a separate package for the Shiny app, which would depend on the model package, but later returned to a single-package layout for simplicity and maintenance reasons. It was simply too awkward to develop the model code and the Shiny app code simultaneously.
 
-- Included Lintr and Styler packages which help make the format consistent as well as catching syntax bugs. Maintaining a consistent format is useful for ensuring that meaningful changes in commits are not obscured by formatting changes.
-- Added a couple of simple tests which run using `testthat`. However, due to the time pressures we did not develop any further tests, which is unfortunate.
-- Added pre-commit hooks which run the tests, but also a script that can run them in case the developer does not want to install pre-commit.
+We added [`Roxygen2`](https://roxygen2.r-lib.org/)-style documentation for all the functions, which produces nicely formatted Markdown documentation in RStudio. We utilised the [Lintr](https://lintr.r-lib.org/) and [Styler](https://styler.r-lib.org/) packages, which help make the format consistent as well as catching syntax bugs. Maintaining a consistent format is useful for ensuring that meaningful changes in commits are not obscured by formatting changes. We added a couple of simple tests which are run using [`testthat`](https://testthat.r-lib.org/), but due to the time pressures on developing a working version of the model for the SPEAK study we did not develop any further tests, which is unfortunate. We configured pre-commit hooks which run the linter, styler, tests and documentation generation, but also provided a script that performs the same steps in case the developer does not want to install [pre-commit](https://pre-commit.com/).
 
-- Finally, we added `Roxygen2`-style documentation for all the functions, which produces nicely formatted Markdown documentation in RStudio.
-- We added some vignettes that demonstrate basic usage, although this could be expanded.
-- Vignettes are run during the build stage of the package. This meant they could not use the full input data since (i) it is unacceptable to have to download 2GB data just to build the package, and (ii) we did not want the package to contain 2GB data itself. To get around this, we included some small rasters in the package (`inst/extdata/rasters/Bush`) and wrote some helper functions for accessing it.
+Finally, we added some vignettes that demonstrate basic usage, although this could be expanded.Vignettes are run during the build stage of the package. This meant they could not use the full input data since (i) it is unacceptable to have to download 3GB data just to build the package, and (ii) we did not want the package to contain 3GB data itself. To get around this, we included some small rasters in the package (`inst/extdata/rasters/Bush`) and wrote some helper functions for accessing it.
+
+
+:::{.callout-note}
+#### A note on the `inst/` directory
+
+Apparently it has become standard practice to use the `inst/` directory to distribute additional elements such as scripts and Shiny apps along with the package. This is the practice we have adopted here. There are really just two important things to know about the `inst/` directory:
+
+First, that its contents are copied to the top-level of the package when the package is built. Hence, the top level of the built package will contain `examples/`, `extdata/` and `scripts/` (the directory containing shell scripts is not included in the package).
+
+Hence, in order for file paths to work when the package is installed, one must omit `inst/` from the path. But this means the path will not work during development.
+
+The way to regain consistency between the two situations (installed versus not installed) is to use[`system.file`](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/system.file). There are several examples of this in the code, including the one below, where paths to files or directories under `inst/` needed to be constructed.
+
+```R
+get_preset_persona_file <- function() {
+    system.file("extdata", "personas", "presets.csv",
+        package = "biodt.recreation", mustWork = TRUE
+    )
+}
+```
+:::
+
+
 
 **Pull Requests merged:**
 
@@ -450,7 +465,7 @@ The original Scotland-wide raster was divided into 20 overlapping spatial window
 - [Path to config.csv is not working as intended #64](https://github.com/BioDT/uc-ces-recreation/issues/64)
 
 
-## Discussion and recommendations
+## Discussion and recommendations {#sec-recommendations}
 
 ### Outstanding issues
 
@@ -589,7 +604,7 @@ From the author's perspective, there are two planned enhancements that will move
 1. Combine the RP model with the [biodiversity model](https://github.com/BioDT/uc-ces/tree/main) as described in @Rolph2024.
 2. Update the raster data at a "specified frequency" to "synchronise" it with the "real-world entities" it is representing.
 
-However, meeting this definition of Digital Twin cannot be an objective in and of itself; it must be an outcome that is realised in pursuit of other objectives. The availability of near real-time data does not justify real-time updates to the RP model. Rather, the frequency with which to update these datasets should be determined by trading off the needs of users with the monetary and environmental cost of the data acquisition and processing pipeline.
+However, meeting this definition of Digital Twin cannot be an objective in and of itself; it must be an outcome that is realised in pursuit of other objectives. The availability of near real-time data does not justify real-time updates to the RP model. Rather, the frequency with which to update these datasets should be determined by balancing the needs of users with the monetary and environmental cost of the data acquisition and processing pipeline.
 
 In cases where the utility of real-time data updates is clear, it may be worth considering whether integrating the BioDT app with third party data services may be more efficient. For example, providing users with a link to a local weather forecast is perfectly sufficient; there would be no need to embed real-time weather forecasts in the app itself. Third-party services could provide information as to the availability of parking, toilets, places to eat, and other things that people may need to plan their activity.
 

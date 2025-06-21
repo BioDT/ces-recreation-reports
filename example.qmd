@@ -111,7 +111,11 @@ names(layers)
 To plot all layers together we can simply call `terra::plot(layers)`. However, here we will just plot the RP layer.
 
 ```{r}
-terra::plot(layers[["Recreational_Potential"]])
+palette <- terra::map.pal("bgyr")
+
+terra::panel(terra::subset(layers, 1:4), nc=2, col=palette)
+
+terra::plot(layers[["Recreational_Potential"]], col=palette)
 ```
 
 For comparison, here is the RP layer for the _Soft Recreationalist_ persona.

@@ -12,10 +12,10 @@ bibliography: references.bib
 
 # Format config shared by all documents
 number-sections: true
-number-depth: 3
+number-depth: 4
 tbl-cap-location: bottom
 toc: true
-toc-depth: 3
+toc-depth: 4
 format:
   html:
     code-annotations: hover

@@ -5,32 +5,14 @@ abstract: >
   This report introduces the Recreational Potential model and describes key aspects of its functionality. 
 ---
 
-## Background
+## Introduction
 
-TODO Brief history of recreational potential work, with references
+The [BioDT project](https://biodt.eu/) (2022-25) brought together a diverse range of European organisations including universities, non-profit research institutes, research infrastructure providers and commercial partners, with the aim of developing prototype '[Digital Twins](https://biodt.eu/DigitalTwin)' (pDTs) to help protect and restore biodiversity. As part of this consortium, the [UK Centre for Ecology & Hydrology](https://www.ceh.ac.uk/) (UKCEH) led the development of a 'Cultural Ecosystem Services' (CES) pDT.
 
-ESTIMAP (“Ecosystem Service Mapping Tool”) is a collection of spatially explicit models, originally developed to support policies at a European scale [@Zulian2013; @Paracchini2014;  @Zulian2018].
-
-[OpenNESS project](https://oppla.eu/groups/openness/openness-project) 2012-2017 [@Zulian2018]. (note www.openness-project.eu has been abandoned)
-
-Something something _Long Term Socio-Ecological Research Platforms_ (LTSER) [@Dick2018]
-
-BioDT project 2022-2025, outputs include [@Rolph2024; @Dick2025b]. 
-
-SPEAK has something to do with Powell2024 ?
-
-TODO Brief introduction to BioDT, the CES project and the recreational potential component. [@Dick2022; @Rolph2024]
-
-
-The BioDT consortium ... 
-As a member of this
-Cultural Ecosystem Services (CES) 
-Digital Twin (DT).
-
-The CES DT was imagined as a platform that brings together near real time data from a wide range of sources in a manner that is somehow tailored to the individual user. The proposed pDT focuses on two components:
+The CES pDT was imagined as a platform that brings together near real time data from a wide range of sources in a manner that is somehow tailored to the individual user. The proposed pDT [@Rolph2024] focuses on two components:
 
 1. The **Recreational Potential (RP)** component aims to estimate the capacity of a given area to sustain the recreational activities valued by an individual user.
-2. The **Biodiversity** aims to predict biodiversity levels ==(abundance?)== across mammals, birds, plant and insects.
+2. The **Biodiversity** component aims to predict spatial distributions of mammals, birds, plant and insects.
 
 The rationale behind bringing these two components together into a unified framework is that encountering interesting flora or fauna can enrich people's recreational experiences, and help them to discover new ways to value nature-rich landscapes.
 
@@ -38,9 +20,23 @@ The driving motivation for this work is to promote good health and connection to
 
 The RP component and the biodiversity component are distinct models that have been developed independently of each other. However, in both cases their outputs can be displayed on an interactive map of Scotland and served to users using an app framework such as R Shiny [@Shiny2025].
 
-Earlier on in the BioDT project, rudimentary versions of the RP and biodiversity components were combined in a single raster overlay. However, this was limited to pre-calculated 'static' raster layers covering a small region (the Cairngorms National Park) rather than all of Scotland [@Rolph2024]. Since then, work has focused on improving the speed and scalability of these components, to enable the interactive and personalisable experience that was envisaged.
-
 In this short report we will describe basic aspects of the Recreational Potential model. For a detailed account of the inner workings of the model the reader is directed to the accompanying [technical supplement](tech_supp.html). The Biodiversity component is described in ==TODO: ref==.
+
+## Background
+
+The Recreational Potential model described here has a direct ancestor in ESTIMAP (Ecosystem Service Mapping Tool), which was a collection of models used to produce spatially explicit assessments of ecosystem services, including recreation, at a European scale [@Zulian2013; @Paracchini2014]. 
+
+Some years later, @Zulian2018 proposed a protocol for adapting ESTIMAP to local conditions, based on an analysis of case studies involving ESTIMAP and incorporating feedback from stakeholders. This work was part of the [OpenNESS project](https://oppla.eu/groups/openness/openness-project) (2012-17), focusing on _Long Term Socio-Ecological Research Platforms_ (LTSER) [@Dick2018].
+
+@Dick2022 adapted the ESTIMAP tool to focus specifically on Recreational Potential in the Cairngorms. They adjusted the parameters of the tool to match two archetypes with different preferences for recreational activities (these are the 'hard' and 'soft' recreationalist personas described later), and conducted interviews with stakeholders to assess how useful the tool was.
+
+Earlier on in the BioDT project (2022-25), the RP and biodiversity models were combined as part of the 'beta' version of the BioDT app.^[The beta version of the BioDT app is no longer available online.] However, at that time the models was limited to pre-calculated 'static' raster layers covering a small region (the Cairngorms National Park) rather than all of Scotland [@Rolph2024]. @Dick2025b gathered feedback on this tool via a survey and interviews at the British Ecological Society annual meeting in December 2024.
+
+In the months since, development work has focused on improving the speed and scalability of these components, to enable the interactive and personalisable experience that was envisaged. The model was rewritten from scratch and a new Shiny app developed that was able to leverage these efficiencies. It was released as 'version 1.0' upon the close of the BioDT project [@ukceh2025], and is [available on GitHub](https://github.com/BioDT/uc-ces-recreation) under an open-source license.
+
+The SPEAK project followed in the same spirit as [@Dick2022], but using the updated Recreational Potential model, which allows for greater individual customisation by users. Some preliminary findings from this study are available as a conference presentation [@Dick2025b] and workshop report [@Dick2025c].
+
+Finally, a retrospective look at the CES part of the BioDT project will be published shortly [@Rolph2025].
 
 ## Model description
 
@@ -48,7 +44,7 @@ In this short report we will describe basic aspects of the Recreational Potentia
 
 To describe the Recreational Potential model we will start from its outputs and work backwards.
 
-The main model output is an two-dimensional array of numbers (a _raster_) representing an *RP value* between $0$ and $1$ for each 20x20 metre square area of land (_pixel_) within a given area, with higher values indicating greater Recreational Potential for that specific persona. These RP values can then be mapped to colours and displayed as a _heat map_ over a map of Scotland, as illustrated in @fig-rpexample.
+The main model output is an two-dimensional array of numbers (a _raster_) representing an *Recreational Potential value* (RP value) between $0$ and $1$ for each 20x20 metre square area of land (_pixel_) within a given area, with higher values indicating greater Recreational Potential for that specific persona. These RP values can then be mapped to colours and displayed as a _heat map_ over a map of Scotland, as illustrated in @fig-rpexample.
 
 ![An example of a heat map displaying Recreational Potential.](images/rp_example.png){#fig-rpexample}
 
@@ -69,32 +65,7 @@ The RP model thus requires two inputs from users:
 1. A **persona**, i.e. the 87 scores for each item/feature, contained in a `.csv` file.
 2. A **region of interest**, i.e. an area within Scotland in which to calculate RP values, given by either a shapefile or the four coordinates of a bounding box.
 
-We will often refer to the computations that produce an RP raster from the two user inputs as the 'dynamic' part of the RP model, since these computations must be performed each time the user makes a change to their persona or region of interest. The dynamic part is outlined in @fig-mermaid.
-
-```{mermaid}
-%%| label: fig-mermaid
-%%| fig-cap: A breakdown of the 'dynamic' part of the Recreational Potential model, that responds to changes in user input.
-
-flowchart LR
- subgraph s1["compute recreational potential"]
-        C[("cropping of the 4<br>components file to the<br>extent of interest")]
-        E["Compute each component's<br>contribution"]
-        F["Rescale to unit interval"]
-  end
-    A("Definition of the<br><i>persona preferences</i>") ---> E
-    B("Definition of the<br><i>area of interest</i>") --> C
-    C --> E
-    E --> F
-    F --> G["recreational potential spatRast"]
-    style s1 fill:#FFF9C4
-    style A color:#000000
-    style B color:#000000
-    style C color:#000000
-    style E color:#000000
-    style F color:#000000
-    style G color:#000000
-```
-
+We will often refer to the computations that produce an RP raster from the two user inputs as the 'dynamic' part of the RP model, since these computations must be performed each time the user makes a change to their persona or region of interest.
 
 ### Persona
 
@@ -118,8 +89,6 @@ $$
 \end{cases}
 $$
 
-==TODO: screenshot of one of these layers==
-
 For items belonging to the _Infrastructure_ (`FIPS_I`) component or the _Water_ (`Water`) component, the input rasters contain values _between_ zero and one.
 
 $$
@@ -130,13 +99,28 @@ u(\mathrm{distance}_j) & \text{otherwise}
 \end{cases}
 $$
 
-where $\mathrm{distance}_j$ is the distance to the nearest pixel in which the feature $j$ is present, and $u(d)$ is a function that takes distances $d$ as input, and outputs values between $0$ and $1$, decreasing as $d$ increases, and falling to zero at a distance of approximately 500m (see [Section 1, Technical Supplement](tech_supp.html#sec-techdesc) for details). 
-
-==TODO: screenshot of  a layer with/without the proximity part==
+where $\mathrm{distance}_j$ is the distance to the nearest pixel in which the feature $j$ is present, and $u(\mathrm{distance})$ is a function that maps distances to values between $0$ and $1$, decreasing as the distance increases and falling to zero at approximately 500m (see [Section 1, Technical Supplement](tech_supp.html#sec-techdesc) for details). 
 
 Thus, $1$ still indicates presence of the feature in that pixel, but $0$ instead indicates that the feature is not only absent in that pixel, but all surrounding pixels within 500m. The range of values between zero and one are used to signify that the feature is nearby (within 500m), but not present in this pixel itself.
 
 This continuous scale allows the RP model to incorporate how areas near e.g., a loch, can still contribute to the recreational potential, even if they do not directly contain the feature.
+
+@fig-inputs contrasts a presence/absence raster (lowlands) with a proximity raster (minor rivers).
+
+```{r, echo=FALSE}
+#| label: fig-inputs
+#| fig-cap: An example of a presence/absence raster (left) and a proximity raster (right) covering the same region just south of Edinburgh.
+
+fips_n <- terra::rast(file.path(biodt.recreation::get_example_data_dir(), "FIPS_N.tif"))
+lowlands <- fips_n$FIPS_N_Landform_9
+lowlands[is.na(lowlands)] <- 0
+
+water <- terra::rast(file.path(biodt.recreation::get_example_data_dir(), "Water.tif"))
+rivers <- water$Water_Rivers_4
+rivers[is.na(rivers)] <- 0
+
+terra::plot(c(lowlands, rivers), main=c("Lowlands", "Minor Rivers"))
+```
 
 ### Recreational Potential calculation {#sec-rpcalc}
 
@@ -163,28 +147,59 @@ $$
 An important detail is that the normalisation step depends on the minimum and maximum values *within the chosen region of interest*. This means that running the model with a different region of interest (e.g. over a larger area) will generally yield different values for the same locations, even if both the persona and the underlying data are unchanged.
 :::
 
+ The dynamic part of the model is depicted in @fig-mermaid.
+
+```{mermaid}
+%%| label: fig-mermaid
+%%| fig-cap: A breakdown of the 'dynamic' part of the Recreational Potential model, that responds to changes in user input.
+
+flowchart LR
+ subgraph s1["'Dynamic' computation of Recreational Potential"]
+        D["Crop the 4<br>component rasters to the<br>region of interest"]
+        E["Calculate each<br>component"]
+        F["Normalise each<br>component"]
+        G["Sum<br>components"]
+        H["Normalise"]
+  end
+    A(["<i>User input:</i><br>Persona scores"]) ---> E
+    B(["<i>User input:</i><br>Region of interest"]) --> D
+    C[("<i>Fixed input:</i><br>Raster data")] --> D
+    D --> E
+    E --> F
+    F --> G
+    G --> H
+    H --> I(("RP value"))
+    style s1 fill:#FFF9C4
+    style A color:#000000
+    style B color:#000000
+    style C color:#000000
+    style D color:#000000
+    style E color:#000000
+    style F color:#000000
+    style G color:#000000
+    style H color:#000000
+```
+
 ## Model code
 
 ### Brief history of development work
 
-The RP model for Scotland has been gradually developed within UKCEH over a number of years, with various contributors.
+The RP model has been gradually developed within UKCEH over a number of years. There have been three (known) major iterations.
 
-- ==TODO early history. Originally copied from someone else's python model?==
-- TODO When was the calibration etc done?
-- Add SPEAK study
+Some effort has been taken to make previous versions findable. All individuals known to have contributed to development are credited in the version 1.0 release [@ukceh2025]. 
 
+| Iteration | Version           | Source                                                           |
+| --------- | :----------------- | :---------------------------------------------------------------- |
+| 1 (2023)  | -                 | [https://github.com/BioDT/uc-ces/tree/main/recreation_model](https://github.com/BioDT/uc-ces/tree/main/recreation_model)       |
+| 2 (2024)  | -                 | [https://github.com/BioDT/uc-ces-recreation/tree/2024-model](https://github.com/BioDT/uc-ces-recreation/tree/2024-model)       |
+| 3 (2025)  | SPEAK pre-release | [https://github.com/BioDT/uc-ces-recreation/tree/SPEAK-prerelease](https://github.com/BioDT/uc-ces-recreation/tree/SPEAK-prerelease) |
+| 3 (2025)  | 1.0               | [https://github.com/BioDT/uc-ces-recreation/releases/tag/v1.0](https://github.com/BioDT/uc-ces-recreation/releases/tag/v1.0)     |
 
-| Time period   | Activity         | References                                                                                                                                                       |
-| ------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2023          | Code development | https://github.com/BioDT/uc-ces/tree/main/recreation_model                                                                                                       |
-| 2024          |                  | https://github.com/BioDT/uc-ces-recreation/tree/2024-model                                                                                                       |
-| Jan-June 2025 |                  | Version used in SPEAK study: https://github.com/BioDT/uc-ces-recreation/tree/SPEAK-prerelease<br>Development version: https://github.com/BioDT/uc-ces-recreation |
+: Versions of the Recreational Potential model. {#tbl-history}
 
-: History of development for the Recreational Potential model. {#tbl-history}
+Source code for the most recent version of the code can be found on GitHub at [https://github.com/BioDT/uc-ces-recreation](https://github.com/BioDT/uc-ces-recreation). This may be more up-to-date than version 1.0 (June 2025), which is the subject of this report.
 
 ### Overview of the repository
-
-Source code for the most recent version of the RP model can be found on GitHub at [https://github.com/BioDT/uc-ces-recreation](https://github.com/BioDT/uc-ces-recreation). This may be more up-to-date than the version of the code published on Zenodo.
 
 The repository is organised in the following way:
 
@@ -315,9 +330,9 @@ This will install the package, which is named `biodt.recreation`. It will also i
 
 Functionality is provided through a collection of _functions_ in the `R/` directory that, after installing the package, are accessible to the user in the `biodt.recreation` namespace. That is, functions such as `compute_potential` are accessed using the syntax `biodt.function::compute_potential`, or by name alone after exposing the whole namespacing using `library(biodt.recreation)`.
 
-Documentation for these functions is contained in the `.Rd` files within the `man/` directory. This documentation can be brought up in RStudio.
+Documentation for these functions is contained in the `.Rd` files within the `man/` directory. This documentation can be brought up in RStudio by typing in `?` followed by the function name. For example, typing in `?compute_potential` opens the page shown in @fig-documentation.
 
-==TODO: screenshot of documentation==
+![An example of rendered documentation in RStudio.](images/documentation.png){#fig-documentation}
 
 ### Downloading the input data
 
@@ -325,7 +340,7 @@ Input data for the RP model is not available in precisely the form required by t
 
 Currently, this 'data production' process is split into a manual stage and an automated stage. The automated stage is carried out by a script in the `inst/scripts/data_production/` directory.
 
-However, users need not run this script; the data which it produces is stored on Dropbox ==(soon moved to Zenodo)== and can be downloaded by calling a function provided by the package.
+However, users need not run this script; the data which it produces is stored on Dropbox^[In case the Dropbox data becomes unavailable, the data is also bundled with the [version 1.0 release](https://doi.org/10.5281/zenodo.15705544) on Zenodo.] and can be downloaded by calling a function provided by the package.
 
 ```R
 # Allow 10 minutes for the download before timing out!
@@ -367,7 +382,14 @@ We provide two 'preset' personas along with the package. These are
 1. **_Hard Recreationalist_**: this persona values remote, challenging environments and avoids built-up or highly managed areas.
 2. **_Soft Recreationalist_**: this persona values tranquil, accessible landscapes and natural water features, and avoids steep or harsh terrain.
 
-==TODO: some detail about these. When/how where these personas created?==
+:::{.callout-note}
+#### Origins of the Hard/Soft Recreationalist personas
+
+These personas can be traced back to the study by @Dick2022 [p. 5], from which we quote:
+
+> Two individuals were selected and invited to parameterise the model because they were both users of the \[Cairngorms National Park\] for recreation and considered by park officials as typical of the spectrum of recreational users of the area (local and visitors)... The self-reported soft recreationalist was a staff member of CNPA who had never climbed a ‘Munro’ (a hill over 3000 ft – a common measurement of hiking capability and achievement in the area) and the hard recreationalist regularly hill walked and had completed over 200 Munros.
+
+:::
 
 Preset personas can be loaded into an `R` session as follows:
 
@@ -384,27 +406,6 @@ soft_recreationalist <- load_persona(persona_file, "Soft_Recreationalist")
 
 In fact the function `get_example_persona()` loads the _Hard Recreationalist_ persona.
 
-:::{.callout-note}
-#### A note on the `inst/` directory
-
-Apparently it has become standard practice to use the `inst/` directory to distribute additional elements such as scripts and Shiny apps along with the package. This is the practice we have adopted here. There are really just two important things to know about the `inst/` directory:
-
-First, that its contents are copied to the top-level of the package when the package is built. Hence, the top level of the built package will contain `examples/`, `extdata/` and `scripts/` (the directory containing shell scripts is not included in the package).
-
-Hence, in order for file paths to work when the package is installed, one must omit `inst/` from the path. But this means the path will not work during development.
-
-The way to regain consistency between the two situations (installed versus not installed) is to use[`system.file`](https://www.rdocumentation.org/packages/base/versions/3.6.2/topics/system.file). There are several examples of this in the code, including the one below, where paths to files or directories under `inst/` needed to be constructed.
-
-```R
-get_preset_persona_file <- function() {
-    system.file("extdata", "personas", "presets.csv",
-        package = "biodt.recreation", mustWork = TRUE
-    )
-}
-```
-:::
-
-
 The strongest preferences of the *Hard Recreationalist* persona are highlighted in @tbl-hard.
 
 ```{r, echo=FALSE}
@@ -412,7 +413,7 @@ library("biodt.recreation")
 source("functions_report.R")
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE}
 #| label: tbl-hard
 #| tbl-cap: Highest and lowest scores in the _Hard Recreationalist_ persona.
 
@@ -426,7 +427,7 @@ knitr::kable(meaningful_scores, format = "html")
 
 The strongest preferences of the *Soft Recreationalist* persona are highlighted in @tbl-hard.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE}
 #| label: tbl-soft
 #| tbl-cap: Highest and lowest scores in the _Soft Recreationalist_ persona.
 
@@ -456,7 +457,11 @@ The app can be run from an `R` session by calling the `run_app()` function:
 biodt.recreation::run_app()
 ```
 
+The result should look like @fig-app.
+
 If you are in RStudio this should launch the app in a separate pane. To launch the app in your default browser, you can pass the option `launch.browser = TRUE` to the function.
+
+![A screenshot of the R Shiny App developed specifically for the RP model for use in the SPEAK study.](images/app.png){#fig-app}
 
 Detailed instructions for using the app are contained within the app itself, in the 'User Guide' tab. However, the essential steps are:
 
@@ -464,11 +469,15 @@ Detailed instructions for using the app are contained within the app itself, in 
 2. Draw a box on the map by clicking the square orange button and dragging your mouse over the map.
 3. Click the 'Update Map' button to compute the Recreational Potential value.
 
+## Interactive demo
+
+:::{.content-visible when-format="pdf"}
+The interactive demo is only available in the HTML version of this report. This is available online at [https://biodt.github.io/ces-recreation-reports](https://biodt.github.io/ces-recreation-reports).
+:::
 
 :::{.content-visible when-format="html"}
-## Interactive example
 
-<!-- The source code used to produce these maps can be found in the [demo notebook](demo.html). -->
+<!-- The source code used to produce this example can be found HERE. -->
 
 ```{r, echo=FALSE}
 library(magrittr)
@@ -523,77 +532,55 @@ data_dir <- get_example_data_dir()
 layers <- compute_potential(persona, bbox, data_dir)
 ```
 
-```{r, warning=FALSE, results='hide', message = FALSE}
+```{r, echo=FALSE}
 build_rp_map(base_map, RP_output = layers)
 ```
 :::
 
-## Known limitations (to do)
+## Known limitations
 
-As things stand, personas are stored in `.csv` files on the server side. This means the app requires write access to the server's filesystem. This is convenient, since users do not have to upload their own persona files. However, it is not a scalable solution. Future work should take a different approach to handling user's personas, such as providing the option to link the app to Google sheets.
+Here we outline some known issues and limitations that a user is likely to encounter when using the model. Issues and suggestions of a more technical nature are discussed in the [developer's report](dev_report.html#sec-recommendations).
 
-- The model is very fast and embarrassingly parallel - therefore can scale very well, to large areas and/or high resolutions.
-	- However, the use-case for large areas is unclear, and the resolution depends on the datasets being used.
+- The RP maps can be insufficiently detailed and sometimes important features such as footpaths are missing. This is due to the underlying data being either inaccurate, out of date, or of insufficient resolution to resolve these features.
 
-- The data production pipeline could be improved:
-	- Fully automated / scripted would allow easier updating with more / updated datasets
-	- Also reproducibility and transparency of how the data was produced (many users wanted to know more about the input data)
+- The model outputs lack important information relevant to recreational activities, such as information about toilets, parking etc.
 
- - Use of rasters is a problem for linear features
-	 - Use vector layers for linear features and distance
-	 - This would also make data production easier
+- Linear features such as paths and rivers are hard to discern. This is due to the fact that _proximity to_ rather than _presence of_ these features contributes to the RP value, so a road appears on the map as a thick band.
+
+- The current set of 87 items that users must score includes many feature types that many lay users will not be familiar with --- what is a _"moraine"_ anyway? 
+
+- The RP values depend on the region of interest specified. Hence, if the region of interest is changed (e.g. by drawing a smaller box on the map) the RP values will likely change, even if the persona scores are unchanged. This is due to the 'normalisation' step.
+
+- The influence of the persona scores on the output RP values is not transparent and sometimes counter-intuitive. Scoring an entire component with high (low) values does not necessarily mean the component will contribute more (less) to the RP. In fact, only differences in scores _within_ a component translate into differences in RP values. This is again due to the 'normalisation' step.
 
 
-Certain limitations, caveats and suggestions of a more technical nature are discussed in the [developer's report](dev_report.html).
+## Future directions
 
-## Future directions (to do)
+We see several potential avenues for further research and development work. Again, more technical detail on these suggestions is provided in the [developer's report](dev_report.html#sec-recommendations).
 
-- Digital twin?
+1.  **Simplifying feature scoring:**
 
-1.  **Simplifying feature scoring**
+    While the current set of 87 items allows for a detailed definition of a persona, this can be very time-consuming for users, especially if they are unfamiliar with many of the feature types. Further work could look at grouping similar features into broader thematic categories (e.g. 'mountain terrain', 'urban infrastructure', 'wetlands') to make the scoring process more intuitive and efficient. The option of scoring items at a finer level of detail could be retained for the benefit of expert users.
 
-    Currently, the model requires users to score 87 individual features across the four components. While this allows for a detailed definition of the "persona profile", it can be time-consuming for users. A future version could:
+	An expanded set of 'preset' personas could be an additional convenience. These could include personas calibrated for cyclists, families, hikers, birdwatchers etc.
 
-    -   Group similar features into broader thematic categories (e.g., “mountain terrain,” “urban infrastructure,” “wetlands”), allowing users to score these aggregated categories rather than individual layers, making the scoring process more intuitive and efficient
+2. **Make the effect of user inputs on RP values more intuitive:**
 
-    -   Maintain the option to score each of the 87 featre for expert users who want fine control
+	As discussed above, the effect of adjusting personas scores or the region of interest on the RP values is likely to be a source of confusion. Future updates to the model should prioritise intuitive behaviour and transparency. Removing the normalisation of components would go a long way to meet these objectives.
 
-    A simpler model configuration could make the model accessible to more users.
+3.  **Periodically update the underlying datasets:**
 
-2.  **Connecting to Live, regularly updated data-sets**
+    Some of the datasets used in the current version of the model will become outdated as landscapes change or improved data becomes available. Periodically updating the datasets is therefore important to maintain relevance of the model. This could be achieved by replacing the manual 'offline' data production process with an automated 'online' process that is triggered periodically, e.g. when a dataset is updated. Doing this would also allow the model to be updated based on the weather or season, and in doing so account for flood risk, trail closures etc.
 
-    Currently the model relies on static raster layers to represents the components, which may become outdated as landscapes change or as better data becomes available. A future version of the model could:
+	However, the frequency with which to update these datasets should be determined by balancing the needs of users with the monetary and environmental cost of the data acquisition and processing pipeline.
 
-    -   Link the model to live/regularly updated data-sets
-    -   Automatically generate the "original" raster layers for each component when updated data becomes available
+4. **Integrate with third-party apps or services:**
 
-3.  **User-defined weighting components**
+	It may be worth considering whether integrating the BioDT app with third party data services may be more efficient than regularly re-creating the input data for the RP model. Third-party services could provide information as to the availability of parking, toilets, places to eat, weather forecast, and other things that people may need to plan their activity.
 
-    Currently the RP model assumes that all four components contribute equally to the Recreational Potential score. However, not all personas may value these components equally. A future version of the model could:
+5.  **Scenario analysis:**
 
-    -   Allow users to specify custom weights for each of the four components (e.g. ,50% landscape, 20% water, 15% infrastructure and 15% natural features)
-
-4.  **Expanding the number of Persona presets available**
-
-    To make the RP model more accessible to casual non-technical users, and to encourage exploration and experimentation with it, a future version of the model could:
-
-    -   Provide persona preset for common user types (e.g., hikers, birdwatchers, families, cyclists etc.)
-    -   Define both features scores and components weights for each persona
-
-5.  **Include seasonal dynamics**
-
-    Currently, the RP model assumes a static Recreation Potential throughout the year, however, this can vary with seasons, and weather conditions. A future version of the model could:
-
-    -   integrate temporal layers by asking the *persona* to specify what season they are intending to recreate in. Then the model could have the underlying components starting values to have different values for different seasons, accounting for trail closures or flooding risks etc.)
-
-6.  **Allow for "future scenarios"**
-
-    With the aim of making the RP model the more relevant to policy makers and stakeholders, a future version of the model could:
-
-    -   have a "scenario analysis" mode, where users can "add" or "remove" values underlying components (e.g., to simulate a new trail or a new cycle path being added or the change of a landscape due to climate change or socio-economic changes)
-    -   allow for direct comparison on how the two (or more) scenarios differ (provide the user with a decrease or increase of Recreational Potential raster.
-
-7.  **JOE and CHRIS to add something if you have other ideas**
+    The RP model could become a tool for scenario planning, if users were able to add or remove features from the landscape to simulate possible developments (e.g. a new cycle route), land use changes (e.g. a housing development), or land cover changes (e.g. from climate change forecasts).
 
 
 {{< include _endmatter.qmd >}}
