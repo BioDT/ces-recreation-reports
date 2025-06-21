@@ -1,5 +1,5 @@
 ---
-title: The BioDT Recreational Potential Model
+title: The BioDT Recreational Potential Model for Scotland
 subtitle: Developers' Report
 abstract: >
   This report provides a high-level, chronological overview of development work carried out by two of the authors (JMR, MT) between November 2024 and June 2025. The intention is to provide some context and explanation for posterity. We also make several recommendations for further development work. Most items are accompanied by one or more links to issues and/or pull requests on GitHub, which often contain further details and references to specific lines of code.

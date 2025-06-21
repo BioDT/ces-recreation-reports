@@ -6,7 +6,7 @@ project:
 date: 2025-06-19
 date-format: long
 date-modified: last-modified
-copyright: UK Centre for Ecology & Hydrology, 2025
+copyright: BioDT and the UK Centre for Ecology & Hydrology, 2025
 license: CC BY
 bibliography: references.bib
 
@@ -33,7 +33,7 @@ format:
 
 # Website config
 website:
-  title: The BioDT Recreational Potential Model
+  title: The BioDT Recreational Potential Model for Scotland
   navbar:
     left:
       - href: summary.qmd

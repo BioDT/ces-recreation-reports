@@ -1,5 +1,5 @@
 ---
-title: The BioDT Recreational Potential Model
+title: The BioDT Recreational Potential Model for Scotland
 subtitle: Summary
 abstract: >
   This report introduces the Recreational Potential model and describes key aspects of its functionality. 

@@ -1,8 +1,8 @@
 ---
-title: The BioDT Recreational Potential Model
+title: The BioDT Recreational Potential Model for Scotland
 subtitle: Technical Supplement
 abstract: >
-  This supplement provides technical details about the BioDT Recreational Potential model. This includes a mathematical description of the model, details regarding the source data, and technical aspects of the code.
+  This supplement provides technical details about the Recreational Potential model. This includes a mathematical description of the model, details regarding the source data, and technical aspects of the code.
 ---
 
 ```{r, echo=FALSE}
@@ -306,37 +306,23 @@ Sustrans National Cycle Network dataset were initially dissolved by two attribut
 
 The water component is derived from a raster indicating the presence or absence of infrastructure features. This original raster, labeled **"original"** in the Easter Bush example map, contains: 1 for cells where the feature is present, and 0 or NAs for cells where the feature is absent.
 
-The water copmonent is derived from:
+The water component is derived from:
 
 ##### Rivers
 
  Os Open Rivers dataset was reduced from 74997 features, by dissolved by attribute fields “name” and “Region” so that all river segments were joined by a common name. To avoid rivers with the same name but located in different areas being incorrectly joined, “Region” from the OS Boundaries dataset was merged with the OS Open Rivers prior to this step. To reduce the dataset into something scoreable at a national scale, it was decided to use a proxy for river size/regional importance.  This is a subjective process, decided on by the research team.  Seven classes were created and dataset features classified based on either the attribute “form” which was a descriptor for water type, or keywords in the attribute “name” (see table for examples), or researcher knowledge of major rivers of national and regional importance.
 
-    +--------------------------------------+-------------------------------------+
-    | class                                | example search terms/or process     |
-    +======================================+=====================================+
-    | Major river or tributary             | Specific e.g. "Tay", "Spey" etc…    |
-    +--------------------------------------+-------------------------------------+
-    | Tidal river or estuary               | taken from dataset attribute "form" |
-    +--------------------------------------+-------------------------------------+
-    | Minor river or tributary             | e.g. "River", "Abhainn",            |
-    +--------------------------------------+-------------------------------------+
-    | "Uisge"                              |                                     |
-    +--------------------------------------+-------------------------------------+
-    | Named minor stream or tributary      | e.g. "Allt", "Alltan",              |
-    +--------------------------------------+-------------------------------------+
-    | "Burn", "Feadan", "Sruth", "Caochan" |                                     |
-    +--------------------------------------+-------------------------------------+
-    | Unnamed minor stream or tributary    | e.g. "Allt", "Alltan",              |
-    +--------------------------------------+-------------------------------------+
-    | "Burn", "Feadan", "Sruth", "Caochan" |                                     |
-    +--------------------------------------+-------------------------------------+
-    | Canal                                | taken from dataset attribute "form" |
-    +--------------------------------------+-------------------------------------+
-    | Lake                                 | taken from dataset attribute "form" |
-    +--------------------------------------+-------------------------------------+
+| Class                             | Example search terms or process                             |
+|:--------------------------------- |:----------------------------------------------------------- |
+| Major river or tributary          | Specific e.g. "Tay", "Spey" etc.                            |
+| Tidal river or estuary            | taken from dataset attribute "form"                         |
+| Minor river or tributary          | e.g. "River", "Abhainn", "Uisge"                            |
+| Named minor stream or tributary   | e.g. "Allt", "Alltan", "Burn", "Feadan", "Sruth", "Caochan" |
+| Unnamed minor stream or tributary | e.g. "Allt", "Alltan", "Burn", "Feadan", "Sruth", "Caochan" |
+| Canal                             | taken from dataset attribute "form"                         |
+| Lake                              | taken from dataset attribute "form"                         |
 
-    : water rivers classification
+: Water rivers classification
 
 
 ##### Lakes
@@ -352,7 +338,7 @@ The Spatial inventory of UK waterbodies dataset contained 25404 features for Sco
 | Large loch  | $100-500$ |
 | Major loch  | $>500$    | 
 
-: watre lakes
+: water lakes
 
 
 ### Quantising the slope raster

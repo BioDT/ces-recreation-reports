@@ -1,5 +1,5 @@
 ---
-title: The BioDT Recreational Potential Model
+title: The BioDT Recreational Potential Model for Scotland
 subtitle: Worked example
 abstract: >
   This notebook demonstrates basic usage of the Recreational Potential model. It is assumed that the user is familiar with installing `R` packages, executing lines of `R` code in interactive sessions, and running `R` scripts. Detailed instructions can be found in the `README.md` files in the [GitHub repository](https://github.com/BioDT/uc-ces-recreation).
@@ -29,10 +29,10 @@ Ensure you have either `remotes` or `devtools` installed (using e.g. `install.pa
 install.packages("remotes")
 ```
 
-Now install the package itself.
+Now install the package itself. We will target version 1.0.^[Since future updates to the code may be incompatible with this notebook, we will target the specific version released at the time this notebook was written, i.e. version 1.0].]
 
 ```{r}
-remotes::install_github("BioDT/uc-ces-recreation")
+remotes::install_github("BioDT/uc-ces-recreation", ref="v1.0")
 ```
 
 Next, you will need to download the input data. The total size is over 2GB, so it is important to set the `timeout` option to something generous.
