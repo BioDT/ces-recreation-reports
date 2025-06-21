@@ -28,8 +28,5 @@ The following publications are associated with this project.
 :::{#refs}
 :::
 
-- SPEAK paper
-- Simon's paper
-
 
 {{< include _endmatter.qmd >}}

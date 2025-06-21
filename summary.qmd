@@ -16,11 +16,11 @@ The CES pDT was imagined as a platform that brings together near real time data 
 
 The rationale behind bringing these two components together into a unified framework is that encountering interesting flora or fauna can enrich people's recreational experiences, and help them to discover new ways to value nature-rich landscapes.
 
-The driving motivation for this work is to promote good health and connection to nature through physical activity outdoors. However, there is also a possible synergy with conservation science, which is increasingly using data collected by non-scientists through 'citizen science' apps such as [iNaturalist](https://www.inaturalist.org/) and [iRecord](https://www.brc.ac.uk/recording). Potentially, certain users could be encouraged to visit areas where there is a greater need for sampling, (see also [DECIDE](https://www.ceh.ac.uk/our-science/projects/decide) project ==citation?==).
+The driving motivation for this work is to promote good health and connection to nature through physical activity outdoors. However, there is also a possible synergy with conservation science, which is increasingly using data collected by non-scientists through 'citizen science' apps such as [iNaturalist](https://www.inaturalist.org/) and [iRecord](https://www.brc.ac.uk/recording). Potentially, certain users could be encouraged to visit areas where there is a greater need for sampling.^[This was the objective of the [DECIDE](https://www.ceh.ac.uk/our-science/projects/decide) project.]
 
 The RP component and the biodiversity component are distinct models that have been developed independently of each other. However, in both cases their outputs can be displayed on an interactive map of Scotland and served to users using an app framework such as R Shiny [@Shiny2025].
 
-In this short report we will describe basic aspects of the Recreational Potential model. For a detailed account of the inner workings of the model the reader is directed to the accompanying [technical supplement](tech_supp.html). The Biodiversity component is described in ==TODO: ref==.
+In this short report we will describe basic aspects of the Recreational Potential model. For a detailed account of the inner workings of the model the reader is directed to the accompanying [technical supplement](tech_supp.html). The Biodiversity component is described in ==**REF**==.
 
 ## Background
 

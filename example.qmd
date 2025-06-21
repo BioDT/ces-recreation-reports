@@ -118,20 +118,28 @@ terra::panel(terra::subset(layers, 1:4), nc=2, col=palette)
 terra::plot(layers[["Recreational_Potential"]], col=palette)
 ```
 
-For comparison, here is the RP layer for the _Soft Recreationalist_ persona.
+For comparison, here are the results using the _Soft Recreationalist_ persona.
 
 ```{r}
 layers <- compute_potential(soft_recreationalist, bbox)
 
-terra::plot(layers[["Recreational_Potential"]])
+terra::panel(terra::subset(layers, 1:4), nc=2, col=palette)
+
+terra::plot(layers[["Recreational_Potential"]], col=palette)
 ```
 
 
 ## More involved example (to do)
 
-- Create persona and bbox from modification / scratch
-
 A region of interest may be given by a path to a shapefile, but the main supported format is a set of four coordinates defining a rectangular area, or 'bounding box'. These can be easily constructed using [`terra::ext`](https://rspatial.github.io/terra/reference/ext.html) by passing a vector `(xmin, xmax, ymin, ymax)` as its first argument. 
+
+TODO - create bbox
+
+Creating or editing personas is far easier using the Shiny app, some spreadsheet software, or even just a text editor. However, for completeness, we demonstrate how to edit a persona dynamically within `R`.
+
+TODO - edit persona
+
+TODO - fancier plot, using `terra::plet` for example.
 
 
 {{< include _endmatter.qmd >}}
