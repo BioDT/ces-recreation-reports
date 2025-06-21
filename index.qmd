@@ -1,5 +1,5 @@
 ---
-title: The BioDT Recreational Potential Model
+title: The BioDT Recreational Potential Model for Scotland
 
 
 toc: false
@@ -9,7 +9,9 @@ nocite: |
   @Rolph2024, @Dick2025, @Dick2025b, @ukceh2025
 ---
 
-This site provides access to technical reports related to the [Recreational Potential model](https://github.com/BioDT/uc-ces-recreation), which was developed by the [UK Centre for Ecology & Hydrology](https://www.ceh.ac.uk/) as part of the [BioDT project](https://biodt.eu/). The documents contained herein can also be accessed in PDF form from the NERC Open Research Archive at **insert url**.
+### Site contents
+
+This site provides access to technical reports related to the [Recreational Potential model for Scotland](https://github.com/BioDT/uc-ces-recreation), which was developed by the [UK Centre for Ecology & Hydrology](https://www.ceh.ac.uk/) as part of the [BioDT project](https://biodt.eu/). The documents contained herein can also be accessed in PDF form from the NERC Open Research Archive at **insert url**.
 
 - The [Summary](summary.html) document provides a high-level overview of the Recreational Model and the research context in which it came about.
 
@@ -19,7 +21,9 @@ This site provides access to technical reports related to the [Recreational Pote
 
 - The [Worked Example](example.html) demonstrates basic usage of the model in `R`.
 
-## Associated publications {.appendix}
+### Associated publications
+
+The following publications are associated with this project.
 
 :::{#refs}
 :::

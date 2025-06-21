@@ -36,7 +36,7 @@ In the months since, development work has focused on improving the speed and sca
 
 The SPEAK project followed in the same spirit as [@Dick2022], but using the updated Recreational Potential model, which allows for greater individual customisation by users. Some preliminary findings from this study are available as a conference presentation [@Dick2025b] and workshop report [@Dick2025c].
 
-Finally, a retrospective look at the CES part of the BioDT project will be published shortly [@Rolph2025].
+A retrospective look at the CES part of the BioDT project will be published shortly under @Rolph2025.
 
 ## Model description
 
@@ -348,9 +348,6 @@ options(timeout=600)
 
 biodt.recreation::download_data()
 ```
-
-In an ideal world this data production 'pipeline' would be entirely automated through one or more scripts. This would enable the input data to be more easily regenerated and updated in future.
-
 
 ### Calculation of RP values
 

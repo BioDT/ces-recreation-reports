@@ -5,61 +5,15 @@ abstract: >
   This supplement provides technical details about the Recreational Potential model. This includes a mathematical description of the model, details regarding the source data, and technical aspects of the code.
 ---
 
-```{r, echo=FALSE}
-library(magrittr)
-library(biodt.recreation)
-
-source("functions_report.R")
-
-water <- terra::rast(system.file("extdata", "rasters", "Bush", "original", "Water.tif", package="biodt.recreation"))
-
-slsra <- terra::rast(system.file("extdata", "rasters", "Bush", "SLSRA.tif", package="biodt.recreation"))
-
-fips_n <- terra::rast(system.file("extdata", "rasters", "Bush", "FIPS_N.tif", package="biodt.recreation"))
-
-fips_i <- terra::rast(system.file("extdata", "rasters", "Bush", "original", "FIPS_I.tif", package="biodt.recreation"))
-
-# the box of bush estate
-e <- terra::ext(water)
-coords <- matrix(c(
-  e$xmin, e$ymin,
-  e$xmax, e$ymin,
-  e$xmax, e$ymax,
-  e$xmin, e$ymax,
-  e$xmin, e$ymin # close polygon
-), ncol = 2, byrow = TRUE)
-bbox_poly <- terra::vect(coords,
-  type = "polygons",
-  crs = terra::crs(water)
-) %>%
-  sf::st_as_sf() %>%
-  sf::st_transform(crs = 4326)
-
-base_map <- 
-  leaflet::leaflet() %>%
-  leaflet::addProviderTiles("OpenStreetMap.Mapnik", options = leaflet::providerTileOptions(zIndex = 0, noWrap = TRUE), group = "Streets") %>%
-  leaflet::addProviderTiles("Esri.WorldImagery", options = leaflet::providerTileOptions(zIndex = 0, noWrap = TRUE), group = "Satellite") %>%
-  leaflet::addPolygons(
-    data = bbox_poly,
-    color = "black",
-    weight = 3,
-    fill = FALSE
-  ) 
-```
-
 ## Technical description of the model {#sec-techdesc}
 
-While there have been several publications citing the RP model, none so far have included an unambiguous technical description of the model itself.
-
-In fact the mathematical basis of the RP model is extremely simple. Nevertheless, it is worth being fully explicit. 
-
-<!-- Were it not for an area-dependent rescaling step it would be nothing more than a linear combination (i.e. a weighted sum) at each 20 metre squared pixel.-->
+While there have been several publications citing the RP model, so far none have included a detailed technical description of the model itself.
 
 ### Presence/absence rasters
 
 We begin by defining some notation.
 
-Let $I : \mathbb{R}^2 \to \{0, 1\}$ be a binary-valued function whose domain can be interpreted as a two-dimensional spatial (e.g. lat-lon) domain, $x \in \mathbb{R}^2$. This is a mathematical representation of a single raster layer in a '[one-hot](https://en.wikipedia.org/wiki/One-hot)' representation, where a value of $I(x) = 1$ indicates presence of a feature at the coordinate $x$, and $I(x) = 0$ indicates absence. 
+Let $I : \mathbb{R}^2 \to \{0, 1\}$ be a binary-valued function that maps pairs of coordinates $x \equiv (x_1, x_2) \in \mathbb{R}^2$ to either $0$ or $1$. This is a mathematical representation of a single raster layer in a '[one-hot](https://en.wikipedia.org/wiki/One-hot)' representation, where a value of $I(x) = 1$ indicates presence of a feature at the coordinate $x$, and $I(x) = 0$ indicates absence. 
 
 The RP model currently includes 87 features/items grouped into four components (see @sec-listitems). Each of these has its own presence/absence raster. We will therefore introduce two subscript indices and write each layer as $I_{ij}(x)$, where
 
@@ -84,7 +38,7 @@ For certain features like rivers and lakes it does not make sense to restrict th
 
 It makes sense to attempt to account for the presence of these features nearby. 
 
-Let $\mathcal{P}_{ij} \subset \mathbb{R}^2$ denote the set of coordinates in which the feature $(ij)$ is present, i.e.
+Let $\mathcal{P}_{ij} \subset \mathbb{R}^2$ denote the set of coordinates in which the feature $(ij)$ is present, i.e.^[The right-hand-side of @eq-presence can be read as "The set of all 2d coordinates $x'$ for which the condition $I_{ij}(x') = 1$ is satisfied."]
 
 $$
 \mathcal{P}_{ij} := \left\{ x' \in \mathbb{R}^2 \mid I_{ij}(x') = 1 \right\} \, .
@@ -98,7 +52,7 @@ $$ {#eq-distance}
 
 where $\lVert x - x' \rVert_2 = \sqrt{(x_1 - x'_1)^2 + (x_2 - x'_2)^2}$.
 
-These distances must be mapped to the unit interval such that $0 \mapsto 1$ and $\infty \mapsto 0$, i.e. so that presence of the feature in this pixel results in the highest value of $1$, tailing off to $0$ when the feature is very far away.
+These distances must be mapped to the unit interval $[0, 1]$ such that $0 \mapsto 1$ and $\infty \mapsto 0$, i.e. so that presence of the feature in this pixel results in the highest value of $1$, tailing off to $0$ when the feature is very far away.
 
 There are many different ways to achieve this. Following @Paracchini2014 [p. 374 -- Eq. 1], the function chosen is a smooth, monotonically decreasing function in the logistic family,
 
@@ -108,13 +62,13 @@ $$  {#eq-proximity}
 
 It remains to specify values for the parameters $\kappa$ and $\alpha$, the latter of which is most important since it determines the rate at which the value of $u$ declines as the distance to the nearest feature increases.
 
-The parameters chosen in the original version of this code were^[The provenance of these values, which date back to the [earliest version of the code](https://github.com/BioDT/uc-ces/commit/5c5961376df6753725e634378fa709dac1050ff6), has been lost. Somewhat confusingly, earlier versions of the code also contained an explicit cutoff at $d=1500$, suggesting that the authors intended distances below this to result in meaningful contributions to the RP. In this author's opinion, there is no reason whatsoever to think that these values are particularly meaningful. The precision with which $\alpha$ is given is a particular curiosity.]
+The parameters chosen in the original version of this code were^[The provenance of these values, which date back to the [earliest version of the code](https://github.com/BioDT/uc-ces/commit/5c5961376df6753725e634378fa709dac1050ff6), has been lost. The precision with which $\alpha$ is given is a particular curiosity.]
 
 $$
 \kappa = 6 \, , \qquad \alpha = 0.01011 \, ,
 $$ {#eq-proxparams}
 
-resulting in a function, @fig-logistic, that halves at $d\approx200$ (metres) and drops to $0.1$ at $d\approx400$. At this distance, features with a user-provided score of $10$ (i.e. the highest) would be equivalent to a local feature given a score of $1$ (the lowest). It is safe to assume that at distances greater than this the contribution from the feature would be indiscernible to the user.
+resulting in a function, @fig-logistic, that halves at $d\approx200$ (metres) and drops to $0.1$ at $d\approx400$.^[Note that this does not exhibit the classic 'S' shape of logistic curves since the domain is restricted to the positive real line (distances are non-negative!).] At this distance, features with a user-provided score of $10$ (i.e. the highest) would be equivalent to a local feature given a score of $1$ (the lowest). It is safe to assume that at distances greater than this the contribution from the feature would be indiscernible to the user.
 
 ```{r}
 #| label: fig-logistic
@@ -136,7 +90,7 @@ plot(d, logistic_func(d), ylim=c(0, 1), type="l", lwd=2,
 
 ### Calculation of a single component
 
-As mentioned previously, there are 87 features in total, each of which corresponds to (a) persona score,
+As mentioned previously, there are 87 features in total, each of which corresponds to (a) persona score between $0$ and $10$,
 
 $$
 \rho_{ij} \in \{0, 1, \ldots, 10\} \, ,
@@ -162,9 +116,9 @@ $$ {#eq-component}
 
 where we have permitted $\rho_i$ to denote the set of persona scores $\{\rho_{i1}, \rho_{i2}, \ldots, \rho_{i n_i} \}$ for the $i$-th component.
 
-### Domain-dependent rescalings
+### Domain-dependent rescalings {#sec-rescalings}
 
-Let $F \vert_{\mathcal{R}}$ denote the restriction of a function $F$ to a domain $\mathcal{R} \subset \mathbb{R}^2$ which defines the region in which we wish to compute Recreational Potential. We now define a family of rescaled functions,
+Let $F \vert_{\mathcal{R}}$ denote the restriction of a function $F$ to a subdomain $\mathcal{R} \subset \mathbb{R}^2$ which defines the 'region of interest' in which we wish to compute Recreational Potential. We now define a family of rescaled functions,
 
 $$
 \hat{F}(x \,; \mathcal{R}) := \frac{F(x) - \min F \big\vert_{\mathcal{R}}}{\max F \big\vert_{\mathcal{R}} - \min F \big\vert_{\mathcal{R}}} \, ,
@@ -172,7 +126,7 @@ $$ {#eq-rescale}
 
 each of which corresponds to a particular choice of restriction, i.e. a particular region of interest.
 
-Assuming that $F(x)$ is not a constant function on $\mathcal{R}$, these rescaled functions are 'normalised' to the unit interval $[0, 1]$ *within* the region of interest, i.e. 
+Assuming that $F(x)$ is not a constant function on $\mathcal{R}$,^[If $F(x)$ is constant in the region of interest then the right-hand-side of @eq-rescale diverges and $\hat{F}$ is undefined.] these rescaled functions are 'normalised' to the unit interval *within* the region of interest, i.e. 
 
 $$
 \min_{x\in\mathcal{R}} \hat{F}(x \,; \mathcal{R}) = 0 \, , \qquad
@@ -207,14 +161,7 @@ The process of producing these rasters is currently split into two distinct part
 1. A **manual part** in which categorical rasters are constructed from raw downloaded datasets using QGIS
 2. A **scripted part** in which these categorical rasters are converted into the form required by the model, using `R`.
 
-The scripted part is executed by running `inst/scripts/data_production/main.R` (or the containerised version) with the manually-produced categorical rasters already present. This script essentially boils down to calling four functions which are found in `R/data_production.R`:
-
-```R
-reproject_all(indir = "Stage_0", outdir = "Stage_1")
-one_hot_all(indir = "Stage_1", outdir = "Stage_2")
-stack_all(indir = "Stage_2", outdir = "Stage_3")
-compute_proximity_rasters(indir = "Stage_3", outdir = "Stage_4")
-```
+The scripted part is executed by running `inst/scripts/data_production/main.R` (or the containerised version) with the manually-produced categorical rasters already present. This script mostly just calls functions defined in `R/data_production.R`.
 
 ### Data sources
 
@@ -358,8 +305,7 @@ C_{\text{slope}}(x) = \begin{cases}
 \end{cases}
 $$ {#eq-slopequant}
 
-The origin of these intervals is another historical artefact for which we have precedent albeit not a deeper justification.
-
+==**TODO: Why are these intervals different from the ones above?**==
 
 ### Reprojection
 
@@ -503,10 +449,54 @@ To get around this issue, the original Scotland-wide raster was divided into 20 
 
 The distance raster was also truncated at 500m, setting any values above this to `NA` which simply passes through the function applying @eq-proximity and ensures that we don't waste disk space storing high-precision floats that are functionally equivalent to zero.
 
-==To account for proximity effects, the distance from each cell to the nearest infrastructure feature was calculated using the terra::distance() function in R. The resulting raster, labeled **"distance"** in the example map, contains the distance in meters from the center of each cell to the nearest feature.
-This raster is named "**scored**" in the example map, using the distance decay function.==
+#### Visual demonstration
 
-==TODO: make this figure static?==
+**TODO: Madda - make this figure static for pdf?**
+
+To account for proximity effects, the distance from each cell to the nearest infrastructure feature was calculated using the `terra::distance()` function in R. The resulting raster, labeled **"distance"** in the example map, contains the distance in meters from the center of each cell to the nearest feature. This raster is named "**scored**" in the example map, using the distance decay function.
+
+
+```{r, echo=FALSE}
+library(magrittr)
+library(biodt.recreation)
+
+source("functions_report.R")
+
+water <- terra::rast(system.file("extdata", "rasters", "Bush", "original", "Water.tif", package="biodt.recreation"))
+
+slsra <- terra::rast(system.file("extdata", "rasters", "Bush", "SLSRA.tif", package="biodt.recreation"))
+
+fips_n <- terra::rast(system.file("extdata", "rasters", "Bush", "FIPS_N.tif", package="biodt.recreation"))
+
+fips_i <- terra::rast(system.file("extdata", "rasters", "Bush", "original", "FIPS_I.tif", package="biodt.recreation"))
+
+# the box of bush estate
+e <- terra::ext(water)
+coords <- matrix(c(
+  e$xmin, e$ymin,
+  e$xmax, e$ymin,
+  e$xmax, e$ymax,
+  e$xmin, e$ymax,
+  e$xmin, e$ymin # close polygon
+), ncol = 2, byrow = TRUE)
+bbox_poly <- terra::vect(coords,
+  type = "polygons",
+  crs = terra::crs(water)
+) %>%
+  sf::st_as_sf() %>%
+  sf::st_transform(crs = 4326)
+
+base_map <- 
+  leaflet::leaflet() %>%
+  leaflet::addProviderTiles("OpenStreetMap.Mapnik", options = leaflet::providerTileOptions(zIndex = 0, noWrap = TRUE), group = "Streets") %>%
+  leaflet::addProviderTiles("Esri.WorldImagery", options = leaflet::providerTileOptions(zIndex = 0, noWrap = TRUE), group = "Satellite") %>%
+  leaflet::addPolygons(
+    data = bbox_poly,
+    color = "black",
+    weight = 3,
+    fill = FALSE
+  ) 
+```
 
 ```{r, echo=FALSE, out.height = 650}
 fips_i_rstack <- list(
@@ -524,10 +514,6 @@ make_layer_map_dist(rstack = fips_i_rstack, base_map,
 ## List of items/features {#sec-listitems}
 
 Here we list the full set of 87 items/features that make up the layers of the input rasters, and must be scored by the user to construct a persona.
-
-:::{.callout-tip}
-The interactive version of this document contains maps that allow you to toggle individual layers.
-:::
 
 | Component        | Short code | Num. layers | Description                                                                                  |
 | ---------------- | ---------- | ----------- | -------------------------------------------------------------------------------------------- |
@@ -558,6 +544,9 @@ make_layer_map(rstack = slsra,  base_map = base_map,
                color = "#386641")
 ```
 
+:::{.callout-tip}
+The interactive version of this document contains maps that allow you to toggle individual layers.
+:::
 ### Natural Features component
 
 ```{r, echo=FALSE}
