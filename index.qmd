@@ -6,7 +6,7 @@ toc: false
 number-sections: false
 
 nocite: |
-  @Rolph2024, @Dick2025, @Dick2025b
+  @Rolph2024, @Dick2025, @Dick2025b, @ukceh2025
 ---
 
 This site provides access to technical reports related to the [Recreational Potential model](https://github.com/BioDT/uc-ces-recreation), which was developed by the [UK Centre for Ecology & Hydrology](https://www.ceh.ac.uk/) as part of the [BioDT project](https://biodt.eu/). The documents contained herein can also be accessed in PDF form from the NERC Open Research Archive at **insert url**.

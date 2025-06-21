@@ -18,7 +18,8 @@ The following command tells you what version is currently active:
 R.version.string
 ```
 
-<!-- There are also certain C++ libraries that are required by the R packages, and need to be installed on the system. Most importantly is the GDAL library. -->
+Certain C++ libraries are required for the model to work, most importantly related to GDAL. See the [`terra` documentation](https://rspatial.github.io/terra/) for guidance.
+
 
 It is recommended to perform the following steps using an `R` environment managed by [`renv`](https://rstudio.github.io/renv/).
 

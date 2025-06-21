@@ -1,8 +1,8 @@
 ## Access to code & data {.appendix}
 
-Code for the Recreational Potential model is available as an R Package hosted on GitHub at [https://github.com/BioDT/uc-ces-recreation](https://github.com/BioDT/uc-ces-recreation).
+Code for the Recreational Potential model is available as an R Package hosted on GitHub at [https://github.com/BioDT/uc-ces-recreation](https://github.com/BioDT/uc-ces-recreation). These reports relate specifically to the [version 1.0 release](https://github.com/BioDT/uc-ces-recreation/releases/tag/v1.0), which is also available on Zenodo at [https://doi.org/10.5281/zenodo.15705544](https://doi.org/10.5281/zenodo.15705544).
 
-The model requires some input data, which has been deposited on Zenodo **HERE**.
+The model requires some input data that is too large to be bundled in with the package, but which can be downloaded from Dropbox after package installation using `biodt.recreation::download_data()`. This data is also included in the Zenodo listing.
 
 The source for these documents and this website can be found at [https://github.com/BioDT/ces-recreation-reports](https://github.com/BioDT/ces-recreation-reports).
 
@@ -24,9 +24,7 @@ See [https://www.elsevier.com/en-gb/researcher/author/policies-and-guidelines/cr
 
 ## Acknowledgements {.appendix}
 
-We wish to acknowledge contributions to previous versions of the Recreational Potential model by Will Bolton, ... .
-
-JMR would like to thank Tomáš Martinovič for assisting with understanding the requirements of BioDT.
+We wish to acknowledge significant contributions to a previous version of the Recreational Potential model by Will Bolton. JMR would also like to thank Tomáš Martinovič for assisting with understanding the requirements of BioDT.
 
 Dylan Powell?
 
