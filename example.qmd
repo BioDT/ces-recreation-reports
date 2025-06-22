@@ -2,7 +2,7 @@
 title: The BioDT Recreational Potential Model for Scotland
 subtitle: Worked example
 abstract: >
-  This notebook demonstrates basic usage of the Recreational Potential model. It is assumed that the user is familiar with installing `R` packages, executing lines of `R` code in interactive sessions, and running `R` scripts. Detailed instructions can be found in the `README.md` files in the [GitHub repository](https://github.com/BioDT/uc-ces-recreation).
+  This notebook demonstrates basic usage of the Recreational Potential model. It is assumed that the user is familiar with installing `R` packages, executing lines of `R` code in interactive sessions, and running `R` scripts. 
 
 number-sections: false
 ---
@@ -43,13 +43,13 @@ biodt.recreation::download_data()
 ```
 
 :::{.callout-tip}
-#### Where are the files?
+### Where are the files?
 Do not be alarmed if you cannot see any new files appearing in your working directory. When `download_data` is called without arguments, the data will be downloaded to the default location which is _inside the directory in which the package is installed_ (under the subdirectory `extdata/rasters/Scotland/`). You may not know where on your filesystem packages are installed, but that's ok --- the package knows where to look for these files.
 :::
 
-## Loading a persona
+## The preset personas
 
-We demonstrate the RP Model applied to the Bush Estate area (nearby Edinburgh) using two contrasting personas:
+We first demonstrate the RP Model applied to an area surrounding the Bush estate near Edinburgh^[This is where the UK Centre for Ecology & Hydrology is based.] using two contrasting personas:
 
 1. **_Hard Recreationalist_**: this persona values remote, challenging environments and avoids built-up or highly managed areas.
 2. **_Soft Recreationalist_**: this persona values tranquil, accessible landscapes and natural water features, and avoids steep or harsh terrain.
@@ -73,73 +73,209 @@ hard_recreationalist <- load_persona(persona_file, "Hard_Recreationalist")
 soft_recreationalist <- load_persona(persona_file, "Soft_Recreationalist")
 ```
 
-Each persona contains 87 scores. It does not tell us very much, but we can view these as a histogram.
+The tab panel below is helpful for inspecting and comparing the two preset personas.
 
 ```{r}
-par(mfrow = c(1, 2))
+#| code-fold: true
+#| code-summary: Show definition of `persona_table` and `persona_hist`
 
-hist(hard_recreationalist, 
-	main = "Hard Recreationalist", 
-	breaks = 11,
-    xlab = "Score", 
-    ylab = "Frequency")
+persona_table <- function(persona) {
 
-hist(soft_recreationalist, 
-	main = "Soft Recreationalist", 
-	breaks = 11,
-    xlab = "Score", 
-    ylab = "Frequency")
+  # Construct named vector of persona descriptions
+  config <- load_config()
+  descriptions <- stats::setNames(config$Description, config$Name)
+
+  # Align order (just in case)
+  descriptions <- descriptions[names(persona)]
+
+  # Construct data.frame from the two named vectors
+  df <- data.frame(
+    Item = names(persona),
+    Description = as.vector(descriptions),
+    Score = as.vector(persona)
+  )
+
+  # Convert dataframe to HTML table
+  knitr::kable(df)
+}
+
+persona_hist <- function(persona) {
+
+  # Make 2x2 grid for histograms
+  par(mfrow = c(2, 2))
+
+  for (component in c("SLSRA", "FIPS_N", "FIPS_I", "Water")) {
+
+    # Scores for this component
+    persona_subset <- persona[grep(paste0("^", component), names(persona))]
+    
+    # Construct histogram
+    hist(persona_subset, main=component, breaks=0:10, xlab="Score", ylab="Frequency")
+  }
+}
 ```
 
+:::{.panel-tabset}
+### Hard Recreationalist
+```{r}
+persona_hist(hard_recreationalist)
+```
+```{r}
+persona_table(hard_recreationalist)
+```
+### Soft Recreationalist
+```{r}
+persona_hist(soft_recreationalist)
+```
+```{r}
+persona_table(soft_recreationalist)
+```
+:::
 
-## Hard versus Soft Recreationalist
 
-Let us compare the two personas in the 'example' region, which is just south of Edinburgh.
+## Computing Recreational Potential
+
+We will now compare results in the 'example' region of interest (the Bush estate).
 
 ```{r}
 bbox <- get_example_bbox()
 ```
 
-To compute Recreational Potential, as well as each individual component, we use the `compute_potential` function. This returns a raster with 5 named layers.
+To compute Recreational Potential, as well as each individual component, we use the `compute_potential` function.
 
 ```{r}
-layers <- compute_potential(hard_recreationalist, bbox)
-
-names(layers)
+layers_hr <- compute_potential(hard_recreationalist, bbox)
+layers_sr <- compute_potential(soft_recreationalist, bbox)
 ```
 
-To plot all layers together we can simply call `terra::plot(layers)`. However, here we will just plot the RP layer.
+This returns a raster with 5 named layers.
+
+1. `SLSRA`
+2. `FIPS_N`
+3. `FIPS_I`
+4. `Water`
+5. `Recreational_Potential`
+
+To plot all layers together we could simply call `terra::plot(layers)`. However, here we will separate the components plot from the RP plot.
 
 ```{r}
+# Set the colour palette for the heatmaps
 palette <- terra::map.pal("bgyr")
-
-terra::panel(terra::subset(layers, 1:4), nc=2, col=palette)
-
-terra::plot(layers[["Recreational_Potential"]], col=palette)
 ```
 
-For comparison, here are the results using the _Soft Recreationalist_ persona.
+First, the component layers.
+
+:::{.panel-tabset}
+### Hard Recreationalist
+```{r}
+terra::panel(terra::subset(layers_hr, 1:4), nc=2, col=palette)
+```
+### Soft Recreationalist
+```{r}
+terra::panel(terra::subset(layers_sr, 1:4), nc=2, col=palette)
+```
+:::
+
+Next, the Recreational Potential layers.
+
+:::{.panel-tabset}
+### Hard Recreationalist
+```{r}
+terra::plot(layers_hr$Recreational_Potential, col=palette)
+```
+### Soft Recreationalist
+```{r}
+terra::plot(layers_sr$Recreational_Potential, col=palette)
+```
+:::
+
+## Defining a region of interest
+
+A rectangular region of interest can be easily constructed using [`terra::ext`](https://rspatial.github.io/terra/reference/ext.html) by passing a vector of coordinates `(xmin, xmax, ymin, ymax)`.^[A region of interest may also be given by a path to a shapefile.] 
 
 ```{r}
-layers <- compute_potential(soft_recreationalist, bbox)
-
-terra::panel(terra::subset(layers, 1:4), nc=2, col=palette)
-
-terra::plot(layers[["Recreational_Potential"]], col=palette)
+xmin <- 300000
+xmax <- 310000
+ymin <- 700000
+ymax <- 710000
+bbox <- terra::ext(c(xmin, xmax, ymin, ymax))
 ```
 
+Let's visualise this area on a map of Scotland.
 
-## More involved example (to do)
+```{r}
+Scotland <- terra::vect(
+  system.file(
+    "extdata", "shapefiles", "Scotland", "Scotland.shp", package="biodt.recreation"
+  )
+)
 
-A region of interest may be given by a path to a shapefile, but the main supported format is a set of four coordinates defining a rectangular area, or 'bounding box'. These can be easily constructed using [`terra::ext`](https://rspatial.github.io/terra/reference/ext.html) by passing a vector `(xmin, xmax, ymin, ymax)` as its first argument. 
+terra::plot(Scotland)
+terra::plot(bbox, border = "red", add = TRUE)
+```
 
-TODO - create bbox
+## Editing a persona
 
 Creating or editing personas is far easier using the Shiny app, some spreadsheet software, or even just a text editor. However, for completeness, we demonstrate how to edit a persona dynamically within `R`.
 
-TODO - edit persona
+Let's say we want to modify the Hard Recreationalist persona to better fit an off-road cyclist who does not want to cycle straight up a mountain. We will edit the slope scores and the cycle path scores.
 
-TODO - fancier plot, using `terra::plet` for example.
+```{r}
+# Note that assignment + edit in R automatically results in a copy!
+custom_persona <- hard_recreationalist
 
+custom_persona[["FIPS_I_NationalCycleNetwork_1"]] <- 5  # on-road, paved
+custom_persona[["FIPS_I_NationalCycleNetwork_2"]] <- 10 # traffic-free, unpaved
+custom_persona[["FIPS_I_NationalCycleNetwork_3"]] <- 10 # traffic-free, paved
+custom_persona[["FIPS_I_NationalCycleNetwork_4"]] <- 10 # on-road, unpaved
+custom_persona[["FIPS_I_RoadsTracks_5"]] <- 8  # access roads / tracks
+
+custom_persona[["FIPS_N_Slope_1"]] <- 7  # no slope
+custom_persona[["FIPS_N_Slope_2"]] <- 8  # gentle
+custom_persona[["FIPS_N_Slope_3"]] <- 6  # medium
+custom_persona[["FIPS_N_Slope_4"]] <- 4  # steep
+custom_persona[["FIPS_N_Slope_5"]] <- 2  # very steep
+custom_persona[["FIPS_N_Slope_6"]] <- 1  # extremely steep
+```
+
+We can calculate the RP values as before and compare the results.
+
+```{r}
+layers_hr <- compute_potential(hard_recreationalist, bbox)
+layers_custom <- compute_potential(custom_persona, bbox)
+```
+
+:::{.panel-tabset}
+### Hard Recreationalist
+```{r}
+terra::panel(terra::subset(layers_hr, 1:4), nc=2, col=palette)
+```
+### Custom Persona
+```{r}
+terra::panel(terra::subset(layers_custom, 1:4), nc=2, col=palette)
+```
+:::
+
+:::{.panel-tabset}
+### Hard Recreationalist
+```{r}
+terra::plot(layers_hr$Recreational_Potential, col=palette)
+```
+### Custom Persona
+```{r}
+terra::plot(layers_custom$Recreational_Potential, col=palette)
+```
+:::
+
+
+## Interactive plots
+
+To create a simple interactive plot is very easy using [`terra::plet`](https://rspatial.github.io/terra/reference/plet.html).
+
+```{r}
+terra::plet(layers_custom, 1:5, col=palette, tiles="Esri.WorldImagery", shared=TRUE)
+```
+
+You can explore different background tiles over at [https://leaflet-extras.github.io/leaflet-providers/preview/](https://leaflet-extras.github.io/leaflet-providers/preview/).
 
 {{< include _endmatter.qmd >}}
