@@ -29,7 +29,7 @@ Ensure you have either `remotes` or `devtools` installed (using e.g. `install.pa
 install.packages("remotes")
 ```
 
-Now install the package itself. We will target version 1.0.^[Since future updates to the code may be incompatible with this notebook, we will target the specific version released at the time this notebook was written, i.e. version 1.0].]
+Now install the package itself. We will target version 1.0.^[Since future updates to the code may be incompatible with this notebook, we will target the specific version released at the time this notebook was written.]
 
 ```{r}
 remotes::install_github("BioDT/uc-ces-recreation", ref="v1.0")
@@ -109,8 +109,15 @@ persona_hist <- function(persona) {
     # Scores for this component
     persona_subset <- persona[grep(paste0("^", component), names(persona))]
     
-    # Construct histogram
-    hist(persona_subset, main=component, breaks=0:10, xlab="Score", ylab="Frequency")
+    # Construct histogram with 11 equally space bins centred on
+    # the integers 0, 1, ..., 10.
+    hist(
+      persona_subset,
+      main=component,
+      breaks=seq(-0.5, 10.5, by=1),
+      xlab="Score",
+      ylab="Frequency"
+    )
   }
 }
 ```
