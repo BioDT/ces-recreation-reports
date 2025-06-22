@@ -2,10 +2,7 @@
 
 This repository contains a collection of reports describing the BioDT [Recreational Potential model](https://github.com/BioDT/uc-ces-recreation), which is a component of the Cultural Ecosystem Services prototype Digital Twin. The material is collected into a [Quarto Website](https://quarto.org/docs/websites).
 
-The documents are also published as PDFs and can be found at **to do (NORA)**.
-
-To cite this work, **to do**.
-
+The reports will soon be available as PDFs (with some limitations on content) from the NORA archive.
 
 ## Building the website
 
@@ -13,3 +10,25 @@ To cite this work, **to do**.
 2. Download Quarto
 3. Run `quarto render` in the repository root.
 4. Open `_project/index.html` with your browser.
+
+## Citation
+
+Biblatex citation:
+
+```bib
+@Report{ukceh2025,
+  author = {Marsh Rossney, Joe and Tigli, Maddalena and Andrews,
+    Christopher and Dick, Jan and Rolph, Simon},
+  title = {Reports on the {BioDT} {Recreational} {Potential} {Model} for
+    {Scotland}},
+  version = {1.0},
+  date = {2025-06},
+  publisher = {Zenodo},
+  doi = {10.5281/zenodo.15715070},
+  url = {https://doi.org/10.5281/zenodo.15715070},
+}
+```
+
+Please cite this work as:
+
+> Marsh Rossney, J., Tigli, M., Andrews, C., Dick, J., & Rolph, S. (2025). Reports on the BioDT Recreational Potential Model for Scotland (1.0). Zenodo. https://doi.org/10.5281/zenodo.15715070

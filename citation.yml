@@ -6,13 +6,14 @@ citation:
   author: 
     - Joe Marsh Rossney
     - Maddalena Tigli
-    - Chris Andrews
+    - Christopher Andrews
     - Jan Dick
     - Simon Rolph
-  title: "The BioDT Recreational Potential Model: Technical Reports"
-  container-title: NERC Open Research Archive
+  title: "Reports on the BioDT Recreational Potential Model for Scotland"
+  version: "1.0"
+  publisher: Zenodo
   issued: 2025-06
-  doi: nora-doi
-  url: https://biodt.github.io/ces-recreation-reports
+  doi: 10.5281/zenodo.15715070
+  url: https://doi.org/10.5281/zenodo.15715070
   abstract: |
     These reports describe the BioDT Recreational Potential Model for Scotland (1.0), at the end of the BioDT project in June 2025.
