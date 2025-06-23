@@ -181,8 +181,8 @@ table <- dplyr::select(table,
   -`BES 2024 Code#`
 )
 
-# Make the access url appear last
-table <- table[, c(1:4, 6:ncol(table), 5)]
+# no need for url as saved in bib (col 5)
+table <- table[, c(1:4, 6:ncol(table))]
 
 # Display nicely
 knitr::kable(table)
@@ -192,108 +192,107 @@ knitr::kable(table)
 
 #### Landscape component
 
-The Landscape component raster consists of 40 layers, each representing one of its features (see [List of items/features] for full list)
+The Landscape component raster consists of 40 layers, each representing one of its features (see [List of items/features] for full list). These features can be grouped into different sub-categories:
+
+-   CP (1 feature) : The Country Parks (CP) feature was sourced from @naturescot2020countryparks.
+
+-   HNV (1 feature): The High Nature Value farming feature was sourced from @eea2023hnv.
+
+-   LCM (28 features): The Land Cover Map (LCM) featured were sourced from @naturescot2023habitat.
+
+-   NNR (1 feature): The Natural Nature Reserves (NNR) feature was sourced from @naturescot2022nnr
+
+-   NP (1 feature): The National Parks (NP) feature was sourced from @stirling2024nationalparks
+
+-   NR (1 feature): The Nature Reserves (NR) feature was sourced from @naturescot2021reserves
+
+-   RP (1 feature): The Regional Parks (RP) feature was sourced from @naturescot2022regionalparks
+
+-   RSPB (1 feature): The Protected sites for birds feature was sourced from @rspb2024reserves
+
+-   SAC (1 feature): The Special Area for Conservation (SAC) feature was sourced from @naturescot2023sac
+
+-   SPA (1 feature): The Special Protection Areas (SPA) feature was sourced form @naturescot2023spa
+
+-   SSSI (1 feature): The Sites of Specific Scientific Interest (SSSI) feature was sourced from @naturescot2024sssi
+
+-   SWT (1 feature): The Scottish Wildlife Trust (SWT) feature was sourced from @swt2024reserveboundaries
+
+-   WLA (1 feature): The Wild Land Area (WLA) feature was sourced form @naturescot2014wildland
+
+The datasets used for this component were clipped to a Scotland Boundary shapefile [@ons2018nuts], and they were rasterized to a 20m x 20m resolution.
 
 #### Natural Features component
 
-The 24 features in this component are grouped into three main categories: Landform (16 features), Slope (6 features), and Soil (2 features)
+The 24 features in this component are grouped into three main categories:
 
-##### Landform features
+-   Landform features (16 features): The landform data was extracted from the Scotland 250K Soils Map. [@hutton2022soil]. The following methodologies were applied:
 
-The landform data was extracted from the Scotland 250K Soils Map (**CHRIS add APA citation**). The following methodologies were applied:
+    1.  Dissolve: the dataset was “dissolved” in QGIS using the “Landform“ attribute, reducing it to 334 unique polygon features.
 
-1.  Initial dissolve: the dataset was "dissolved" in QGIS using the Landform field, reducing it to 334 unique polygon features.
+    2.  Grouping: the 334 landform types were manually grouped into 16 broader categories based on descriptive keywords (e.g. “hills”, “foothills” etc…) see ([Appendix I: Groups of landform features]).
 
-2.  Grouping: the 334 landform types were manually grouped into 16 broader categories based on descriptive keywords (e.g. "hills", "foothills" etc...). (**Chris can you confirm they were 16 and not 17? For transparency and reprodcucibility, a table in the appending mapping the original attributes to the grouped category would be ideal)**
+    3.  Rasterization: the dataset was converted into a raster at a 20 m x 20 m resolution.
 
-3.  Final dissolve and resterization: The grouped dataset was dissolved again to generate one polygon per broad category. Finally, the data-sets was converted into raster format at a 20 m x 20 m resolution, with each layer corresponding to one of the 16 landform categories.
+-   Slope features (6 features): Slope data were derived from the Copernicus GLO-30 Digital Elevation Model (DEM), a global 30 m resolution dataset [@esa2021dem]. The following methodology was applied:
 
-##### Slope features
+    1.   Slope calculation: the DEM was converted into a matching CRS (EPSG: 27700) using Warp (Reproject) using QGIS, with a slope raster calculated using GDAL Slope with its default settings.
 
-Slope data were derived from the Copernicus GLO-30 Digital Elevation Model (DEM), a global 30 m resolution dataset (**CHRIS add APA citation and confirm resolution**). The following methodologies were applied:
+    2.  Up-sampling: the raster was resampled to a 20 m x 20 m resolution.
 
-1.  Slope calculation: the DEM the elevation data were converted into slopes using QGIS (**chris, was this using GDAL in its default setting?**).
+<!-- -->
 
-2.  Reclassification: The continuous slope values were re-classified into six slopes classes (which form the six slope features) (see Table X). (**Chris were this category picked by you or do they come from somewhere? I think we need to specify this**)
+-   Soil features (2 features): The landform data was derived from the Scotland 250K Soils Map [@hutton2022soil] The following methodology was applied:
 
-| Slope (%) | Slope description     |
-|-----------|-----------------------|
-| \<3       | easy                  |
-| 3-5       | gentle slope          |
-| 5-10      | medium slope          |
-| 10-20     | steep slope           |
-| 20-30     | very steep slope      |
-| \>30      | extremely steep slope |
+    1.  Initial dissolve: The dataset was “dissolved” by field “genSoilTyp” in QGIS, reducing it to 12 unique attribute values.
 
-: Slopes categories used to reclassify the Copernicus GLO-30 Digital Elevation Model (DEM) data into the 6 "slope" features of the Natural Features component of the RP model.
+    2.  Grouping: The values were manually aggregated into two soil classes: organic (peat) and mineral based on the original classifications (see [Appendix II: Groups Soil features]).
 
-3.  Upsampling: The slope raster was upsampled to a 20m x 20m resolution in QGIS.\
-    (**do you know which method was used to interpolate?**) (**was the raster first up-sampled to 20m x 20 m and then the slope calculated or the opposite?**)
-
-##### Soil features
-
-The ==landform data was extracted from the Scotland 250K Soils Map== (**APA citation**). The following methodologies were applied:
-
-1.  Initial dissolve: The dataset was "dissolved" by field “genSoilTyp” in QGIS, reducing it to 12 unique attribute values (12 soil types).
-
-2.  Grouping: These were manually grouped into 2 soil categories: orgnaic (peat) and mineral. (**chris, table with what soil type was assigned to each group**).
-
-3.  Final dissolve and rasterization: The grouped dataset was dissolved again to the new soil type. Finally, the data-sets was converted into raster format at a 20 m x 20 m resolution.
+    3.  Rasterization: the dataset was converted into a raster at a 20 m x 20 m resolution.
 
 #### Infrastructure Features component
 
-The infrastructure component (FIPS_I.tif) is derived from a raster indicating the presence/absence or vicinity to 10 infrastructure features. The file for this component is derived through a three-step process:
+The 10 features are grouped into three main categories:
 
-To begin with, a raster with a value of 1 for cells where the features is present, and 0 or NAs for the cells where the feature is absent. The 10 features are grouped into three main categories: "Roads Tracks" (5 features), "Cycle Network" (4 features), and Local Path Network" (1 feature):
+-   Roads Tracks (5 features): Road Tracks data was sourced from the OS OpenRoads dataset [@os2023roads]. The following methodologies were applied:
 
-##### Roads and Tracks
+    1.   Dissolve: The OpenRoads dataset [@os2023roads] was “dissolved” in QGIS by the field “Road type” and “Tracks”.
 
-Road Tracks data was sourced from the OS OpenRoads dataset (**add citation**). The following methodologies were applied:
+    2.  Adding access roads: the attribute field “Access roads” from the OSM_Roads dataset [@osmScotlandMap] was merged into the dissolved dataset.
 
-1.  Initial dissolve: the dataset was "dissolved" in QGIS using the by the “Road type” field, reducing it to XX unique polygon features (.
+    3.  Rasterization: the combined dataset was rasterized at a 20 m x 20 m resolution.
 
-2.    “Tracks” were extracted from OSM_Roads datasets then merged with the attribute field “Access Roads” in the OpenRoads dataset to create the attribute value “Access roads / Tracks”.
+-   Cycle Network (4 features): The National Cycle Network data was sourced from the Sustrans National Cycle Network dataset [@sustrans2024ncn]. The following methodology was applied:
 
-##### Cycle network
+    1.  Dissolve: The dataset was “dissolved” in QGIS using the two attribute fields “Desc\_” and “Surface”.
 
-Sustrans National Cycle Network dataset were initially dissolved by two attribute fields  “Desc\_” & “Surface” in QGIS.  A new attribute field was created taking the attribute value from “Desc\_” (on road / off road) and suffixing with grouped surface types (paved or unpaved).
+    2.  Grouping: The “Desc\_” features were then grouped in (1) on road, and (2) off road; whilst the “Surface” features grouped in (3) paved and (4) unpaved. This produced four distinct feature classes
+
+    3.  Rasterization: The dataset was converted into raster format at a 20 m x 20 m resolution.
+
+-   Local Path Network (1 feature): The “Local Path Network” data was sourced from the Scotland’s Core Paths dataset provided by the @improvement2024corepaths. The dataset was converted into raster format at a 20 m x 20 m resolution.
 
 #### Water component
 
-The water component is derived from a raster indicating the presence or absence of infrastructure features. This original raster, labeled **"original"** in the Easter Bush example map, contains: 1 for cells where the feature is present, and 0 or NAs for cells where the feature is absent.
+The 13 features can be divided into two categories:
 
-The water component is derived from:
+-   Rivers (6 features): The river data was sourced from the Os Open Rivers [@os2023rivers] and the OS Boundaries dataset. The following methodology was applied:
 
-##### Rivers
+    1.  merging: To avoid naming inconsistencies, the “Region” field from the OS Boundaries dataset was joined to the Os Open Rivers dataset [@os2023rivers].
 
-Os Open Rivers dataset was reduced from 74997 features, by dissolved by attribute fields “name” and “Region” so that all river segments were joined by a common name. To avoid rivers with the same name but located in different areas being incorrectly joined, “Region” from the OS Boundaries dataset was merged with the OS Open Rivers prior to this step. To reduce the dataset into something scoreable at a national scale, it was decided to use a proxy for river size/regional importance.  This is a subjective process, decided on by the research team.  Seven classes were created and dataset features classified based on either the attribute “form” which was a descriptor for water type, or keywords in the attribute “name” (see table for examples), or researcher knowledge of major rivers of national and regional importance.
+    2.  initial dissolve: the merged dataset was “dissolved” in QGIS using the “name” and “Region” fields. This combined river segments sharing the same name and region into single features, reducing the dataset into 74 997 features.
 
-| Class | Example search terms or process |
-|:-------------------------|:--------------------------------------------|
-| Major river or tributary | Specific e.g. "Tay", "Spey" etc. |
-| Tidal river or estuary | taken from dataset attribute "form" |
-| Minor river or tributary | e.g. "River", "Abhainn", "Uisge" |
-| Named minor stream or tributary | e.g. "Allt", "Alltan", "Burn", "Feadan", "Sruth", "Caochan" |
-| Unnamed minor stream or tributary | e.g. "Allt", "Alltan", "Burn", "Feadan", "Sruth", "Caochan" |
-| Canal | taken from dataset attribute "form" |
-| Lake | taken from dataset attribute "form" |
+    3.  Reclassification: To simplify the river data at a national scale, a reclassification was carried out (see [Appendix III: Reclassification rivers and lakes] for examples). This is a subjective and based on:  the “form” attribute (indicating water type), or keywords searches in the “name” field, and researcher knowledge of major rivers of national and regional importance.
 
-: Water rivers classification
+    4.  Rasterization: the dataset was converted into raster format at a 20 m x 20 m resolution.
 
-##### Lakes
+<!-- -->
 
-The Spatial inventory of UK waterbodies dataset contained 25404 features for Scotland.  To make it into a relevant and scorable dataset it was reduced to six features based on the given size (in hectares) of a waterbody using the attribute “Poly_Area_Ha”.  Classification was as follows:
+-   Lakes (7 features): The lakes data was sourced from the Spatial inventory of UK waterbodies dataset [@taylor2021waterbodies]. The following methodology was applied:
 
-| Class       | size (ha) |
-|-------------|-----------|
-| Pond        | $<0.2$    |
-| Lochan      | $0.2-2$   |
-| Small loch  | $2-10$    |
-| Mediun loch | $10-100$  |
-| Large loch  | $100-500$ |
-| Major loch  | $>500$    |
+    1.  Reclassification: The dataset contained 25404 features for Scotland. To make it into a relevant and scorable dataset it was reduced to six features based on the given size (in hectares) of a waterbody using the attribute “Poly_Area_Ha” (see [Appendix III: Reclassification rivers and lakes]).
 
-: water lakes
+    2.  Rasterization: the datasets were converted into raster format at a 20 m x 20 m resolution.
 
 ### Quantising the slope raster
 
@@ -311,6 +310,17 @@ C_{\text{slope}}(x) = \begin{cases}
 6 & &16.7 \leq s(x) \, .
 \end{cases}
 $$ {#eq-slopequant}
+
+This six categories, adapted from @Dick2022 (see Table below)
+
+| Slope (%) | Slope description     |
+|-----------|-----------------------|
+| \<3       | easy                  |
+| 3-5       | gentle slope          |
+| 5-10      | medium slope          |
+| 10-20     | steep slope           |
+| 20-30     | very steep slope      |
+| \>30      | extremely steep slope |
 
 ==**TODO: Why are these intervals different from the ones above?**==
 
@@ -610,5 +620,49 @@ make_layer_map_dist(rstack = water_rstack, base_map,
                     color_original = "#4E6766")
 ```
 :::
+
+## Appendix I: Groups of landform features
+
+```{r}
+# Read table
+table <- readr::read_csv("landform_groups.csv", show_col_types = FALSE)
+
+# Display nicely
+knitr::kable(table)
+```
+
+## Appendix II: Groups Soil features
+
+|  |  |
+|-----------------------------------|-------------------------------------|
+| **Reclassification** |  **genSoilTyp** |
+| Organic | Peaty podzols, Peaty gleys, Peat, |
+| Mineral | Mineral podzols, Mineral gleys, Brown soils, Montane soils, Immature soils, Alluvial soils, Calcareous soils |
+
+## Appendix III: Reclassification rivers and lakes
+
+Rivers:
+
+|  |  |
+|----|----|
+| **Class** |  **Example search terms / or   process** |
+| Major river   or tributary | Specific e.g.   "Tay", "Spey" etc… |
+|  Tidal river   or estuary | taken from   dataset attribute "form" |
+| Minor river   or tributary | e.g.   "River", "Abhainn", "Uisge" |
+| Named minor   stream or tributary | e.g.   "Allt", "Alltan", "Burn", "Feadan",   "Sruth", "Caochan" |
+| Unnamed minor   stream or tributary | Waterways   with no names |
+| Canal | taken from   dataset attribute "form" |
+| Lake | taken from   dataset attribute "form" |
+
+Lakes:
+
+| Class       | size (ha) |
+|-------------|-----------|
+| Pond        | $<0.2$    |
+| Lochan      | $0.2-2$   |
+| Small loch  | $2-10$    |
+| Mediun loch | $10-100$  |
+| Large loch  | $100-500$ |
+| Major loch  | $>500$    |
 
 {{< include _endmatter.qmd >}}
