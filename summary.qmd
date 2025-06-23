@@ -497,7 +497,9 @@ palette <- colorRampPalette(rev(RColorBrewer::brewer.pal(11, "Spectral")))(100)
 
 ```
 
-Here an interactive demo for the model ran using the hard recreationalist preset persona for the Bush Estate area is showed. First the 4 components layers are showed. You can explore each of the layers (top right corner of the map). Not all layers had values for the specific Bush Estate area so some layers are not mapped. The underlying map was made black and white to make the layers with few values in it more visible. As it is possible to see the components of Landscape (SLSRA) and Natural features (FIPS_N) have either the features present or the feature absent; whilst the Infrastructure and Water components show the distance gradient.
+This interactive demo showcases the model running with the **hard recreationalist preset persona** for the Bush Estate area First the relevant section of the 4 components rasters are showed, which can be explored individually using the layer selector in the top-right corner of the map. Please note that not all layers contain data specific to the Bush Estate area, so some may not be visible.
+
+The base map has been rendered in black and white to enhance the visibility of layers with sparse data. As shown, the **Landscape (SLSRA)** and **Natural Features (FIPS_N)** components display binary data, indicating either the presence or absence of features; whereas the **Infrastructure** and **Water** components present a distance gradient.
 
 Water component:
 
@@ -568,7 +570,7 @@ terra::plet(
 )
 ```
 
-The output of the RP model ran for this example case and a Hard Recreationalist persona profile (from the presets available in the package) is showed in the map below. The contribution of each component to the RP can be observed by switching layer from the controls in the top right corner of the map.
+The output of the RP model for this example case, using the **Hard Recreationalist** persona profile (selected from the available presets), is displayed in the map below. It is possible to explore the contribution of each component to the RP score by switching between layers using the controls in the top-right corner of the map.
 
 ```{r, echo=FALSE, warning=FALSE, results='hide', message = FALSE}
 
