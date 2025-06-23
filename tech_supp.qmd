@@ -13,17 +13,17 @@ While there have been several publications citing the RP model, so far none have
 
 We begin by defining some notation.
 
-Let $I : \mathbb{R}^2 \to \{0, 1\}$ be a binary-valued function that maps pairs of coordinates $x \equiv (x_1, x_2) \in \mathbb{R}^2$ to either $0$ or $1$. This is a mathematical representation of a single raster layer in a '[one-hot](https://en.wikipedia.org/wiki/One-hot)' representation, where a value of $I(x) = 1$ indicates presence of a feature at the coordinate $x$, and $I(x) = 0$ indicates absence. 
+Let $I : \mathbb{R}^2 \to \{0, 1\}$ be a binary-valued function that maps pairs of coordinates $x \equiv (x_1, x_2) \in \mathbb{R}^2$ to either $0$ or $1$. This is a mathematical representation of a single raster layer in a '[one-hot](https://en.wikipedia.org/wiki/One-hot)' representation, where a value of $I(x) = 1$ indicates presence of a feature at the coordinate $x$, and $I(x) = 0$ indicates absence.
 
 The RP model currently includes 87 features/items grouped into four components (see @sec-listitems). Each of these has its own presence/absence raster. We will therefore introduce two subscript indices and write each layer as $I_{ij}(x)$, where
 
-- $i \in \{1, 2, 3, 4\}$ labels the component to which $I_{ij}$ belongs, as specified in @tbl-componentlabels, and
-- $j \in \{1, 2, \ldots, n_i\}$ labels the item/feature within that component, of which there are $n_i$.
+-   $i \in \{1, 2, 3, 4\}$ labels the component to which $I_{ij}$ belongs, as specified in @tbl-componentlabels, and
+-   $j \in \{1, 2, \ldots, n_i\}$ labels the item/feature within that component, of which there are $n_i$.
 
 As a concrete example, if $j=1$ labels the 'pond' item, then $I_{41}(x)$ takes a value of $1$ whenever there is a pond at $x$, and a value of $0$ elsewhere.
 
 | $i$ | Component        | Short code |
-| --- | ---------------- | ---------- |
+|-----|------------------|------------|
 | 1   | Landscape        | `SLSRA`    |
 | 2   | Natural Features | `FIPS_N`   |
 | 3   | Infrastructure   | `FIPS_I`   |
@@ -31,14 +31,17 @@ As a concrete example, if $j=1$ labels the 'pond' item, then $I_{41}(x)$ takes a
 
 : Integer label and short-code for the four components of the RP model {#tbl-componentlabels}
 
-
 ### Proximity contributions
 
-For certain features like rivers and lakes it does not make sense to restrict their contributions to the Recreational Potential to the pixels in which they are present. One does not need to be standing in a lake to appreciate it!^[Indeed this is true for almost every type of feature, but these proximity contributions were only computed for roads/paths and water features.]
+For certain features like rivers and lakes it does not make sense to restrict their contributions to the Recreational Potential to the pixels in which they are present. One does not need to be standing in a lake to appreciate it![^1]
 
-It makes sense to attempt to account for the presence of these features nearby. 
+[^1]: Indeed this is true for almost every type of feature, but these proximity contributions were only computed for roads/paths and water features.
 
-Let $\mathcal{P}_{ij} \subset \mathbb{R}^2$ denote the set of coordinates in which the feature $(ij)$ is present, i.e.^[The right-hand-side of @eq-presence can be read as "The set of all 2d coordinates $x'$ for which the condition $I_{ij}(x') = 1$ is satisfied."]
+It makes sense to attempt to account for the presence of these features nearby.
+
+Let $\mathcal{P}_{ij} \subset \mathbb{R}^2$ denote the set of coordinates in which the feature $(ij)$ is present, i.e.[^2]
+
+[^2]: The right-hand-side of @eq-presence can be read as "The set of all 2d coordinates $x'$ for which the condition $I_{ij}(x') = 1$ is satisfied."
 
 $$
 \mathcal{P}_{ij} := \left\{ x' \in \mathbb{R}^2 \mid I_{ij}(x') = 1 \right\} \, .
@@ -58,17 +61,21 @@ There are many different ways to achieve this. Following @Paracchini2014 [p. 374
 
 $$
 u(d_{ij}(x) \,; \alpha, \kappa) = \frac{\kappa + 1}{\kappa + \exp(\alpha \, d_{ij}(x))} \, .
-$$  {#eq-proximity}
+$$ {#eq-proximity}
 
 It remains to specify values for the parameters $\kappa$ and $\alpha$, the latter of which is most important since it determines the rate at which the value of $u$ declines as the distance to the nearest feature increases.
 
-The parameters chosen in the original version of this code were^[The provenance of these values, which date back to the [earliest version of the code](https://github.com/BioDT/uc-ces/commit/5c5961376df6753725e634378fa709dac1050ff6), has been lost. The precision with which $\alpha$ is given is a particular curiosity.]
+The parameters chosen in the original version of this code were[^3]
+
+[^3]: The provenance of these values, which date back to the [earliest version of the code](https://github.com/BioDT/uc-ces/commit/5c5961376df6753725e634378fa709dac1050ff6), has been lost. The precision with which $\alpha$ is given is a particular curiosity.
 
 $$
 \kappa = 6 \, , \qquad \alpha = 0.01011 \, ,
 $$ {#eq-proxparams}
 
-resulting in a function, @fig-logistic, that halves at $d\approx200$ (metres) and drops to $0.1$ at $d\approx400$.^[Note that this does not exhibit the classic 'S' shape of logistic curves since the domain is restricted to the positive real line (distances are non-negative!).] At this distance, features with a user-provided score of $10$ (i.e. the highest) would be equivalent to a local feature given a score of $1$ (the lowest). It is safe to assume that at distances greater than this the contribution from the feature would be indiscernible to the user.
+resulting in a function, @fig-logistic, that halves at $d\approx200$ (metres) and drops to $0.1$ at $d\approx400$.[^4] At this distance, features with a user-provided score of $10$ (i.e. the highest) would be equivalent to a local feature given a score of $1$ (the lowest). It is safe to assume that at distances greater than this the contribution from the feature would be indiscernible to the user.
+
+[^4]: Note that this does not exhibit the classic 'S' shape of logistic curves since the domain is restricted to the positive real line (distances are non-negative!).
 
 ```{r}
 #| label: fig-logistic
@@ -126,14 +133,16 @@ $$ {#eq-rescale}
 
 each of which corresponds to a particular choice of restriction, i.e. a particular region of interest.
 
-Assuming that $F(x)$ is not a constant function on $\mathcal{R}$,^[If $F(x)$ is constant in the region of interest then the right-hand-side of @eq-rescale diverges and $\hat{F}$ is undefined.] these rescaled functions are 'normalised' to the unit interval *within* the region of interest, i.e. 
+Assuming that $F(x)$ is not a constant function on $\mathcal{R}$,[^5] these rescaled functions are 'normalised' to the unit interval *within* the region of interest, i.e.
+
+[^5]: If $F(x)$ is constant in the region of interest then the right-hand-side of @eq-rescale diverges and $\hat{F}$ is undefined.
 
 $$
 \min_{x\in\mathcal{R}} \hat{F}(x \,; \mathcal{R}) = 0 \, , \qquad
 \max_{x\in\mathcal{R}} \hat{F}(x \,; \mathcal{R}) = 1 \, .
 $$ {#eq-minmax}
 
-It is important to be aware that with this approach to rescaling introduces a dependence on the region of interest. That is, 
+It is important to be aware that with this approach to rescaling introduces a dependence on the region of interest. That is,
 
 $$
 \hat{F}(x \,; \mathcal{R}_1) \neq \hat{F}(x \,; \mathcal{R}_2) \, .
@@ -151,15 +160,14 @@ $$ {#eq-rp}
 
 and rescaled $F_{\text{RP}} \longrightarrow \hat{F}_\text{RP}$ using @eq-rescale once more (with the same $\mathcal{R}$) so that the result falls in the interval $[0, 1]$.
 
-
 ## Production of input rasters
 
 The data production, or raster pre-processing stage refers to the production of the rasters that are directly multiplied by the persona scores in the dynamic part of the model. That is, the output of this stage is four multi-layered rasters $(f_1, f_2, f_3, f_4)$ corresponding to the four components, where $f_i := (f_{i1}, f_{i2}, \ldots, f_{i n_i})$, whose individual layers $f_{ij}$ are defined by @eq-raster12 (for $i = 1, 2$) and @eq-raster23 (for $i=2,3$).
 
 The process of producing these rasters is currently split into two distinct parts:
 
-1. A **manual part** in which categorical rasters are constructed from raw downloaded datasets using QGIS
-2. A **scripted part** in which these categorical rasters are converted into the form required by the model, using `R`.
+1.  A **manual part** in which categorical rasters are constructed from raw downloaded datasets using QGIS
+2.  A **scripted part** in which these categorical rasters are converted into the form required by the model, using `R`.
 
 The scripted part is executed by running `inst/scripts/data_production/main.R` (or the containerised version) with the manually-produced categorical rasters already present. This script mostly just calls functions defined in `R/data_production.R`.
 
@@ -169,11 +177,12 @@ The scripted part is executed by running `inst/scripts/data_production/main.R` (
 # Read table
 table <- readr::read_csv("data_sources.csv", show_col_types = FALSE)
 
-# Drop first col (BES2024 number)
-table <- table[, -1]
+table <- dplyr::select(table,
+  -`BES 2024 Code#`
+)
 
 # Make the access url appear last
-table <- table[, c(1, 2, 4:ncol(table), 3)]
+table <- table[, c(1:4, 6:ncol(table), 5)]
 
 # Display nicely
 knitr::kable(table)
@@ -183,7 +192,7 @@ knitr::kable(table)
 
 #### Landscape component
 
-**TO DO**
+The Landscape component raster consists of 40 layers, each representing one of its features (see [List of items/features] for full list)
 
 #### Natural Features component
 
@@ -219,7 +228,7 @@ Slope data were derived from the Copernicus GLO-30 Digital Elevation Model (DEM)
 : Slopes categories used to reclassify the Copernicus GLO-30 Digital Elevation Model (DEM) data into the 6 "slope" features of the Natural Features component of the RP model.
 
 3.  Upsampling: The slope raster was upsampled to a 20m x 20m resolution in QGIS.\
-        (**do you know which method was used to interpolate?**) (**was the raster first up-sampled to 20m x 20 m and then the slope calculated or the opposite?**)
+    (**do you know which method was used to interpolate?**) (**was the raster first up-sampled to 20m x 20 m and then the slope calculated or the opposite?**)
 
 ##### Soil features
 
@@ -257,36 +266,34 @@ The water component is derived from:
 
 ##### Rivers
 
- Os Open Rivers dataset was reduced from 74997 features, by dissolved by attribute fields “name” and “Region” so that all river segments were joined by a common name. To avoid rivers with the same name but located in different areas being incorrectly joined, “Region” from the OS Boundaries dataset was merged with the OS Open Rivers prior to this step. To reduce the dataset into something scoreable at a national scale, it was decided to use a proxy for river size/regional importance.  This is a subjective process, decided on by the research team.  Seven classes were created and dataset features classified based on either the attribute “form” which was a descriptor for water type, or keywords in the attribute “name” (see table for examples), or researcher knowledge of major rivers of national and regional importance.
+Os Open Rivers dataset was reduced from 74997 features, by dissolved by attribute fields “name” and “Region” so that all river segments were joined by a common name. To avoid rivers with the same name but located in different areas being incorrectly joined, “Region” from the OS Boundaries dataset was merged with the OS Open Rivers prior to this step. To reduce the dataset into something scoreable at a national scale, it was decided to use a proxy for river size/regional importance.  This is a subjective process, decided on by the research team.  Seven classes were created and dataset features classified based on either the attribute “form” which was a descriptor for water type, or keywords in the attribute “name” (see table for examples), or researcher knowledge of major rivers of national and regional importance.
 
-| Class                             | Example search terms or process                             |
-|:--------------------------------- |:----------------------------------------------------------- |
-| Major river or tributary          | Specific e.g. "Tay", "Spey" etc.                            |
-| Tidal river or estuary            | taken from dataset attribute "form"                         |
-| Minor river or tributary          | e.g. "River", "Abhainn", "Uisge"                            |
-| Named minor stream or tributary   | e.g. "Allt", "Alltan", "Burn", "Feadan", "Sruth", "Caochan" |
+| Class | Example search terms or process |
+|:-------------------------|:--------------------------------------------|
+| Major river or tributary | Specific e.g. "Tay", "Spey" etc. |
+| Tidal river or estuary | taken from dataset attribute "form" |
+| Minor river or tributary | e.g. "River", "Abhainn", "Uisge" |
+| Named minor stream or tributary | e.g. "Allt", "Alltan", "Burn", "Feadan", "Sruth", "Caochan" |
 | Unnamed minor stream or tributary | e.g. "Allt", "Alltan", "Burn", "Feadan", "Sruth", "Caochan" |
-| Canal                             | taken from dataset attribute "form"                         |
-| Lake                              | taken from dataset attribute "form"                         |
+| Canal | taken from dataset attribute "form" |
+| Lake | taken from dataset attribute "form" |
 
 : Water rivers classification
-
 
 ##### Lakes
 
 The Spatial inventory of UK waterbodies dataset contained 25404 features for Scotland.  To make it into a relevant and scorable dataset it was reduced to six features based on the given size (in hectares) of a waterbody using the attribute “Poly_Area_Ha”.  Classification was as follows:
 
-| Class        | size (ha) |
-| ------------ | --------- |
-| Pond         | $<0.2$    |
-| Lochan       | $0.2-2$   |
-| Small loch   | $2-10$    |
+| Class       | size (ha) |
+|-------------|-----------|
+| Pond        | $<0.2$    |
+| Lochan      | $0.2-2$   |
+| Small loch  | $2-10$    |
 | Mediun loch | $10-100$  |
 | Large loch  | $100-500$ |
-| Major loch  | $>500$    | 
+| Major loch  | $>500$    |
 
 : water lakes
-
 
 ### Quantising the slope raster
 
@@ -313,9 +320,9 @@ The categorical rasters produced in the previous stage do not necessarily share 
 
 We projected all rasters onto a reference raster with the following properties:
 
-- **Coordinate reference system** (CRS): [EPSG:27700](https://epsg.io/27700) (British National Grid)
-- **Resolution**: 20 metres x 20 metres
-- **Extent**: $(x_\text{min}, x_\text{max}, y_\text{min}, y_\text{max}) = (-10000, 660000, 460000, 1220000)$, which is a rectangular box around Scotland.
+-   **Coordinate reference system** (CRS): [EPSG:27700](https://epsg.io/27700) (British National Grid)
+-   **Resolution**: 20 metres x 20 metres
+-   **Extent**: $(x_\text{min}, x_\text{max}, y_\text{min}, y_\text{max}) = (-10000, 660000, 460000, 1220000)$, which is a rectangular box around Scotland.
 
 We used the 'nearest' interpolation mode (`method="near"`) since the data is categorical. The reprojected rasters therefore contain the same set of integer values as the original rasters.
 
@@ -378,36 +385,36 @@ $$ {#eq-onehot}
 
 The implementation of this step involves the use of `terra::lapp` to parallelise the calculation over the spatial domain. In practice we use `NA` instead of `0` to denote absence.
 
-```R
+``` r
 one_hot_pixel <- function(x) {  # <1>
-	out <- matrix(0, nrow = length(x), ncol = length(feature_mapping))
-	for (i in seq_along(feature_mapping)) {
-		out[, i] <- ifelse(x == as.numeric(feature_mapping[i]), 1, NA)
-	}
-	return(out)
+    out <- matrix(0, nrow = length(x), ncol = length(feature_mapping))
+    for (i in seq_along(feature_mapping)) {
+        out[, i] <- ifelse(x == as.numeric(feature_mapping[i]), 1, NA)
+    }
+    return(out)
 }  # <1>
 
 layer <- terra::lapp(  # <2>
-	layer,  # <2>
-	fun = one_hot_pixel,  # <2>
-	filename = outfile,  # <3>
-	overwrite = TRUE,
-	wopt = list(
-		names = names(feature_mapping),
-		datatype = "INT1U"
-	)  # <3>
+    layer,  # <2>
+    fun = one_hot_pixel,  # <2>
+    filename = outfile,  # <3>
+    overwrite = TRUE,
+    wopt = list(
+        names = names(feature_mapping),
+        datatype = "INT1U"
+    )  # <3>
 )
 ```
 
-1. Take a single pixel value (`x`) of a single-layered raster and return the one-hot representation at that point, i.e. a vector of `n_i` values of which up to one is `1` (present) and the remainder are `NA` (absent).
-2. Apply this function in a vectorised fashion to every pixel of the input faster.
-3. Write the outputs to `outfile` as they are computed, to reduce memory requirements.
+1.  Take a single pixel value (`x`) of a single-layered raster and return the one-hot representation at that point, i.e. a vector of `n_i` values of which up to one is `1` (present) and the remainder are `NA` (absent).
+2.  Apply this function in a vectorised fashion to every pixel of the input faster.
+3.  Write the outputs to `outfile` as they are computed, to reduce memory requirements.
 
 ### Stacking into component rasters
 
 This stage is nothing more than combining many single-layered rasters files into a single multi-layered raster for each component. Roughly speaking, we do
 
-```R
+``` r
 # Construct a list of rasters from each .tif file in `infiles`
 rasters <- lapply(infiles, terra::rast)
 
@@ -424,11 +431,12 @@ terra::writeRaster(stacked, outfile)
 
 Note that `terra::rast(rasters)` does not preserve layer names when `rasters` is a list of rasters, hence the need for the two lines prior to `writeRaster`.
 
-:::{.callout-warning}
+::: callout-warning
 #### A warning about layer names
+
 It is *very* unfortunate that the names we have used for the layers follow the same format (`filename_i` for integers `i`) as the names that are automatically generated by `terra::rast`. Because of this, if these two lines that re-apply layer names are omitted, it is not obvious that anything is wrong; no error will be thrown and one can go onto compute RP values, since the names are as expected.
 
-However, *the results will be wrong*, since `terra::rast` will apply _the right names in the wrong order_.
+However, *the results will be wrong*, since `terra::rast` will apply *the right names in the wrong order*.
 
 Future developers are strongly recommended to fix this problem by using different layer names. This issue and suggested solutions are discussed in depth in the [Developers' Report](dev_report.html#sec-layernames).
 :::
@@ -437,15 +445,15 @@ Future developers are strongly recommended to fix this problem by using differen
 
 This stage applies @eq-distance and @eq-proximity to each layer of the Infrastructure and Water components.
 
-In fact @eq-distance is the most challenging computation in the whole processing pipeline, due to the fact that its memory requirements scale poorly with the size of the input raster. 
+In fact @eq-distance is the most challenging computation in the whole processing pipeline, due to the fact that its memory requirements scale poorly with the size of the input raster.
 
 Every single other processing step is entirely local; all of the information required to generate an output value for a pixel at coordinate $x$ is contained in the input pixels at coordinate $x$. This makes it trivial to process the data in chunks, and memory costs scale linearly with the area of the chunks.
 
-In contrast, calculating distance to the nearest feature is strongly non-local; the output value at $x$ is a function of the full set of input values. Naively, the entire raster must be loaded to compute the output at a single location. 
+In contrast, calculating distance to the nearest feature is strongly non-local; the output value at $x$ is a function of the full set of input values. Naively, the entire raster must be loaded to compute the output at a single location.
 
 To perform this calculation we used [`terra::distance`](https://rspatial.github.io/terra/reference/distance.html). It is not necessarily true that the underlying C++ implementation of `GDALComputeProximity`, which is called by `terra::distance`, actually loads the entire raster into memory immediately. However, for Scotland at 20 metre resolution, we found that the memory requirements for this distance calculation (several 10s of GB) surpass the typical memory available on a standard personal computer by an order of magnitude.
 
-To get around this issue, the original Scotland-wide raster was divided into 20 overlapping spatial 'windows'. Note that the size of the overlap needed to be at least as large as the effective cutoff distance of 500m. After the distance step was complete within each window, the windows were stitched together, discarding the overlaps. 
+To get around this issue, the original Scotland-wide raster was divided into 20 overlapping spatial 'windows'. Note that the size of the overlap needed to be at least as large as the effective cutoff distance of 500m. After the distance step was complete within each window, the windows were stitched together, discarding the overlaps.
 
 The distance raster was also truncated at 500m, setting any values above this to `NA` which simply passes through the function applying @eq-proximity and ensures that we don't waste disk space storing high-precision floats that are functionally equivalent to zero.
 
@@ -455,8 +463,7 @@ The distance raster was also truncated at 500m, setting any values above this to
 
 To account for proximity effects, the distance from each cell to the nearest infrastructure feature was calculated using the `terra::distance()` function in R. The resulting raster, labeled **"distance"** in the example map, contains the distance in meters from the center of each cell to the nearest feature. This raster is named "**scored**" in the example map, using the distance decay function.
 
-:::{.content-visible when-format="html"}
-
+::: {.content-visible when-format="html"}
 ```{r, echo=FALSE}
 library(magrittr)
 library(biodt.recreation)
@@ -510,18 +517,18 @@ make_layer_map_dist(rstack = fips_i_rstack, base_map,
                     show_index = 2,
                     color_original = "#DA627D")
 ```
-
 :::
+
 ## List of items/features {#sec-listitems}
 
 Here we list the full set of 87 items/features that make up the layers of the input rasters, and must be scored by the user to construct a persona.
 
-| Component        | Short code | Num. layers | Description                                                                                  |
-| ---------------- | ---------- | ----------- | -------------------------------------------------------------------------------------------- |
-| Landscape        | `SLSRA`    | 40          | Land cover type, landscape designations and conservation, and farmland of high nature value. |
-| Natural Features | `FIPS_N`   | 24          | Landform types, soil types and slope.                                                        |
-| Infrastructure   | `FIPS_I`   | 10          | Roads, tracks, footpaths and cycle networks.                                                 |
-| Water            | `Water`    | 13          | Lakes and rivers.                                                                            |
+| Component | Short code | Num. layers | Description |
+|----------|----------|----------|------------------------------------------|
+| Landscape | `SLSRA` | 40 | Land cover type, landscape designations and conservation, and farmland of high nature value. |
+| Natural Features | `FIPS_N` | 24 | Landform types, soil types and slope. |
+| Infrastructure | `FIPS_I` | 10 | Roads, tracks, footpaths and cycle networks. |
+| Water | `Water` | 13 | Lakes and rivers. |
 
 ```{r, echo=FALSE}
 config <- biodt.recreation::load_config()
@@ -539,7 +546,7 @@ dplyr::select(config_by_component$SLSRA, Name, Description) |>
 	knitr::kable(format = "html")
 ```
 
-:::{.content-visible when-format="html"}
+::: {.content-visible when-format="html"}
 ```{r, echo=FALSE}
 make_layer_map(rstack = slsra,  base_map = base_map,
                show_index = 5, #start with SLSRA_LCM_6 selected as example
@@ -547,9 +554,10 @@ make_layer_map(rstack = slsra,  base_map = base_map,
 ```
 :::
 
-:::{.callout-tip}
+::: callout-tip
 The interactive version of this document contains maps that allow you to toggle individual layers.
 :::
+
 ### Natural Features component
 
 ```{r, echo=FALSE}
@@ -560,8 +568,7 @@ dplyr::select(config_by_component$FIPS_N, Name, Description) |>
 	knitr::kable(format = "html")
 ```
 
-
-:::{.content-visible when-format="html"}
+::: {.content-visible when-format="html"}
 ```{r, echo=FALSE}
 make_layer_map(rstack = fips_n,  base_map = base_map,
                show_index = 5, #start with FIPS_N_Landform_16 selected as example
@@ -580,7 +587,6 @@ dplyr::select(config_by_component$FIPS_I, Name, Description) |>
 	knitr::kable(format = "html")
 ```
 
-
 ### Water component
 
 ```{r, echo=FALSE}
@@ -591,7 +597,7 @@ dplyr::select(config_by_component$Water, Name, Description) |>
 	knitr::kable(format = "html")
 ```
 
-:::{.content-visible when-format="html"}
+::: {.content-visible when-format="html"}
 ```{r, echo=FALSE, out.height = 650}
 water_rstack <- list(
   "original" = water,
@@ -604,7 +610,5 @@ make_layer_map_dist(rstack = water_rstack, base_map,
                     color_original = "#4E6766")
 ```
 :::
-
-
 
 {{< include _endmatter.qmd >}}
