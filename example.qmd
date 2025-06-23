@@ -20,7 +20,6 @@ R.version.string
 
 Certain C++ libraries are required for the model to work, most importantly related to GDAL. See the [`terra` documentation](https://rspatial.github.io/terra/) for guidance.
 
-
 It is recommended to perform the following steps using an `R` environment managed by [`renv`](https://rstudio.github.io/renv/).
 
 Ensure you have either `remotes` or `devtools` installed (using e.g. `install.packages` or `renv::install`).
@@ -29,7 +28,9 @@ Ensure you have either `remotes` or `devtools` installed (using e.g. `install.pa
 install.packages("remotes")
 ```
 
-Now install the package itself. We will target version 1.0.^[Since future updates to the code may be incompatible with this notebook, we will target the specific version released at the time this notebook was written.]
+Now install the package itself. We will target version 1.0.[^1]
+
+[^1]: Since future updates to the code may be incompatible with this notebook, we will target the specific version released at the time this notebook was written.
 
 ```{r}
 remotes::install_github("BioDT/uc-ces-recreation", ref="v1.0")
@@ -42,17 +43,20 @@ options(timeout=1200)
 biodt.recreation::download_data()
 ```
 
-:::{.callout-tip}
+::: callout-tip
 ### Where are the files?
-Do not be alarmed if you cannot see any new files appearing in your working directory. When `download_data` is called without arguments, the data will be downloaded to the default location which is _inside the directory in which the package is installed_ (under the subdirectory `extdata/rasters/Scotland/`). You may not know where on your filesystem packages are installed, but that's ok --- the package knows where to look for these files.
+
+Do not be alarmed if you cannot see any new files appearing in your working directory. When `download_data` is called without arguments, the data will be downloaded to the default location which is *inside the directory in which the package is installed* (under the subdirectory `extdata/rasters/Scotland/`). You may not know where on your filesystem packages are installed, but that's ok --- the package knows where to look for these files.
 :::
 
 ## The preset personas
 
-We first demonstrate the RP Model applied to an area surrounding the Bush estate near Edinburgh^[This is where the UK Centre for Ecology & Hydrology is based.] using two contrasting personas:
+We first demonstrate the RP Model applied to an area surrounding the Bush estate near Edinburgh[^2] using two contrasting personas:
 
-1. **_Hard Recreationalist_**: this persona values remote, challenging environments and avoids built-up or highly managed areas.
-2. **_Soft Recreationalist_**: this persona values tranquil, accessible landscapes and natural water features, and avoids steep or harsh terrain.
+[^2]: This is where the UK Centre for Ecology & Hydrology is based.
+
+1.  ***Hard Recreationalist***: this persona values remote, challenging environments and avoids built-up or highly managed areas.
+2.  ***Soft Recreationalist***: this persona values tranquil, accessible landscapes and natural water features, and avoids steep or harsh terrain.
 
 The resulting maps will illustrate how different preferences lead to different areas being highlighted for recreational value.
 
@@ -108,7 +112,7 @@ persona_hist <- function(persona) {
 
     # Scores for this component
     persona_subset <- persona[grep(paste0("^", component), names(persona))]
-    
+
     # Construct histogram with 11 equally space bins centred on
     # the integers 0, 1, ..., 10.
     hist(
@@ -122,23 +126,27 @@ persona_hist <- function(persona) {
 }
 ```
 
-:::{.panel-tabset}
+::: panel-tabset
 ### Hard Recreationalist
+
 ```{r}
 persona_hist(hard_recreationalist)
 ```
+
 ```{r}
 persona_table(hard_recreationalist)
 ```
+
 ### Soft Recreationalist
+
 ```{r}
 persona_hist(soft_recreationalist)
 ```
+
 ```{r}
 persona_table(soft_recreationalist)
 ```
 :::
-
 
 ## Computing Recreational Potential
 
@@ -157,27 +165,30 @@ layers_sr <- compute_potential(soft_recreationalist, bbox)
 
 This returns a raster with 5 named layers.
 
-1. `SLSRA`
-2. `FIPS_N`
-3. `FIPS_I`
-4. `Water`
-5. `Recreational_Potential`
+1.  `SLSRA`
+2.  `FIPS_N`
+3.  `FIPS_I`
+4.  `Water`
+5.  `Recreational_Potential`
 
 To plot all layers together we could simply call `terra::plot(layers)`. However, here we will separate the components plot from the RP plot.
 
 ```{r}
-# Set the colour palette for the heatmaps
+#Set the colour palette for the heatmaps
 palette <- terra::map.pal("bgyr")
 ```
 
 First, the component layers.
 
-:::{.panel-tabset}
+::: panel-tabset
 ### Hard Recreationalist
+
 ```{r}
 terra::panel(terra::subset(layers_hr, 1:4), nc=2, col=palette)
 ```
+
 ### Soft Recreationalist
+
 ```{r}
 terra::panel(terra::subset(layers_sr, 1:4), nc=2, col=palette)
 ```
@@ -185,12 +196,15 @@ terra::panel(terra::subset(layers_sr, 1:4), nc=2, col=palette)
 
 Next, the Recreational Potential layers.
 
-:::{.panel-tabset}
+::: panel-tabset
 ### Hard Recreationalist
+
 ```{r}
 terra::plot(layers_hr$Recreational_Potential, col=palette)
 ```
+
 ### Soft Recreationalist
+
 ```{r}
 terra::plot(layers_sr$Recreational_Potential, col=palette)
 ```
@@ -198,7 +212,9 @@ terra::plot(layers_sr$Recreational_Potential, col=palette)
 
 ## Defining a region of interest
 
-A rectangular region of interest can be easily constructed using [`terra::ext`](https://rspatial.github.io/terra/reference/ext.html) by passing a vector of coordinates `(xmin, xmax, ymin, ymax)`.^[A region of interest may also be given by a path to a shapefile.] 
+A rectangular region of interest can be easily constructed using [`terra::ext`](https://rspatial.github.io/terra/reference/ext.html) by passing a vector of coordinates `(xmin, xmax, ymin, ymax)`.[^3]
+
+[^3]: A region of interest may also be given by a path to a shapefile.
 
 ```{r}
 xmin <- 300000
@@ -228,7 +244,7 @@ Creating or editing personas is far easier using the Shiny app, some spreadsheet
 Let's say we want to modify the Hard Recreationalist persona to better fit an off-road cyclist who does not want to cycle straight up a mountain. We will edit the slope scores and the cycle path scores.
 
 ```{r}
-# Note that assignment + edit in R automatically results in a copy!
+Note that assignment + edit in R automatically results in a copy!
 custom_persona <- hard_recreationalist
 
 custom_persona[["FIPS_I_NationalCycleNetwork_1"]] <- 5  # on-road, paved
@@ -252,28 +268,33 @@ layers_hr <- compute_potential(hard_recreationalist, bbox)
 layers_custom <- compute_potential(custom_persona, bbox)
 ```
 
-:::{.panel-tabset}
+::: panel-tabset
 ### Hard Recreationalist
+
 ```{r}
 terra::panel(terra::subset(layers_hr, 1:4), nc=2, col=palette)
 ```
+
 ### Custom Persona
+
 ```{r}
 terra::panel(terra::subset(layers_custom, 1:4), nc=2, col=palette)
 ```
 :::
 
-:::{.panel-tabset}
+::: panel-tabset
 ### Hard Recreationalist
+
 ```{r}
 terra::plot(layers_hr$Recreational_Potential, col=palette)
 ```
+
 ### Custom Persona
+
 ```{r}
 terra::plot(layers_custom$Recreational_Potential, col=palette)
 ```
 :::
-
 
 ## Interactive plots
 
@@ -283,6 +304,6 @@ To create a simple interactive plot is very easy using [`terra::plet`](https://r
 terra::plet(layers_custom, 1:5, col=palette, tiles="Esri.WorldImagery", shared=TRUE)
 ```
 
-You can explore different background tiles over at [https://leaflet-extras.github.io/leaflet-providers/preview/](https://leaflet-extras.github.io/leaflet-providers/preview/).
+You can explore different background tiles over at <https://leaflet-extras.github.io/leaflet-providers/preview/>.
 
 {{< include _endmatter.qmd >}}
