@@ -13,17 +13,17 @@ While there have been several publications citing the RP model, so far none have
 
 We begin by defining some notation.
 
-Let $I : \mathbb{R}^2 \to \{0, 1\}$ be a binary-valued function that maps pairs of coordinates $x \equiv (x_1, x_2) \in \mathbb{R}^2$ to either $0$ or $1$. This is a mathematical representation of a single raster layer in a '[one-hot](https://en.wikipedia.org/wiki/One-hot)' representation, where a value of $I(x) = 1$ indicates presence of a feature at the coordinate $x$, and $I(x) = 0$ indicates absence. 
+Let $I : \mathbb{R}^2 \to \{0, 1\}$ be a binary-valued function that maps pairs of coordinates $x \equiv (x_1, x_2) \in \mathbb{R}^2$ to either $0$ or $1$. This is a mathematical representation of a single raster layer in a '[one-hot](https://en.wikipedia.org/wiki/One-hot)' representation, where a value of $I(x) = 1$ indicates presence of a feature at the coordinate $x$, and $I(x) = 0$ indicates absence.
 
 The RP model currently includes 87 features/items grouped into four components (see @sec-listitems). Each of these has its own presence/absence raster. We will therefore introduce two subscript indices and write each layer as $I_{ij}(x)$, where
 
-- $i \in \{1, 2, 3, 4\}$ labels the component to which $I_{ij}$ belongs, as specified in @tbl-componentlabels, and
-- $j \in \{1, 2, \ldots, n_i\}$ labels the item/feature within that component, of which there are $n_i$.
+-   $i \in \{1, 2, 3, 4\}$ labels the component to which $I_{ij}$ belongs, as specified in @tbl-componentlabels, and
+-   $j \in \{1, 2, \ldots, n_i\}$ labels the item/feature within that component, of which there are $n_i$.
 
 As a concrete example, if $j=1$ labels the 'pond' item, then $I_{41}(x)$ takes a value of $1$ whenever there is a pond at $x$, and a value of $0$ elsewhere.
 
 | $i$ | Component        | Short code |
-| --- | ---------------- | ---------- |
+|-----|------------------|------------|
 | 1   | Landscape        | `SLSRA`    |
 | 2   | Natural Features | `FIPS_N`   |
 | 3   | Infrastructure   | `FIPS_I`   |
@@ -31,14 +31,17 @@ As a concrete example, if $j=1$ labels the 'pond' item, then $I_{41}(x)$ takes a
 
 : Integer label and short-code for the four components of the RP model {#tbl-componentlabels}
 
-
 ### Proximity contributions
 
-For certain features like rivers and lakes it does not make sense to restrict their contributions to the Recreational Potential to the pixels in which they are present. One does not need to be standing in a lake to appreciate it!^[Indeed this is true for almost every type of feature, but these proximity contributions were only computed for roads/paths and water features.]
+For certain features like rivers and lakes it does not make sense to restrict their contributions to the Recreational Potential to the pixels in which they are present. One does not need to be standing in a lake to appreciate it![^1]
 
-It makes sense to attempt to account for the presence of these features nearby. 
+[^1]: Indeed this is true for almost every type of feature, but these proximity contributions were only computed for roads/paths and water features.
 
-Let $\mathcal{P}_{ij} \subset \mathbb{R}^2$ denote the set of coordinates in which the feature $(ij)$ is present, i.e.^[The right-hand-side of @eq-presence can be read as "The set of all 2d coordinates $x'$ for which the condition $I_{ij}(x') = 1$ is satisfied."]
+It makes sense to attempt to account for the presence of these features nearby.
+
+Let $\mathcal{P}_{ij} \subset \mathbb{R}^2$ denote the set of coordinates in which the feature $(ij)$ is present, i.e.[^2]
+
+[^2]: The right-hand-side of @eq-presence can be read as "The set of all 2d coordinates $x'$ for which the condition $I_{ij}(x') = 1$ is satisfied."
 
 $$
 \mathcal{P}_{ij} := \left\{ x' \in \mathbb{R}^2 \mid I_{ij}(x') = 1 \right\} \, .
@@ -58,17 +61,21 @@ There are many different ways to achieve this. Following @Paracchini2014 [p. 374
 
 $$
 u(d_{ij}(x) \,; \alpha, \kappa) = \frac{\kappa + 1}{\kappa + \exp(\alpha \, d_{ij}(x))} \, .
-$$  {#eq-proximity}
+$$ {#eq-proximity}
 
 It remains to specify values for the parameters $\kappa$ and $\alpha$, the latter of which is most important since it determines the rate at which the value of $u$ declines as the distance to the nearest feature increases.
 
-The parameters chosen in the original version of this code were^[The provenance of these values, which date back to the [earliest version of the code](https://github.com/BioDT/uc-ces/commit/5c5961376df6753725e634378fa709dac1050ff6), has been lost. The precision with which $\alpha$ is given is a particular curiosity.]
+The parameters chosen in the original version of this code were[^3]
+
+[^3]: The provenance of these values, which date back to the [earliest version of the code](https://github.com/BioDT/uc-ces/commit/5c5961376df6753725e634378fa709dac1050ff6), has been lost. The precision with which $\alpha$ is given is a particular curiosity.
 
 $$
 \kappa = 6 \, , \qquad \alpha = 0.01011 \, ,
 $$ {#eq-proxparams}
 
-resulting in a function, @fig-logistic, that halves at $d\approx200$ (metres) and drops to $0.1$ at $d\approx400$.^[Note that this does not exhibit the classic 'S' shape of logistic curves since the domain is restricted to the positive real line (distances are non-negative!).] At this distance, features with a user-provided score of $10$ (i.e. the highest) would be equivalent to a local feature given a score of $1$ (the lowest). It is safe to assume that at distances greater than this the contribution from the feature would be indiscernible to the user.
+resulting in a function, @fig-logistic, that halves at $d\approx200$ (metres) and drops to $0.1$ at $d\approx400$.[^4] At this distance, features with a user-provided score of $10$ (i.e. the highest) would be equivalent to a local feature given a score of $1$ (the lowest). It is safe to assume that at distances greater than this the contribution from the feature would be indiscernible to the user.
+
+[^4]: Note that this does not exhibit the classic 'S' shape of logistic curves since the domain is restricted to the positive real line (distances are non-negative!).
 
 ```{r}
 #| label: fig-logistic
@@ -126,14 +133,16 @@ $$ {#eq-rescale}
 
 each of which corresponds to a particular choice of restriction, i.e. a particular region of interest.
 
-Assuming that $F(x)$ is not a constant function on $\mathcal{R}$,^[If $F(x)$ is constant in the region of interest then the right-hand-side of @eq-rescale diverges and $\hat{F}$ is undefined.] these rescaled functions are 'normalised' to the unit interval *within* the region of interest, i.e. 
+Assuming that $F(x)$ is not a constant function on $\mathcal{R}$,[^5] these rescaled functions are 'normalised' to the unit interval *within* the region of interest, i.e.
+
+[^5]: If $F(x)$ is constant in the region of interest then the right-hand-side of @eq-rescale diverges and $\hat{F}$ is undefined.
 
 $$
 \min_{x\in\mathcal{R}} \hat{F}(x \,; \mathcal{R}) = 0 \, , \qquad
 \max_{x\in\mathcal{R}} \hat{F}(x \,; \mathcal{R}) = 1 \, .
 $$ {#eq-minmax}
 
-It is important to be aware that with this approach to rescaling introduces a dependence on the region of interest. That is, 
+It is important to be aware that with this approach to rescaling introduces a dependence on the region of interest. That is,
 
 $$
 \hat{F}(x \,; \mathcal{R}_1) \neq \hat{F}(x \,; \mathcal{R}_2) \, .
@@ -151,15 +160,14 @@ $$ {#eq-rp}
 
 and rescaled $F_{\text{RP}} \longrightarrow \hat{F}_\text{RP}$ using @eq-rescale once more (with the same $\mathcal{R}$) so that the result falls in the interval $[0, 1]$.
 
-
 ## Production of input rasters
 
 The data production, or raster pre-processing stage refers to the production of the rasters that are directly multiplied by the persona scores in the dynamic part of the model. That is, the output of this stage is four multi-layered rasters $(f_1, f_2, f_3, f_4)$ corresponding to the four components, where $f_i := (f_{i1}, f_{i2}, \ldots, f_{i n_i})$, whose individual layers $f_{ij}$ are defined by @eq-raster12 (for $i = 1, 2$) and @eq-raster23 (for $i=2,3$).
 
 The process of producing these rasters is currently split into two distinct parts:
 
-1. A **manual part** in which categorical rasters are constructed from raw downloaded datasets using QGIS
-2. A **scripted part** in which these categorical rasters are converted into the form required by the model, using `R`.
+1.  A **manual part** in which categorical rasters are constructed from raw downloaded datasets using QGIS
+2.  A **scripted part** in which these categorical rasters are converted into the form required by the model, using `R`.
 
 The scripted part is executed by running `inst/scripts/data_production/main.R` (or the containerised version) with the manually-produced categorical rasters already present. This script mostly just calls functions defined in `R/data_production.R`.
 
@@ -169,11 +177,12 @@ The scripted part is executed by running `inst/scripts/data_production/main.R` (
 # Read table
 table <- readr::read_csv("data_sources.csv", show_col_types = FALSE)
 
-# Drop first col (BES2024 number)
-table <- table[, -1]
+table <- dplyr::select(table,
+  -`BES 2024 Code#`
+)
 
-# Make the access url appear last
-table <- table[, c(1, 2, 4:ncol(table), 3)]
+# no need for url as saved in bib (col 5)
+table <- table[, c(1:4, 6:ncol(table))]
 
 # Display nicely
 knitr::kable(table)
@@ -183,110 +192,107 @@ knitr::kable(table)
 
 #### Landscape component
 
-**TO DO**
+The Landscape component raster consists of 40 layers, each representing one of its features (see [List of items/features] for full list). These features can be grouped into different sub-categories:
+
+-   CP (1 feature) : The Country Parks (CP) feature was sourced from @naturescot2020countryparks.
+
+-   HNV (1 feature): The High Nature Value farming feature was sourced from @eea2023hnv.
+
+-   LCM (28 features): The Land Cover Map (LCM) featured were sourced from @naturescot2023habitat.
+
+-   NNR (1 feature): The Natural Nature Reserves (NNR) feature was sourced from @naturescot2022nnr
+
+-   NP (1 feature): The National Parks (NP) feature was sourced from @stirling2024nationalparks
+
+-   NR (1 feature): The Nature Reserves (NR) feature was sourced from @naturescot2021reserves
+
+-   RP (1 feature): The Regional Parks (RP) feature was sourced from @naturescot2022regionalparks
+
+-   RSPB (1 feature): The Protected sites for birds feature was sourced from @rspb2024reserves
+
+-   SAC (1 feature): The Special Area for Conservation (SAC) feature was sourced from @naturescot2023sac
+
+-   SPA (1 feature): The Special Protection Areas (SPA) feature was sourced form @naturescot2023spa
+
+-   SSSI (1 feature): The Sites of Specific Scientific Interest (SSSI) feature was sourced from @naturescot2024sssi
+
+-   SWT (1 feature): The Scottish Wildlife Trust (SWT) feature was sourced from @swt2024reserveboundaries
+
+-   WLA (1 feature): The Wild Land Area (WLA) feature was sourced form @naturescot2014wildland
+
+The datasets used for this component were clipped to a Scotland Boundary shapefile [@ons2018nuts], and they were rasterized to a 20m x 20m resolution.
 
 #### Natural Features component
 
-The 24 features in this component are grouped into three main categories: Landform (16 features), Slope (6 features), and Soil (2 features)
+The 24 features in this component are grouped into three main categories:
 
-##### Landform features
+-   Landform features (16 features): The landform data was extracted from the Scotland 250K Soils Map. [@hutton2022soil]. The following methodologies were applied:
 
-The landform data was extracted from the Scotland 250K Soils Map (**CHRIS add APA citation**). The following methodologies were applied:
+    1.  Dissolve: the dataset was “dissolved” in QGIS using the “Landform“ attribute, reducing it to 334 unique polygon features.
 
-1.  Initial dissolve: the dataset was "dissolved" in QGIS using the Landform field, reducing it to 334 unique polygon features.
+    2.  Grouping: the 334 landform types were manually grouped into 16 broader categories based on descriptive keywords (e.g. “hills”, “foothills” etc…) see ([Appendix I: Groups of landform features]).
 
-2.  Grouping: the 334 landform types were manually grouped into 16 broader categories based on descriptive keywords (e.g. "hills", "foothills" etc...). (**Chris can you confirm they were 16 and not 17? For transparency and reprodcucibility, a table in the appending mapping the original attributes to the grouped category would be ideal)**
+    3.  Rasterization: the dataset was converted into a raster at a 20 m x 20 m resolution.
 
-3.  Final dissolve and resterization: The grouped dataset was dissolved again to generate one polygon per broad category. Finally, the data-sets was converted into raster format at a 20 m x 20 m resolution, with each layer corresponding to one of the 16 landform categories.
+-   Slope features (6 features): Slope data were derived from the Copernicus GLO-30 Digital Elevation Model (DEM), a global 30 m resolution dataset [@esa2021dem]. The following methodology was applied:
 
-##### Slope features
+    1.   Slope calculation: the DEM was converted into a matching CRS (EPSG: 27700) using Warp (Reproject) using QGIS, with a slope raster calculated using GDAL Slope with its default settings.
 
-Slope data were derived from the Copernicus GLO-30 Digital Elevation Model (DEM), a global 30 m resolution dataset (**CHRIS add APA citation and confirm resolution**). The following methodologies were applied:
+    2.  Up-sampling: the raster was resampled to a 20 m x 20 m resolution.
 
-1.  Slope calculation: the DEM the elevation data were converted into slopes using QGIS (**chris, was this using GDAL in its default setting?**).
+<!-- -->
 
-2.  Reclassification: The continuous slope values were re-classified into six slopes classes (which form the six slope features) (see Table X). (**Chris were this category picked by you or do they come from somewhere? I think we need to specify this**)
+-   Soil features (2 features): The landform data was derived from the Scotland 250K Soils Map [@hutton2022soil] The following methodology was applied:
 
-| Slope (%) | Slope description     |
-|-----------|-----------------------|
-| \<3       | easy                  |
-| 3-5       | gentle slope          |
-| 5-10      | medium slope          |
-| 10-20     | steep slope           |
-| 20-30     | very steep slope      |
-| \>30      | extremely steep slope |
+    1.  Initial dissolve: The dataset was “dissolved” by field “genSoilTyp” in QGIS, reducing it to 12 unique attribute values.
 
-: Slopes categories used to reclassify the Copernicus GLO-30 Digital Elevation Model (DEM) data into the 6 "slope" features of the Natural Features component of the RP model.
+    2.  Grouping: The values were manually aggregated into two soil classes: organic (peat) and mineral based on the original classifications (see [Appendix II: Groups Soil features]).
 
-3.  Upsampling: The slope raster was upsampled to a 20m x 20m resolution in QGIS.\
-        (**do you know which method was used to interpolate?**) (**was the raster first up-sampled to 20m x 20 m and then the slope calculated or the opposite?**)
-
-##### Soil features
-
-The ==landform data was extracted from the Scotland 250K Soils Map== (**APA citation**). The following methodologies were applied:
-
-1.  Initial dissolve: The dataset was "dissolved" by field “genSoilTyp” in QGIS, reducing it to 12 unique attribute values (12 soil types).
-
-2.  Grouping: These were manually grouped into 2 soil categories: orgnaic (peat) and mineral. (**chris, table with what soil type was assigned to each group**).
-
-3.  Final dissolve and rasterization: The grouped dataset was dissolved again to the new soil type. Finally, the data-sets was converted into raster format at a 20 m x 20 m resolution.
+    3.  Rasterization: the dataset was converted into a raster at a 20 m x 20 m resolution.
 
 #### Infrastructure Features component
 
-The infrastructure component (FIPS_I.tif) is derived from a raster indicating the presence/absence or vicinity to 10 infrastructure features. The file for this component is derived through a three-step process:
+The 10 features are grouped into three main categories:
 
-To begin with, a raster with a value of 1 for cells where the features is present, and 0 or NAs for the cells where the feature is absent. The 10 features are grouped into three main categories: "Roads Tracks" (5 features), "Cycle Network" (4 features), and Local Path Network" (1 feature):
+-   Roads Tracks (5 features): Road Tracks data was sourced from the OS OpenRoads dataset [@os2023roads]. The following methodologies were applied:
 
-##### Roads and Tracks
+    1.   Dissolve: The OpenRoads dataset [@os2023roads] was “dissolved” in QGIS by the field “Road type” and “Tracks”.
 
-Road Tracks data was sourced from the OS OpenRoads dataset (**add citation**). The following methodologies were applied:
+    2.  Adding access roads: the attribute field “Access roads” from the OSM_Roads dataset [@osmScotlandMap] was merged into the dissolved dataset.
 
-1.  Initial dissolve: the dataset was "dissolved" in QGIS using the by the “Road type” field, reducing it to XX unique polygon features (.
+    3.  Rasterization: the combined dataset was rasterized at a 20 m x 20 m resolution.
 
-2.    “Tracks” were extracted from OSM_Roads datasets then merged with the attribute field “Access Roads” in the OpenRoads dataset to create the attribute value “Access roads / Tracks”.
+-   Cycle Network (4 features): The National Cycle Network data was sourced from the Sustrans National Cycle Network dataset [@sustrans2024ncn]. The following methodology was applied:
 
-##### Cycle network
+    1.  Dissolve: The dataset was “dissolved” in QGIS using the two attribute fields “Desc\_” and “Surface”.
 
-Sustrans National Cycle Network dataset were initially dissolved by two attribute fields  “Desc\_” & “Surface” in QGIS.  A new attribute field was created taking the attribute value from “Desc\_” (on road / off road) and suffixing with grouped surface types (paved or unpaved).
+    2.  Grouping: The “Desc\_” features were then grouped in (1) on road, and (2) off road; whilst the “Surface” features grouped in (3) paved and (4) unpaved. This produced four distinct feature classes
+
+    3.  Rasterization: The dataset was converted into raster format at a 20 m x 20 m resolution.
+
+-   Local Path Network (1 feature): The “Local Path Network” data was sourced from the Scotland’s Core Paths dataset provided by the @improvement2024corepaths. The dataset was converted into raster format at a 20 m x 20 m resolution.
 
 #### Water component
 
-The water component is derived from a raster indicating the presence or absence of infrastructure features. This original raster, labeled **"original"** in the Easter Bush example map, contains: 1 for cells where the feature is present, and 0 or NAs for cells where the feature is absent.
+The 13 features can be divided into two categories:
 
-The water component is derived from:
+-   Rivers (6 features): The river data was sourced from the Os Open Rivers [@os2023rivers] and the OS Boundaries dataset. The following methodology was applied:
 
-##### Rivers
+    1.  merging: To avoid naming inconsistencies, the “Region” field from the OS Boundaries dataset was joined to the Os Open Rivers dataset [@os2023rivers].
 
- Os Open Rivers dataset was reduced from 74997 features, by dissolved by attribute fields “name” and “Region” so that all river segments were joined by a common name. To avoid rivers with the same name but located in different areas being incorrectly joined, “Region” from the OS Boundaries dataset was merged with the OS Open Rivers prior to this step. To reduce the dataset into something scoreable at a national scale, it was decided to use a proxy for river size/regional importance.  This is a subjective process, decided on by the research team.  Seven classes were created and dataset features classified based on either the attribute “form” which was a descriptor for water type, or keywords in the attribute “name” (see table for examples), or researcher knowledge of major rivers of national and regional importance.
+    2.  initial dissolve: the merged dataset was “dissolved” in QGIS using the “name” and “Region” fields. This combined river segments sharing the same name and region into single features, reducing the dataset into 74 997 features.
 
-| Class                             | Example search terms or process                             |
-|:--------------------------------- |:----------------------------------------------------------- |
-| Major river or tributary          | Specific e.g. "Tay", "Spey" etc.                            |
-| Tidal river or estuary            | taken from dataset attribute "form"                         |
-| Minor river or tributary          | e.g. "River", "Abhainn", "Uisge"                            |
-| Named minor stream or tributary   | e.g. "Allt", "Alltan", "Burn", "Feadan", "Sruth", "Caochan" |
-| Unnamed minor stream or tributary | e.g. "Allt", "Alltan", "Burn", "Feadan", "Sruth", "Caochan" |
-| Canal                             | taken from dataset attribute "form"                         |
-| Lake                              | taken from dataset attribute "form"                         |
+    3.  Reclassification: To simplify the river data at a national scale, a reclassification was carried out (see [Appendix III: Reclassification rivers and lakes] for examples). This is a subjective and based on:  the “form” attribute (indicating water type), or keywords searches in the “name” field, and researcher knowledge of major rivers of national and regional importance.
 
-: Water rivers classification
+    4.  Rasterization: the dataset was converted into raster format at a 20 m x 20 m resolution.
 
+<!-- -->
 
-##### Lakes
+-   Lakes (7 features): The lakes data was sourced from the Spatial inventory of UK waterbodies dataset [@taylor2021waterbodies]. The following methodology was applied:
 
-The Spatial inventory of UK waterbodies dataset contained 25404 features for Scotland.  To make it into a relevant and scorable dataset it was reduced to six features based on the given size (in hectares) of a waterbody using the attribute “Poly_Area_Ha”.  Classification was as follows:
+    1.  Reclassification: The dataset contained 25404 features for Scotland. To make it into a relevant and scorable dataset it was reduced to six features based on the given size (in hectares) of a waterbody using the attribute “Poly_Area_Ha” (see [Appendix III: Reclassification rivers and lakes]).
 
-| Class        | size (ha) |
-| ------------ | --------- |
-| Pond         | $<0.2$    |
-| Lochan       | $0.2-2$   |
-| Small loch   | $2-10$    |
-| Mediun loch | $10-100$  |
-| Large loch  | $100-500$ |
-| Major loch  | $>500$    | 
-
-: water lakes
-
+    2.  Rasterization: the datasets were converted into raster format at a 20 m x 20 m resolution.
 
 ### Quantising the slope raster
 
@@ -305,6 +311,17 @@ C_{\text{slope}}(x) = \begin{cases}
 \end{cases}
 $$ {#eq-slopequant}
 
+This six categories, adapted from @Dick2022 (see Table below)
+
+| Slope (%) | Slope description     |
+|-----------|-----------------------|
+| \<3       | easy                  |
+| 3-5       | gentle slope          |
+| 5-10      | medium slope          |
+| 10-20     | steep slope           |
+| 20-30     | very steep slope      |
+| \>30      | extremely steep slope |
+
 ==**TODO: Why are these intervals different from the ones above?**==
 
 ### Reprojection
@@ -313,9 +330,9 @@ The categorical rasters produced in the previous stage do not necessarily share 
 
 We projected all rasters onto a reference raster with the following properties:
 
-- **Coordinate reference system** (CRS): [EPSG:27700](https://epsg.io/27700) (British National Grid)
-- **Resolution**: 20 metres x 20 metres
-- **Extent**: $(x_\text{min}, x_\text{max}, y_\text{min}, y_\text{max}) = (-10000, 660000, 460000, 1220000)$, which is a rectangular box around Scotland.
+-   **Coordinate reference system** (CRS): [EPSG:27700](https://epsg.io/27700) (British National Grid)
+-   **Resolution**: 20 metres x 20 metres
+-   **Extent**: $(x_\text{min}, x_\text{max}, y_\text{min}, y_\text{max}) = (-10000, 660000, 460000, 1220000)$, which is a rectangular box around Scotland.
 
 We used the 'nearest' interpolation mode (`method="near"`) since the data is categorical. The reprojected rasters therefore contain the same set of integer values as the original rasters.
 
@@ -378,36 +395,36 @@ $$ {#eq-onehot}
 
 The implementation of this step involves the use of `terra::lapp` to parallelise the calculation over the spatial domain. In practice we use `NA` instead of `0` to denote absence.
 
-```R
+``` r
 one_hot_pixel <- function(x) {  # <1>
-	out <- matrix(0, nrow = length(x), ncol = length(feature_mapping))
-	for (i in seq_along(feature_mapping)) {
-		out[, i] <- ifelse(x == as.numeric(feature_mapping[i]), 1, NA)
-	}
-	return(out)
+    out <- matrix(0, nrow = length(x), ncol = length(feature_mapping))
+    for (i in seq_along(feature_mapping)) {
+        out[, i] <- ifelse(x == as.numeric(feature_mapping[i]), 1, NA)
+    }
+    return(out)
 }  # <1>
 
 layer <- terra::lapp(  # <2>
-	layer,  # <2>
-	fun = one_hot_pixel,  # <2>
-	filename = outfile,  # <3>
-	overwrite = TRUE,
-	wopt = list(
-		names = names(feature_mapping),
-		datatype = "INT1U"
-	)  # <3>
+    layer,  # <2>
+    fun = one_hot_pixel,  # <2>
+    filename = outfile,  # <3>
+    overwrite = TRUE,
+    wopt = list(
+        names = names(feature_mapping),
+        datatype = "INT1U"
+    )  # <3>
 )
 ```
 
-1. Take a single pixel value (`x`) of a single-layered raster and return the one-hot representation at that point, i.e. a vector of `n_i` values of which up to one is `1` (present) and the remainder are `NA` (absent).
-2. Apply this function in a vectorised fashion to every pixel of the input faster.
-3. Write the outputs to `outfile` as they are computed, to reduce memory requirements.
+1.  Take a single pixel value (`x`) of a single-layered raster and return the one-hot representation at that point, i.e. a vector of `n_i` values of which up to one is `1` (present) and the remainder are `NA` (absent).
+2.  Apply this function in a vectorised fashion to every pixel of the input faster.
+3.  Write the outputs to `outfile` as they are computed, to reduce memory requirements.
 
 ### Stacking into component rasters
 
 This stage is nothing more than combining many single-layered rasters files into a single multi-layered raster for each component. Roughly speaking, we do
 
-```R
+``` r
 # Construct a list of rasters from each .tif file in `infiles`
 rasters <- lapply(infiles, terra::rast)
 
@@ -424,11 +441,12 @@ terra::writeRaster(stacked, outfile)
 
 Note that `terra::rast(rasters)` does not preserve layer names when `rasters` is a list of rasters, hence the need for the two lines prior to `writeRaster`.
 
-:::{.callout-warning}
+::: callout-warning
 #### A warning about layer names
+
 It is *very* unfortunate that the names we have used for the layers follow the same format (`filename_i` for integers `i`) as the names that are automatically generated by `terra::rast`. Because of this, if these two lines that re-apply layer names are omitted, it is not obvious that anything is wrong; no error will be thrown and one can go onto compute RP values, since the names are as expected.
 
-However, *the results will be wrong*, since `terra::rast` will apply _the right names in the wrong order_.
+However, *the results will be wrong*, since `terra::rast` will apply *the right names in the wrong order*.
 
 Future developers are strongly recommended to fix this problem by using different layer names. This issue and suggested solutions are discussed in depth in the [Developers' Report](dev_report.html#sec-layernames).
 :::
@@ -437,15 +455,15 @@ Future developers are strongly recommended to fix this problem by using differen
 
 This stage applies @eq-distance and @eq-proximity to each layer of the Infrastructure and Water components.
 
-In fact @eq-distance is the most challenging computation in the whole processing pipeline, due to the fact that its memory requirements scale poorly with the size of the input raster. 
+In fact @eq-distance is the most challenging computation in the whole processing pipeline, due to the fact that its memory requirements scale poorly with the size of the input raster.
 
 Every single other processing step is entirely local; all of the information required to generate an output value for a pixel at coordinate $x$ is contained in the input pixels at coordinate $x$. This makes it trivial to process the data in chunks, and memory costs scale linearly with the area of the chunks.
 
-In contrast, calculating distance to the nearest feature is strongly non-local; the output value at $x$ is a function of the full set of input values. Naively, the entire raster must be loaded to compute the output at a single location. 
+In contrast, calculating distance to the nearest feature is strongly non-local; the output value at $x$ is a function of the full set of input values. Naively, the entire raster must be loaded to compute the output at a single location.
 
 To perform this calculation we used [`terra::distance`](https://rspatial.github.io/terra/reference/distance.html). It is not necessarily true that the underlying C++ implementation of `GDALComputeProximity`, which is called by `terra::distance`, actually loads the entire raster into memory immediately. However, for Scotland at 20 metre resolution, we found that the memory requirements for this distance calculation (several 10s of GB) surpass the typical memory available on a standard personal computer by an order of magnitude.
 
-To get around this issue, the original Scotland-wide raster was divided into 20 overlapping spatial 'windows'. Note that the size of the overlap needed to be at least as large as the effective cutoff distance of 500m. After the distance step was complete within each window, the windows were stitched together, discarding the overlaps. 
+To get around this issue, the original Scotland-wide raster was divided into 20 overlapping spatial 'windows'. Note that the size of the overlap needed to be at least as large as the effective cutoff distance of 500m. After the distance step was complete within each window, the windows were stitched together, discarding the overlaps.
 
 The distance raster was also truncated at 500m, setting any values above this to `NA` which simply passes through the function applying @eq-proximity and ensures that we don't waste disk space storing high-precision floats that are functionally equivalent to zero.
 
@@ -455,8 +473,7 @@ The distance raster was also truncated at 500m, setting any values above this to
 
 To account for proximity effects, the distance from each cell to the nearest infrastructure feature was calculated using the `terra::distance()` function in R. The resulting raster, labeled **"distance"** in the example map, contains the distance in meters from the center of each cell to the nearest feature. This raster is named "**scored**" in the example map, using the distance decay function.
 
-:::{.content-visible when-format="html"}
-
+::: {.content-visible when-format="html"}
 ```{r, echo=FALSE}
 library(magrittr)
 library(biodt.recreation)
@@ -510,18 +527,18 @@ make_layer_map_dist(rstack = fips_i_rstack, base_map,
                     show_index = 2,
                     color_original = "#DA627D")
 ```
-
 :::
+
 ## List of items/features {#sec-listitems}
 
 Here we list the full set of 87 items/features that make up the layers of the input rasters, and must be scored by the user to construct a persona.
 
-| Component        | Short code | Num. layers | Description                                                                                  |
-| ---------------- | ---------- | ----------- | -------------------------------------------------------------------------------------------- |
-| Landscape        | `SLSRA`    | 40          | Land cover type, landscape designations and conservation, and farmland of high nature value. |
-| Natural Features | `FIPS_N`   | 24          | Landform types, soil types and slope.                                                        |
-| Infrastructure   | `FIPS_I`   | 10          | Roads, tracks, footpaths and cycle networks.                                                 |
-| Water            | `Water`    | 13          | Lakes and rivers.                                                                            |
+| Component | Short code | Num. layers | Description |
+|----------|----------|----------|------------------------------------------|
+| Landscape | `SLSRA` | 40 | Land cover type, landscape designations and conservation, and farmland of high nature value. |
+| Natural Features | `FIPS_N` | 24 | Landform types, soil types and slope. |
+| Infrastructure | `FIPS_I` | 10 | Roads, tracks, footpaths and cycle networks. |
+| Water | `Water` | 13 | Lakes and rivers. |
 
 ```{r, echo=FALSE}
 config <- biodt.recreation::load_config()
@@ -539,7 +556,7 @@ dplyr::select(config_by_component$SLSRA, Name, Description) |>
 	knitr::kable(format = "html")
 ```
 
-:::{.content-visible when-format="html"}
+::: {.content-visible when-format="html"}
 ```{r, echo=FALSE}
 make_layer_map(rstack = slsra,  base_map = base_map,
                show_index = 5, #start with SLSRA_LCM_6 selected as example
@@ -547,9 +564,10 @@ make_layer_map(rstack = slsra,  base_map = base_map,
 ```
 :::
 
-:::{.callout-tip}
+::: callout-tip
 The interactive version of this document contains maps that allow you to toggle individual layers.
 :::
+
 ### Natural Features component
 
 ```{r, echo=FALSE}
@@ -560,8 +578,7 @@ dplyr::select(config_by_component$FIPS_N, Name, Description) |>
 	knitr::kable(format = "html")
 ```
 
-
-:::{.content-visible when-format="html"}
+::: {.content-visible when-format="html"}
 ```{r, echo=FALSE}
 make_layer_map(rstack = fips_n,  base_map = base_map,
                show_index = 5, #start with FIPS_N_Landform_16 selected as example
@@ -580,7 +597,6 @@ dplyr::select(config_by_component$FIPS_I, Name, Description) |>
 	knitr::kable(format = "html")
 ```
 
-
 ### Water component
 
 ```{r, echo=FALSE}
@@ -591,7 +607,7 @@ dplyr::select(config_by_component$Water, Name, Description) |>
 	knitr::kable(format = "html")
 ```
 
-:::{.content-visible when-format="html"}
+::: {.content-visible when-format="html"}
 ```{r, echo=FALSE, out.height = 650}
 water_rstack <- list(
   "original" = water,
@@ -605,6 +621,48 @@ make_layer_map_dist(rstack = water_rstack, base_map,
 ```
 :::
 
+## Appendix I: Groups of landform features
 
+```{r}
+# Read table
+table <- readr::read_csv("landform_groups.csv", show_col_types = FALSE)
+
+# Display nicely
+knitr::kable(table)
+```
+
+## Appendix II: Groups Soil features
+
+|  |  |
+|-----------------------------------|-------------------------------------|
+| **Reclassification** |  **genSoilTyp** |
+| Organic | Peaty podzols, Peaty gleys, Peat, |
+| Mineral | Mineral podzols, Mineral gleys, Brown soils, Montane soils, Immature soils, Alluvial soils, Calcareous soils |
+
+## Appendix III: Reclassification rivers and lakes
+
+Rivers:
+
+|  |  |
+|----|----|
+| **Class** |  **Example search terms / or   process** |
+| Major river   or tributary | Specific e.g.   "Tay", "Spey" etc… |
+|  Tidal river   or estuary | taken from   dataset attribute "form" |
+| Minor river   or tributary | e.g.   "River", "Abhainn", "Uisge" |
+| Named minor   stream or tributary | e.g.   "Allt", "Alltan", "Burn", "Feadan",   "Sruth", "Caochan" |
+| Unnamed minor   stream or tributary | Waterways   with no names |
+| Canal | taken from   dataset attribute "form" |
+| Lake | taken from   dataset attribute "form" |
+
+Lakes:
+
+| Class       | size (ha) |
+|-------------|-----------|
+| Pond        | $<0.2$    |
+| Lochan      | $0.2-2$   |
+| Small loch  | $2-10$    |
+| Mediun loch | $10-100$  |
+| Large loch  | $100-500$ |
+| Major loch  | $>500$    |
 
 {{< include _endmatter.qmd >}}
