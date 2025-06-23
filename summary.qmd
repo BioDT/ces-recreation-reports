@@ -55,7 +55,7 @@ The main model output is an two-dimensional array of numbers (a *raster*) repres
 An RP value is constructed from a combination of **87** *items* representing distinct attributes of the land. The 87 items are grouped into four *components*, which are outlined in @tbl-components. RP values are calculated by weighting each item by a *score* between $0$ and $10$ that reflects the importance of that item to the user. A full set of 87 scores is referred to as a *persona.*
 
 | Component | Short code | \# items |
-|:-----------------------------------------------|:-----------|:-----------|
+|:------------------------------------------|:--------------|:--------------|
 | **Landscape** - the suitability of land to support recreational activity | `SLSRA` | 40 |
 | **Natural Features** influencing the potential | `FIPS_N` | 24 |
 | **Infrastructure** features influencing the potential | `FIPS_I` | 10 |
@@ -192,7 +192,7 @@ The RP model has been gradually developed within UKCEH over a number of years. T
 Some effort has been taken to make previous versions findable. All individuals known to have contributed to development are credited in the version 1.0 release [@ukceh2025].
 
 | Iteration | Version | Source |
-|--------------|:-------------|:--------------------------------------------|
+|----------------|:---------------|:----------------------------------------|
 | 1 (2023) | \- | <https://github.com/BioDT/uc-ces/tree/main/recreation_model> |
 | 2 (2024) | \- | <https://github.com/BioDT/uc-ces-recreation/tree/2024-model> |
 | 3 (2025) | SPEAK pre-release | <https://github.com/BioDT/uc-ces-recreation/tree/SPEAK-prerelease> |
@@ -485,45 +485,95 @@ library(biodt.recreation)
 
 source("functions_report.R")
 
-water <- terra::rast(system.file("extdata", "rasters", "Bush", "original", "Water.tif", package="biodt.recreation"))
+water <- terra::rast(system.file("extdata", "rasters", "Bush", "Water.tif", package="biodt.recreation"))
 
 slsra <- terra::rast(system.file("extdata", "rasters", "Bush", "SLSRA.tif", package="biodt.recreation"))
 
 fips_n <- terra::rast(system.file("extdata", "rasters", "Bush", "FIPS_N.tif", package="biodt.recreation"))
 
-fips_i <- terra::rast(system.file("extdata", "rasters", "Bush", "original", "FIPS_I.tif", package="biodt.recreation"))
+fips_i <- terra::rast(system.file("extdata", "rasters", "Bush", "FIPS_I.tif", package="biodt.recreation"))
 
-
-# the box of bush estate
-e <- terra::ext(water)
-coords <- matrix(c(
-  e$xmin, e$ymin,
-  e$xmax, e$ymin,
-  e$xmax, e$ymax,
-  e$xmin, e$ymax,
-  e$xmin, e$ymin # close polygon
-), ncol = 2, byrow = TRUE)
-bbox_poly <- terra::vect(coords,
-  type = "polygons",
-  crs = terra::crs(water)
-) %>%
-  sf::st_as_sf() %>%
-  sf::st_transform(crs = 4326)
-
-base_map <- 
-  leaflet::leaflet() %>%
-  leaflet::addProviderTiles("OpenStreetMap.Mapnik", options = leaflet::providerTileOptions(zIndex = 0, noWrap = TRUE), group = "Streets") %>%
-  leaflet::addProviderTiles("Esri.WorldImagery", options = leaflet::providerTileOptions(zIndex = 0, noWrap = TRUE), group = "Satellite") %>%
-  leaflet::addPolygons(
-    data = bbox_poly,
-    color = "black",
-    weight = 3,
-    fill = FALSE
-  ) 
+palette <- colorRampPalette(rev(RColorBrewer::brewer.pal(11, "Spectral")))(100)
 
 ```
 
+Here an interactive demo for the model ran using the hard recreationalist preset persona for the Bush Estate area is showed. First the 4 components layers are showed. You can explore each of the layers (top right corner of the map). Not all layers had values for the specific Bush Estate area so some layers are not mapped. The underlying map was made black and white to make the layers with few values in it more visible. As it is possible to see the components of Landscape (SLSRA) and Natural features (FIPS_N) have either the features present or the feature absent; whilst the Infrastructure and Water components show the distance gradient.
+
+Water component:
+
+```{r, echo=FALSE}
+
+water_valid <- keep_valid_layers(water)
+names(water_valid) <-  gsub("^Water_", "", names(water_valid))
+
+
+terra::plet(
+  water_valid,
+  1:terra::nlyr(water_valid),
+  col = palette,
+  tiles = "CartoDB.PositronNoLabels",
+  shared = TRUE,
+  legend = "bottomleft"
+)
+```
+
+Landscape component:
+
+```{r, echo=FALSE}
+slsra_valid <- keep_valid_layers(slsra)
+names(slsra_valid) <-  gsub("^SLSRA_", "", names(slsra_valid))
+
+terra::plet(
+  slsra_valid,
+  1:terra::nlyr(slsra_valid),
+  col = RColorBrewer::brewer.pal(11, "Spectral")[1],
+  alpha = 1,
+  tiles = "CartoDB.PositronNoLabels",
+  shared = TRUE,
+  legend = NULL
+)
+```
+
+Natural Features component:
+
+```{r, echo=FALSE}
+fips_n_valid <- keep_valid_layers(fips_n)
+names(fips_n_valid) <-  gsub("^FIPS_N_", "", names(fips_n_valid))
+
+
+terra::plet(
+  fips_n_valid,
+  1:terra::nlyr(fips_n_valid),
+  col = RColorBrewer::brewer.pal(11, "Spectral")[1],
+  alpha = 1,
+  tiles = "CartoDB.PositronNoLabels",
+  shared = TRUE,
+  legend = NULL
+)
+```
+
+Infrastructure component:
+
+```{r, echo=FALSE}
+fips_i_valid <- keep_valid_layers(fips_i)
+names(fips_i_valid) <-  gsub("^FIPS_I_", "", names(fips_i_valid))
+
+terra::plet(
+  fips_i_valid,
+  1:terra::nlyr(fips_i_valid),
+  col = palette,
+  tiles = "CartoDB.PositronNoLabels",
+  shared = TRUE,
+  legend = "bottomleft"
+)
+```
+
+The output of the RP model ran for this example case and a Hard Recreationalist persona profile (from the presets available in the package) is showed in the map below. The contribution of each component to the RP can be observed by switching layer from the controls in the top right corner of the map.
+
 ```{r, echo=FALSE, warning=FALSE, results='hide', message = FALSE}
+
+#run the model
+
 persona <- get_example_persona()
 bbox <- get_example_bbox()
 data_dir <- get_example_data_dir()
@@ -533,7 +583,31 @@ layers <- compute_potential(persona, bbox, data_dir)
 ```
 
 ```{r, echo=FALSE}
-build_rp_map(base_map, RP_output = layers)
+
+layers_custom <- c(
+  layers[[5]],
+  layers[[1]],
+  layers[[2]],
+  layers[[3]],
+  layers[[4]]
+)
+names(layers_custom) <- c(
+  "Recreational Potential",
+  "Landscape component",
+  "Natural features component",
+  "Infrastructure component",
+  "Water component"
+)
+
+palette <- colorRampPalette(rev(RColorBrewer::brewer.pal(11, "Spectral")))(100)
+
+terra::plet(
+  layers_custom,
+  1:5,
+  col = palette,
+  tiles = "Esri.WorldImagery",
+  shared = TRUE
+)
 ```
 :::
 
@@ -541,7 +615,7 @@ build_rp_map(base_map, RP_output = layers)
 
 We ran the RP model across its full domain using the tow "presets" persona of a Hard Recreationalist and a Soft Recreationalist (results showed as figure in [#fig_scotland_RP](#fig_scotland_RP)). The resulting datasets have been published to Zenodo.
 
-![Recreational Potential (RP) for the whole of Scotland using the two persona presets: hard recreationlaist and soft recreationalist.](images/RP_Scotland_figure.png){#fig_scotland_RP fig-align="center"}
+![Recreational Potential (RP) for the whole of Scotland using the two persona presets: hard recreationalist and soft recreationalist.](images/RP_Scotland_figure.png){#fig_scotland_RP fig-align="center"}
 
 ## Known limitations
 

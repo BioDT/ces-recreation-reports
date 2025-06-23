@@ -237,3 +237,26 @@ build_rp_map <- function(base_map, RP_output) {
   
   return(map)
 }
+
+#' @title keep_valid_layers
+#' @description keep only layers with NAs
+keep_valid_layers <- function(raster) {
+  # Create mask for valid layers
+  valid_mask <- sapply(1:terra::nlyr(raster), function(i) {
+    any(is.finite(terra::values(raster[[i]])))
+  })
+  
+  # Subset valid layers
+  raster_valid <- raster[[which(valid_mask)]]
+  
+  # Print names of dropped layers
+  invalid_names <- names(raster)[!valid_mask]
+  if (length(invalid_names) > 0) {
+    cat("Discarded layers (no valid data):\n")
+    print(invalid_names)
+  } else {
+    cat("All layers contain valid data.\n")
+  }
+  
+  return(raster_valid)
+}
