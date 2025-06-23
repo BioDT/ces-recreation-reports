@@ -185,7 +185,7 @@ table <- dplyr::select(table,
 table <- table[, c(1:4, 6:ncol(table))]
 
 # Display nicely
-knitr::kable(table)
+knitr::kable(table, caption = "Data sources used for the creation of the underlaying raster datasets.")
 ```
 
 ### Manipulation in QGIS
@@ -230,7 +230,7 @@ The 24 features in this component are grouped into three main categories:
 
     1.  Dissolve: the dataset was “dissolved” in QGIS using the “Landform“ attribute, reducing it to 334 unique polygon features.
 
-    2.  Grouping: the 334 landform types were manually grouped into 16 broader categories based on descriptive keywords (e.g. “hills”, “foothills” etc…) see ([Appendix I: Groups of landform features]).
+    2.  Reclassification: the 334 landform types were manually grouped into 16 broader categories based on descriptive keywords (e.g. “hills”, “foothills” etc…) see ([Appendix I: Reclassification info]).
 
     3.  Rasterization: the dataset was converted into a raster at a 20 m x 20 m resolution.
 
@@ -246,7 +246,7 @@ The 24 features in this component are grouped into three main categories:
 
     1.  Initial dissolve: The dataset was “dissolved” by field “genSoilTyp” in QGIS, reducing it to 12 unique attribute values.
 
-    2.  Grouping: The values were manually aggregated into two soil classes: organic (peat) and mineral based on the original classifications (see [Appendix II: Groups Soil features]).
+    2.  Grouping: The values were manually aggregated into two soil classes: organic (peat) and mineral based on the original classifications (see [Appendix I: Reclassification info]).
 
     3.  Rasterization: the dataset was converted into a raster at a 20 m x 20 m resolution.
 
@@ -282,7 +282,7 @@ The 13 features can be divided into two categories:
 
     2.  initial dissolve: the merged dataset was “dissolved” in QGIS using the “name” and “Region” fields. This combined river segments sharing the same name and region into single features, reducing the dataset into 74 997 features.
 
-    3.  Reclassification: To simplify the river data at a national scale, a reclassification was carried out (see [Appendix III: Reclassification rivers and lakes] for examples). This is a subjective and based on:  the “form” attribute (indicating water type), or keywords searches in the “name” field, and researcher knowledge of major rivers of national and regional importance.
+    3.  Reclassification: To simplify the river data at a national scale, a reclassification was carried out (see [Appendix I: Reclassification info] for examples). This is a subjective and based on:  the “form” attribute (indicating water type), or keywords searches in the “name” field, and researcher knowledge of major rivers of national and regional importance.
 
     4.  Rasterization: the dataset was converted into raster format at a 20 m x 20 m resolution.
 
@@ -290,7 +290,7 @@ The 13 features can be divided into two categories:
 
 -   Lakes (7 features): The lakes data was sourced from the Spatial inventory of UK waterbodies dataset [@taylor2021waterbodies]. The following methodology was applied:
 
-    1.  Reclassification: The dataset contained 25404 features for Scotland. To make it into a relevant and scorable dataset it was reduced to six features based on the given size (in hectares) of a waterbody using the attribute “Poly_Area_Ha” (see [Appendix III: Reclassification rivers and lakes]).
+    1.  Reclassification: The dataset contained 25404 features for Scotland. To make it into a relevant and scorable dataset it was reduced to six features based on the given size (in hectares) of a waterbody using the attribute “Poly_Area_Ha” (see [Appendix I: Reclassification info]).
 
     2.  Rasterization: the datasets were converted into raster format at a 20 m x 20 m resolution.
 
@@ -311,8 +311,6 @@ C_{\text{slope}}(x) = \begin{cases}
 \end{cases}
 $$ {#eq-slopequant}
 
-This six categories, adapted from @Dick2022 (see Table below)
-
 | Slope (%) | Slope description     |
 |-----------|-----------------------|
 | \<3       | easy                  |
@@ -321,6 +319,8 @@ This six categories, adapted from @Dick2022 (see Table below)
 | 10-20     | steep slope           |
 | 20-30     | very steep slope      |
 | \>30      | extremely steep slope |
+
+: Six classification slopes used, adapted from @Dick2022
 
 ==**TODO: Why are these intervals different from the ones above?**==
 
@@ -621,17 +621,15 @@ make_layer_map_dist(rstack = water_rstack, base_map,
 ```
 :::
 
-## Appendix I: Groups of landform features
+## Appendix I: Reclassification info
 
 ```{r}
 # Read table
 table <- readr::read_csv("landform_groups.csv", show_col_types = FALSE)
 
 # Display nicely
-knitr::kable(table)
+knitr::kable(table, caption = "Reclassification of the Natural Features component (landform layer).")
 ```
-
-## Appendix II: Groups Soil features
 
 |  |  |
 |-----------------------------------|-------------------------------------|
@@ -639,9 +637,7 @@ knitr::kable(table)
 | Organic | Peaty podzols, Peaty gleys, Peat, |
 | Mineral | Mineral podzols, Mineral gleys, Brown soils, Montane soils, Immature soils, Alluvial soils, Calcareous soils |
 
-## Appendix III: Reclassification rivers and lakes
-
-Rivers:
+: Reclassification of the Natural Features component (soild layer).
 
 |  |  |
 |----|----|
@@ -654,7 +650,7 @@ Rivers:
 | Canal | taken from   dataset attribute "form" |
 | Lake | taken from   dataset attribute "form" |
 
-Lakes:
+: Reclassification of the Water component (river layer).
 
 | Class       | size (ha) |
 |-------------|-----------|
@@ -664,5 +660,7 @@ Lakes:
 | Mediun loch | $10-100$  |
 | Large loch  | $100-500$ |
 | Major loch  | $>500$    |
+
+: Reclassification of the Water component (lakes layer).
 
 {{< include _endmatter.qmd >}}
