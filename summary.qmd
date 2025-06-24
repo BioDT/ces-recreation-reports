@@ -20,9 +20,9 @@ The driving motivation for this work is to promote good health and connection to
 
 [^1]: This was the objective of the [DECIDE](https://www.ceh.ac.uk/our-science/projects/decide) project.
 
-The RP component and the biodiversity component are distinct models that have been developed independently of each other. However, in both cases their outputs can be displayed on an interactive map of Scotland and served to users using an app framework such as R Shiny [@Shiny2025].
+The RP component and the biodiversity component are distinct models that have been developed independently of each other. However, in both cases their outputs can be displayed on an interactive map of Scotland and served to users using an app framework such as [R Shiny](https://shiny.posit.co/).
 
-In this short report we will describe basic aspects of the Recreational Potential model. For a detailed account of the inner workings of the model the reader is directed to the accompanying [technical supplement](tech_supp.html). The Biodiversity component is described in ==**REF**==.
+In this short report we will describe basic aspects of the Recreational Potential model. For a detailed account of the inner workings of the model the reader is directed to the accompanying [technical supplement](tech_supp.html).
 
 ## Background
 
@@ -426,7 +426,7 @@ meaningful_scores <- summarise_persona_scores(hard_recreationalist)
 knitr::kable(meaningful_scores, format = "html")
 ```
 
-The strongest preferences of the *Soft Recreationalist* persona are highlighted in @tbl-hard.
+The strongest preferences of the *Soft Recreationalist* persona are highlighted in @tbl-sft.
 
 ```{r, echo=FALSE, message=FALSE}
 #| label: tbl-soft
@@ -473,108 +473,21 @@ Detailed instructions for using the app are contained within the app itself, in 
 ## Interactive demo
 
 ::: {.content-visible when-format="pdf"}
-The interactive demo is only available in the HTML version of this report. This is available online at <https://biodt.github.io/ces-recreation-reports>.
+The interactive demo is only provided in the HTML version of this report. This is available online at <https://biodt.github.io/ces-recreation-reports>.
 :::
 
 ::: {.content-visible when-format="html"}
 <!-- The source code used to produce this example can be found HERE. -->
 
-```{r, echo=FALSE}
-library(magrittr)
-library(biodt.recreation)
-
-source("functions_report.R")
-
-water <- terra::rast(system.file("extdata", "rasters", "Bush", "Water.tif", package="biodt.recreation"))
-
-slsra <- terra::rast(system.file("extdata", "rasters", "Bush", "SLSRA.tif", package="biodt.recreation"))
-
-fips_n <- terra::rast(system.file("extdata", "rasters", "Bush", "FIPS_N.tif", package="biodt.recreation"))
-
-fips_i <- terra::rast(system.file("extdata", "rasters", "Bush", "FIPS_I.tif", package="biodt.recreation"))
-
-palette <- colorRampPalette(rev(RColorBrewer::brewer.pal(11, "Spectral")))(100)
-
-```
-
-This interactive demo showcases the model running with the **hard recreationalist preset persona** for the Bush Estate area First the relevant section of the 4 components rasters are showed, which can be explored individually using the layer selector in the top-right corner of the map. Please note that not all layers contain data specific to the Bush Estate area, so some may not be visible.
-
-The base map has been rendered in black and white to enhance the visibility of layers with sparse data. As shown, the **Landscape (SLSRA)** and **Natural Features (FIPS_N)** components display binary data, indicating either the presence or absence of features; whereas the **Infrastructure** and **Water** components present a distance gradient.
-
-Water component:
-
-```{r, echo=FALSE}
-
-water_valid <- keep_valid_layers(water)
-names(water_valid) <-  gsub("^Water_", "", names(water_valid))
 
 
-terra::plet(
-  water_valid,
-  1:terra::nlyr(water_valid),
-  col = palette,
-  tiles = "CartoDB.PositronNoLabels",
-  shared = TRUE,
-  legend = "bottomleft"
-)
-```
+This interactive demo showcases the model running with the *Hard Recreationalist* persona for the Bush Estate area near Edinburgh.
 
-Landscape component:
-
-```{r, echo=FALSE}
-slsra_valid <- keep_valid_layers(slsra)
-names(slsra_valid) <-  gsub("^SLSRA_", "", names(slsra_valid))
-
-terra::plet(
-  slsra_valid,
-  1:terra::nlyr(slsra_valid),
-  col = RColorBrewer::brewer.pal(11, "Spectral")[1],
-  alpha = 1,
-  tiles = "CartoDB.PositronNoLabels",
-  shared = TRUE,
-  legend = NULL
-)
-```
-
-Natural Features component:
-
-```{r, echo=FALSE}
-fips_n_valid <- keep_valid_layers(fips_n)
-names(fips_n_valid) <-  gsub("^FIPS_N_", "", names(fips_n_valid))
-
-
-terra::plet(
-  fips_n_valid,
-  1:terra::nlyr(fips_n_valid),
-  col = RColorBrewer::brewer.pal(11, "Spectral")[1],
-  alpha = 1,
-  tiles = "CartoDB.PositronNoLabels",
-  shared = TRUE,
-  legend = NULL
-)
-```
-
-Infrastructure component:
-
-```{r, echo=FALSE}
-fips_i_valid <- keep_valid_layers(fips_i)
-names(fips_i_valid) <-  gsub("^FIPS_I_", "", names(fips_i_valid))
-
-terra::plet(
-  fips_i_valid,
-  1:terra::nlyr(fips_i_valid),
-  col = palette,
-  tiles = "CartoDB.PositronNoLabels",
-  shared = TRUE,
-  legend = "bottomleft"
-)
-```
-
-The output of the RP model for this example case, using the **Hard Recreationalist** persona profile (selected from the available presets), is displayed in the map below. It is possible to explore the contribution of each component to the RP score by switching between layers using the controls in the top-right corner of the map.
+The model outputs for this example case are displayed in the map below. It is possible to explore the contribution of each component using the controls in the top-right corner of the map.
 
 ```{r, echo=FALSE, warning=FALSE, results='hide', message = FALSE}
-
-#run the model
+library(biodt.recreation)
+source("functions_report.R")
 
 persona <- get_example_persona()
 bbox <- get_example_bbox()
@@ -582,9 +495,6 @@ data_dir <- get_example_data_dir()
 
 # Compute all layers
 layers <- compute_potential(persona, bbox, data_dir)
-```
-
-```{r, echo=FALSE}
 
 layers_custom <- c(
   layers[[5]],
@@ -602,7 +512,9 @@ names(layers_custom) <- c(
 )
 
 palette <- colorRampPalette(rev(RColorBrewer::brewer.pal(11, "Spectral")))(100)
+```
 
+```{r, echo=FALSE}
 terra::plet(
   layers_custom,
   1:5,
@@ -611,17 +523,104 @@ terra::plet(
   shared = TRUE
 )
 ```
+
+We now take a step back, splitting each component into its constituent layers. You can switch between different components by clicking on the tabs, and toggle different feature layers using the layer selector in the top-right corner of the map. Please note that not all layers contain data specific to the Bush Estate area, so some may not be visible.
+
+The base map has been rendered in black and white to enhance the visibility of layers with sparse data. As shown, the *Landscape* (`SLSRA`) and *Natural Features* (`FIPS_N`) components display binary data, indicating either the presence or absence of features; whereas the *Infrastructure* (`FIPS_I`) and *Water* (`Water`) components present a distance gradient.
+
+:::{.callout-tip}
+As you explore the maps, it is helpful to have the [list of features and their descriptions](tech_supp.html#sec-listitems) open in another browser window.
+:::
+
+::: panel-tabset
+### Water
+
+```{r, echo=FALSE}
+water <- terra::rast(system.file("extdata", "rasters", "Bush", "Water.tif", package="biodt.recreation"))
+
+water_valid <- keep_valid_layers(water)
+names(water_valid) <-  gsub("^Water_", "", names(water_valid))
+
+terra::plet(
+  water_valid,
+  1:terra::nlyr(water_valid),
+  col = palette,
+  tiles = "CartoDB.PositronNoLabels",
+  shared = TRUE,
+  legend = "bottomleft"
+)
+```
+
+### Landscape
+
+```{r, echo=FALSE}
+slsra <- terra::rast(system.file("extdata", "rasters", "Bush", "SLSRA.tif", package="biodt.recreation"))
+
+slsra_valid <- keep_valid_layers(slsra)
+names(slsra_valid) <-  gsub("^SLSRA_", "", names(slsra_valid))
+
+terra::plet(
+  slsra_valid,
+  1:terra::nlyr(slsra_valid),
+  col = RColorBrewer::brewer.pal(11, "Spectral")[1],
+  alpha = 1,
+  tiles = "CartoDB.PositronNoLabels",
+  shared = TRUE,
+  legend = NULL
+)
+```
+
+### Natural Features
+
+```{r, echo=FALSE}
+fips_n <- terra::rast(system.file("extdata", "rasters", "Bush", "FIPS_N.tif", package="biodt.recreation"))
+
+fips_n_valid <- keep_valid_layers(fips_n)
+names(fips_n_valid) <-  gsub("^FIPS_N_", "", names(fips_n_valid))
+
+terra::plet(
+  fips_n_valid,
+  1:terra::nlyr(fips_n_valid),
+  col = RColorBrewer::brewer.pal(11, "Spectral")[1],
+  alpha = 1,
+  tiles = "CartoDB.PositronNoLabels",
+  shared = TRUE,
+  legend = NULL
+)
+```
+
+### Infrastructure
+
+```{r, echo=FALSE}
+fips_i <- terra::rast(system.file("extdata", "rasters", "Bush", "FIPS_I.tif", package="biodt.recreation"))
+
+fips_i_valid <- keep_valid_layers(fips_i)
+names(fips_i_valid) <-  gsub("^FIPS_I_", "", names(fips_i_valid))
+
+terra::plet(
+  fips_i_valid,
+  1:terra::nlyr(fips_i_valid),
+  col = palette,
+  tiles = "CartoDB.PositronNoLabels",
+  shared = TRUE,
+  legend = "bottomleft"
+)
+```
+
 :::
 
 ## Scotland wide datasets
 
-We ran the RP model across its full domain using the tow "presets" persona of a Hard Recreationalist and a Soft Recreationalist (results showed as figure in [#fig_scotland_RP](#fig_scotland_RP)). The resulting datasets have been published to Zenodo.
+The outputs of the RP model for the *Hard Recreationalist* and *Soft Recreationalist* personas for the whole of Scotland will soon be available for download as a data product [@Tigli2025]. The results are previewed in @fig-scotlandRP.
 
-![Recreational Potential (RP) for the whole of Scotland using the two persona presets: hard recreationalist and soft recreationalist.](images/RP_Scotland_figure.png){#fig_scotland_RP fig-align="center"}
+
+![Recreational Potential values for the whole of Scotland using the two persona presets.](images/RP_Scotland_figure.png){#fig-scotlandRP fig-align="center"}
+
+Producing these large raster datasets is not straightforward unless one has access to high-memory computing facilities. We describe the steps we took to reduce peak memory requirements in the [Developers' Report](dev_report.html#sec-proximity).
 
 ## Known limitations
 
-Here we outline some known issues and limitations that a user is likely to encounter when using the model. Issues and suggestions of a more technical nature are discussed in the [developer's report](dev_report.html#sec-recommendations).
+Here we outline some known issues and limitations that a user is likely to encounter when using the model. Issues and suggestions of a more technical nature are discussed in the [Developers' Report](dev_report.html#sec-recommendations).
 
 -   The RP maps can be insufficiently detailed and sometimes important features such as footpaths are missing. This is due to the underlying data being either inaccurate, out of date, or of insufficient resolution to resolve these features.
 
@@ -637,7 +636,7 @@ Here we outline some known issues and limitations that a user is likely to encou
 
 ## Future directions
 
-We see several potential avenues for further research and development work. Again, more technical detail on these suggestions is provided in the [developer's report](dev_report.html#sec-recommendations).
+We see several potential avenues for further research and development work. Again, more technical detail on these suggestions is provided in the [Developers' Report](dev_report.html#sec-recommendations).
 
 1.  **Simplifying feature scoring:**
 

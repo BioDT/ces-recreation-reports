@@ -6,7 +6,7 @@ toc: false
 number-sections: false
 
 nocite: |
-  @Rolph2024, @Dick2025, @Dick2025b, @ukceh2025
+  @Rolph2024, @Dick2025, @Dick2025b, @MarshRossney2025, @Tigli2025
 ---
 
 ### Site contents
