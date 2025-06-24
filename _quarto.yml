@@ -65,14 +65,6 @@ website:
     right: |
       [![](/logos/ukceh.svg){fig-alt="UKCEH" width=250px}](https://www.ceh.ac.uk)
 
-
-  announcement:
-    content: "This site is a **work in progress** and all reports should be considered **drafts**! "
-    dismissable: false
-    icon: exclamation-circle
-    position: above-navbar
-    type: danger
-
 # Re-compute only when source changes
 execute:
   freeze: auto
