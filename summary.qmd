@@ -80,9 +80,18 @@ Personas are stored in `.csv` files. However, the interactive R Shiny app provid
 
 ### Input data {#sec-inputs}
 
-There is another essential set of inputs to the model which are not specified by the user. These are a set of 87 raster layers --- one for each of the 87 items --- covering Scotland at a resolution of 20x20m.
+There is another essential set of inputs to the model which are not specified by the user. These are a set of 87 _feature layers_ --- one for each of the 87 items --- covering Scotland at a resolution of 20x20m.
 
-For items belonging to the *Landscape* (`SLSRA`) component or the *Natural Features* component (`FIPS_N`), these rasters contain just ones and zeros, with $1$ indicating presence of the feature in that pixel and $0$ indicating absence.
+:::{.callout-note}
+#### Items and feature layers
+We use the term _items_ in the context of a persona (i.e. a single persona score is an _item_), and _feature layers_ in the context of raster data (a single layer of a raster is a _feature_).
+
+There is a one-to-one relationship between the 87 items and the 87 feature layers.
+
+Thus, they are described by the same set of labels. For example, the user must provide a score for the `Water_Lakes_1` (Pond) _item_, and the input dataset also contains a _feature layer_ called `Water_Lakes_1`.
+:::
+
+For features belonging to the *Landscape* (`SLSRA`) component or the *Natural Features* component (`FIPS_N`), these rasters contain just ones and zeros, with $1$ indicating presence of the feature in that pixel and $0$ indicating absence.
 
 $$
 \mathrm{SLSRA}_j = \begin{cases}
@@ -91,7 +100,7 @@ $$
 \end{cases}
 $$
 
-For items belonging to the *Infrastructure* (`FIPS_I`) component or the *Water* (`Water`) component, the input rasters contain values *between* zero and one.
+For features belonging to the *Infrastructure* (`FIPS_I`) component or the *Water* (`Water`) component, the input rasters contain values *between* zero and one.
 
 $$
 \mathrm{Water}_j = \begin{cases}
