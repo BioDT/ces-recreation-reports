@@ -441,27 +441,29 @@ The distance raster was also truncated at 500m, setting any values above this to
 
 #### Visual demonstration
 
-**TODO: Madda - make this figure static for pdf?**
+Here we provide a visual demonstration of how a 'proximity' raster is obtained from a raster containing just the presence/absence data. The example provided is for the `FIPS_I_RoadsTracks_2` feature layer, which corresponds to 'A' roads.
 
-To account for proximity effects, the distance from each cell to the nearest infrastructure feature was calculated using the `terra::distance()` function in R. The resulting raster, labeled **"distance"** in the example map, contains the distance in meters from the center of each cell to the nearest feature. This raster is named "**scored**" in the example map, using the distance decay function.
+The presence/absence raster traces out the path of the road. The distance from each cell to the nearest present cell is then calculated using the `terra::distance()` function
+. The resulting raster, labeled *distance* in the example map, contains the distance in meters from the center of each cell to the nearest feature. Application of @eq-proximity results in the 'proximity' layer.
+
+The three layers can be toggled using the control panel in the top-right corner.
 
 ::: {.content-visible when-format="html"}
+
 ```{r, echo=FALSE}
 library(magrittr)
 library(biodt.recreation)
 
 source("functions_report.R")
 
-water <- terra::rast(system.file("extdata", "rasters", "Bush", "original", "Water.tif", package="biodt.recreation"))
+fips_i <- terra::rast(system.file("extdata", "rasters", "Bush", "FIPS_I.tif", package="biodt.recreation"))
 
-slsra <- terra::rast(system.file("extdata", "rasters", "Bush", "SLSRA.tif", package="biodt.recreation"))
+fips_i_dist <- terra::rast(system.file("extdata", "rasters", "Bush", "dist", "FIPS_I_dist.tif", package="biodt.recreation"))
 
-fips_n <- terra::rast(system.file("extdata", "rasters", "Bush", "FIPS_N.tif", package="biodt.recreation"))
-
-fips_i <- terra::rast(system.file("extdata", "rasters", "Bush", "original", "FIPS_I.tif", package="biodt.recreation"))
+fips_i_linear <- terra::rast(system.file("extdata", "rasters", "Bush", "original", "FIPS_I.tif", package="biodt.recreation"))
 
 # the box of bush estate
-e <- terra::ext(water)
+e <- terra::ext(fips_i)
 coords <- matrix(c(
   e$xmin, e$ymin,
   e$xmax, e$ymin,
@@ -469,9 +471,10 @@ coords <- matrix(c(
   e$xmin, e$ymax,
   e$xmin, e$ymin # close polygon
 ), ncol = 2, byrow = TRUE)
+
 bbox_poly <- terra::vect(coords,
   type = "polygons",
-  crs = terra::crs(water)
+  crs = terra::crs(fips_i)
 ) %>%
   sf::st_as_sf() %>%
   sf::st_transform(crs = 4326)
@@ -485,17 +488,17 @@ base_map <-
     color = "black",
     weight = 3,
     fill = FALSE
-  ) 
+  )
+
+layers <- list(
+  "Presence/Absence" = fips_i_linear$FIPS_I_RoadsTracks_2,
+  "Distance" = fips_i_dist$FIPS_I_RoadsTracks_2,
+  "Proximity" = fips_i$FIPS_I_RoadsTracks_2
+)
 ```
 
 ```{r, echo=FALSE, out.height = 650}
-fips_i_rstack <- list(
-  "original" = fips_i,
-  "distance" = terra::rast(system.file("extdata", "rasters", "Bush", "dist", "FIPS_I_dist.tif", package="biodt.recreation")),
-  "scored" = terra::rast(system.file("extdata", "rasters", "Bush", "FIPS_I.tif", package="biodt.recreation"))
-  )
-
-make_layer_map_dist(rstack = fips_i_rstack, base_map,
+make_layer_map_dist(rstack = layers, base_map,
                     show_index = 2,
                     color_original = "#DA627D")
 ```
