@@ -29,7 +29,7 @@ As a concrete example, if $j=1$ labels the 'pond' item, then $I_{41}(x)$ takes a
 | 3   | Infrastructure   | `FIPS_I`   |
 | 4   | Water            | `Water`    |
 
-: Integer label and short-code for the four components of the RP model {#tbl-componentlabels}
+: Integer label and short-code for the four components of the RP model. {#tbl-componentlabels}
 
 ### Proximity contributions
 
@@ -171,28 +171,11 @@ The process of producing these rasters is currently split into two distinct part
 
 The scripted part is executed by running `inst/scripts/data_production/main.R` (or the containerised version) with the manually-produced categorical rasters already present. This script mostly just calls functions defined in `R/data_production.R`.
 
-### Data sources
-
-```{r, echo=FALSE, display=FALSE}
-# Read table
-table <- readr::read_csv("data_sources.csv", show_col_types = FALSE)
-
-table <- dplyr::select(table,
-  -`BES 2024 Code#`
-)
-
-# no need for url as saved in bib (col 5)
-table <- table[, c(1:4, 6:ncol(table))]
-
-# Display nicely
-knitr::kable(table, caption = "Data sources used for the creation of the underlaying raster datasets.")
-```
-
 ### Manipulation in QGIS
 
 #### Landscape component
 
-The Landscape component raster consists of 40 layers, each representing one of its features (see [List of items/features] for full list). These features can be grouped into different sub-categories:
+The Landscape component raster consists of 40 layers, each representing one of its features (see @sec-listitems for full list). These features can be grouped into different sub-categories:
 
 -   CP (1 feature) : The Country Parks (CP) feature was sourced from @naturescot2020countryparks.
 
@@ -200,25 +183,25 @@ The Landscape component raster consists of 40 layers, each representing one of i
 
 -   LCM (28 features): The Land Cover Map (LCM) featured were sourced from @naturescot2023habitat.
 
--   NNR (1 feature): The Natural Nature Reserves (NNR) feature was sourced from @naturescot2022nnr
+-   NNR (1 feature): The Natural Nature Reserves (NNR) feature was sourced from @naturescot2022nnr.
 
 -   NP (1 feature): The National Parks (NP) feature was sourced from @stirling2024nationalparks
 
--   NR (1 feature): The Nature Reserves (NR) feature was sourced from @naturescot2021reserves
+-   NR (1 feature): The Nature Reserves (NR) feature was sourced from @naturescot2021reserves.
 
--   RP (1 feature): The Regional Parks (RP) feature was sourced from @naturescot2022regionalparks
+-   RP (1 feature): The Regional Parks (RP) feature was sourced from @naturescot2022regionalparks.
 
--   RSPB (1 feature): The Protected sites for birds feature was sourced from @rspb2024reserves
+-   RSPB (1 feature): The Protected sites for birds feature was sourced from @rspb2024reserves.
 
--   SAC (1 feature): The Special Area for Conservation (SAC) feature was sourced from @naturescot2023sac
+-   SAC (1 feature): The Special Area for Conservation (SAC) feature was sourced from @naturescot2023sac.
 
--   SPA (1 feature): The Special Protection Areas (SPA) feature was sourced form @naturescot2023spa
+-   SPA (1 feature): The Special Protection Areas (SPA) feature was sourced form @naturescot2023spa.
 
--   SSSI (1 feature): The Sites of Specific Scientific Interest (SSSI) feature was sourced from @naturescot2024sssi
+-   SSSI (1 feature): The Sites of Specific Scientific Interest (SSSI) feature was sourced from @naturescot2024sssi.
 
--   SWT (1 feature): The Scottish Wildlife Trust (SWT) feature was sourced from @swt2024reserveboundaries
+-   SWT (1 feature): The Scottish Wildlife Trust (SWT) feature was sourced from @swt2024reserveboundaries.
 
--   WLA (1 feature): The Wild Land Area (WLA) feature was sourced form @naturescot2014wildland
+-   WLA (1 feature): The Wild Land Area (WLA) feature was sourced form @naturescot2014wildland.
 
 The datasets used for this component were clipped to a Scotland Boundary shapefile [@ons2018nuts], and they were rasterized to a 20m x 20m resolution.
 
@@ -230,7 +213,7 @@ The 24 features in this component are grouped into three main categories:
 
     1.  Dissolve: the dataset was “dissolved” in QGIS using the “Landform“ attribute, reducing it to 334 unique polygon features.
 
-    2.  Reclassification: the 334 landform types were manually grouped into 16 broader categories based on descriptive keywords (e.g. “hills”, “foothills” etc…) see ([Appendix I: Reclassification info]).
+    2.  Reclassification: the 334 landform types were manually grouped into 16 broader categories based on descriptive keywords (e.g. “hills”, “foothills” etc…). See @sec-reclass.
 
     3.  Rasterization: the dataset was converted into a raster at a 20 m x 20 m resolution.
 
@@ -246,7 +229,7 @@ The 24 features in this component are grouped into three main categories:
 
     1.  Initial dissolve: The dataset was “dissolved” by field “genSoilTyp” in QGIS, reducing it to 12 unique attribute values.
 
-    2.  Grouping: The values were manually aggregated into two soil classes: organic (peat) and mineral based on the original classifications (see [Appendix I: Reclassification info]).
+    2.  Grouping: The values were manually aggregated into two soil classes: organic (peat) and mineral based on the original classifications (see @sec-reclass).
 
     3.  Rasterization: the dataset was converted into a raster at a 20 m x 20 m resolution.
 
@@ -278,7 +261,7 @@ The 13 features can be divided into two categories:
 
 -   Rivers (6 features): The river data was sourced from the Os Open Rivers [@os2023rivers] and the OS Boundaries dataset. The following methodology was applied:
 
-    1.  merging: To avoid naming inconsistencies, the “Region” field from the OS Boundaries dataset was joined to the Os Open Rivers dataset [@os2023rivers].
+    1.  merging: To avoid naming inconsistencies, the “Region” field from the [OS Boundaries](https://osdatahub.os.uk/downloads/open/BoundaryLine) dataset was joined to the Os Open Rivers dataset [@os2023rivers].
 
     2.  initial dissolve: the merged dataset was “dissolved” in QGIS using the “name” and “Region” fields. This combined river segments sharing the same name and region into single features, reducing the dataset into 74 997 features.
 
@@ -290,7 +273,7 @@ The 13 features can be divided into two categories:
 
 -   Lakes (7 features): The lakes data was sourced from the Spatial inventory of UK waterbodies dataset [@taylor2021waterbodies]. The following methodology was applied:
 
-    1.  Reclassification: The dataset contained 25404 features for Scotland. To make it into a relevant and scorable dataset it was reduced to six features based on the given size (in hectares) of a waterbody using the attribute “Poly_Area_Ha” (see [Appendix I: Reclassification info]).
+    1.  Reclassification: The dataset contained 25404 features for Scotland. To make it into a relevant and scorable dataset it was reduced to six features based on the given size (in hectares) of a waterbody using the attribute “Poly_Area_Ha” (see @sec-reclass).
 
     2.  Rasterization: the datasets were converted into raster format at a 20 m x 20 m resolution.
 
@@ -556,18 +539,6 @@ dplyr::select(config_by_component$SLSRA, Name, Description) |>
 	knitr::kable(format = "html")
 ```
 
-::: {.content-visible when-format="html"}
-```{r, echo=FALSE}
-make_layer_map(rstack = slsra,  base_map = base_map,
-               show_index = 5, #start with SLSRA_LCM_6 selected as example
-               color = "#386641")
-```
-:::
-
-::: callout-tip
-The interactive version of this document contains maps that allow you to toggle individual layers.
-:::
-
 ### Natural Features component
 
 ```{r, echo=FALSE}
@@ -577,15 +548,6 @@ The interactive version of this document contains maps that allow you to toggle 
 dplyr::select(config_by_component$FIPS_N, Name, Description) |> 
 	knitr::kable(format = "html")
 ```
-
-::: {.content-visible when-format="html"}
-```{r, echo=FALSE}
-make_layer_map(rstack = fips_n,  base_map = base_map,
-               show_index = 5, #start with FIPS_N_Landform_16 selected as example
-               color = "#CBA340")
-
-```
-:::
 
 ### Infrastructure Features component
 
@@ -607,50 +569,67 @@ dplyr::select(config_by_component$Water, Name, Description) |>
 	knitr::kable(format = "html")
 ```
 
-::: {.content-visible when-format="html"}
-```{r, echo=FALSE, out.height = 650}
-water_rstack <- list(
-  "original" = water,
-  "distance" = terra::rast(system.file("extdata", "rasters", "Bush", "dist", "Water_dist.tif", package="biodt.recreation")),
-  "scored" = terra::rast(system.file("extdata", "rasters", "Bush", "Water.tif", package="biodt.recreation"))
-  )
+## List of data sources
 
-make_layer_map_dist(rstack = water_rstack, base_map,
-                    show_index = 6, # "water rivers 3 distance"
-                    color_original = "#4E6766")
+```{r, echo=FALSE, display=FALSE}
+#| label: tbl-sources
+#| tbl-cap: List of data sources.
+
+# Read table
+table <- readr::read_csv("data_sources.csv", show_col_types = FALSE)
+
+table <- dplyr::select(table,
+  -`BES 2024 Code#`
+)
+
+# no need for url as saved in bib (col 5)
+table <- table[, c(1:4, 6:ncol(table))]
+
+# Display nicely
+knitr::kable(table, caption = "Data sources used for the creation of the underlaying raster datasets.")
 ```
-:::
 
-## Appendix I: Reclassification info
+## Reclassification tables {#sec-reclass}
 
-```{r}
+### Landform
+
+
+```{r, echo=FALSE, display=FALSE}
+#| label: tbl-landform
+#| tbl-cap: Reclassification of the Natural Features component (landform layers) baed on data extracted from @hutton2022soil.
+
 # Read table
 table <- readr::read_csv("landform_groups.csv", show_col_types = FALSE)
 
 # Display nicely
-knitr::kable(table, caption = "Reclassification of the Natural Features component (landform layer).")
+knitr::kable(table)
 ```
 
-|  |  |
-|-----------------------------------|-------------------------------------|
-| **Reclassification** |  **genSoilTyp** |
-| Organic | Peaty podzols, Peaty gleys, Peat, |
-| Mineral | Mineral podzols, Mineral gleys, Brown soils, Montane soils, Immature soils, Alluvial soils, Calcareous soils |
+### Soil
 
-: Reclassification of the Natural Features component (soild layer).
+| **Reclassification** | **genSoilTyp**                                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Organic              | Peaty podzols, Peaty gleys, Peat,                                                                            |
+| Mineral              | Mineral podzols, Mineral gleys, Brown soils, Montane soils, Immature soils, Alluvial soils, Calcareous soils |
 
-|  |  |
-|----|----|
-| **Class** |  **Example search terms / or   process** |
-| Major river   or tributary | Specific e.g.   "Tay", "Spey" etc… |
-|  Tidal river   or estuary | taken from   dataset attribute "form" |
-| Minor river   or tributary | e.g.   "River", "Abhainn", "Uisge" |
-| Named minor   stream or tributary | e.g.   "Allt", "Alltan", "Burn", "Feadan",   "Sruth", "Caochan" |
-| Unnamed minor   stream or tributary | Waterways   with no names |
-| Canal | taken from   dataset attribute "form" |
-| Lake | taken from   dataset attribute "form" |
+: Reclassification of the Natural Features component (soil layers) based on @hutton2022soil. {#tbl-soil}
 
-: Reclassification of the Water component (river layer).
+### Rivers
+
+|                                   |                                                               |
+| --------------------------------- | ------------------------------------------------------------- |
+| **Class**                         | **Example search terms or process**                           |
+| Major river or tributary          | Specific e.g. "Tay", "Spey" etc…                              |
+| Tidal river or estuary            | taken from dataset attribute "form"                           |
+| Minor river or tributary          | e.g. "River", "Abhainn", "Uisge"                              |
+| Named minor stream or tributary   | e.g. "Allt", "Alltan", "Burn", "Feadan",   "Sruth", "Caochan" |
+| Unnamed minor stream or tributary | Waterways with no names                                       |
+| Canal                             | taken from dataset attribute "form"                           |
+| Lake                              | taken from dataset attribute "form"                           |
+
+: Reclassification of the Water component (river layers) based on @os2023rivers. {#tbl-rivers}
+
+### Lakes
 
 | Class       | size (ha) |
 |-------------|-----------|
@@ -661,6 +640,6 @@ knitr::kable(table, caption = "Reclassification of the Natural Features componen
 | Large loch  | $100-500$ |
 | Major loch  | $>500$    |
 
-: Reclassification of the Water component (lakes layer).
+: Reclassification of the Water component (lakes layers) based on data from @taylor2021waterbodies. {#tbl-lakes}
 
 {{< include _endmatter.qmd >}}
