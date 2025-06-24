@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15715070.svg)](https://doi.org/10.5281/zenodo.15715070)
+
 # Reports on the BioDT Recreational Potential Model for Scotland
 
 This repository contains a collection of reports describing the [BioDT Recreational Potential model for Scotland](https://github.com/BioDT/uc-ces-recreation), which is a component of the Cultural Ecosystem Services prototype Digital Twin. The material is collected into a [Quarto Website](https://quarto.org/docs/websites).
