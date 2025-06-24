@@ -294,18 +294,7 @@ C_{\text{slope}}(x) = \begin{cases}
 \end{cases}
 $$ {#eq-slopequant}
 
-| Slope (%) | Slope description     |
-|-----------|-----------------------|
-| \<3       | easy                  |
-| 3-5       | gentle slope          |
-| 5-10      | medium slope          |
-| 10-20     | steep slope           |
-| 20-30     | very steep slope      |
-| \>30      | extremely steep slope |
-
-: Six classification slopes used, adapted from @Dick2022
-
-==**TODO: Why are these intervals different from the ones above?**==
+These classification intervals differ from those used in @Dick2022 but are consistent with the [earliest known `R` implementation of the RP model](https://github.com/BioDT/uc-ces/blob/main/recreation_model/MODEL_Recreation_potential.R#L75).
 
 ### Reprojection
 
