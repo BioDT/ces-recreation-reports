@@ -244,7 +244,7 @@ Creating or editing personas is far easier using the Shiny app, some spreadsheet
 Let's say we want to modify the Hard Recreationalist persona to better fit an off-road cyclist who does not want to cycle straight up a mountain. We will edit the slope scores and the cycle path scores.
 
 ```{r}
-Note that assignment + edit in R automatically results in a copy!
+# Note that assignment + edit in R automatically results in a copy!
 custom_persona <- hard_recreationalist
 
 custom_persona[["FIPS_I_NationalCycleNetwork_1"]] <- 5  # on-road, paved

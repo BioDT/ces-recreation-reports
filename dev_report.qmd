@@ -112,7 +112,7 @@ rsconnect::connectApiUser(server="connect-apps.ceh.ac.uk", account="<username>",
 rsconnect::deployApp(appDir=".")
 ```
 
-This will take a long time if you have a lot of data to upload - for me it took up to an hour to upload \~2 gigabytes of data.
+This will take a long time if you have a lot of data to upload. For me it took up to an hour to upload \~2GB data.
 
 You will want to add the directory `rsconnect/` to your `.gitignore` file.
 
@@ -463,28 +463,26 @@ The original Scotland-wide raster was divided into 20 overlapping spatial window
 
 At the time of writing there are around 20 open issues on the GitHub repository.
 
-| Issue | Theme | Comments |
-|----|----|----|
-| [Use Google Sheets for persona configuration #11](https://github.com/BioDT/uc-ces-recreation/issues/11) | Functionality / User experience |  |
-| [Explanation for 'proximity' contributions #19](https://github.com/BioDT/uc-ces-recreation/issues/19) | Documentation / Research required |  |
-| [Explain how contributions to the recreational potential are weighted #25](https://github.com/BioDT/uc-ces-recreation/issues/25) | Documentation / Research required |  |
-| [Toggle layers more efficiently using showGroup / hideGroup #35](https://github.com/BioDT/uc-ces-recreation/issues/35) | Efficiency | Probably inconsequential |
-| [Modify logistic function parameters so that proximity scores fall off over a longer distance #39](https://github.com/BioDT/uc-ces-recreation/issues/39) | Research required |  |
-| [Documentation explaining how the data was produced #41](https://github.com/BioDT/uc-ces-recreation/issues/41) | Documentation | Important |
-| [Use descriptive feature/layer names #50](https://github.com/BioDT/uc-ces-recreation/issues/50) | Good practice | Important |
-| [Compute 500m buffer using original vector layers #51](https://github.com/BioDT/uc-ces-recreation/issues/51) | Efficiency |  |
-| [Replace HTML with Markdown for extended text sections in Shiny app #52](https://github.com/BioDT/uc-ces-recreation/issues/52) | Developer experience |  |
-| [Relationship between the Recreational Potential model/app and 'Digital Twins' #53](https://github.com/BioDT/uc-ces-recreation/issues/53) | Documentation | Discussed in @sec-dt |
-| [Consider non-linear colour mapping for the app #56](https://github.com/BioDT/uc-ces-recreation/issues/56) | User experience / Research required |  |
-| [Include sufficient information in persona csv files for manual editing #57](https://github.com/BioDT/uc-ces-recreation/issues/57) | User experience |  |
-| [Download map from shiny app #59](https://github.com/BioDT/uc-ces-recreation/issues/59) | Functionality / User experience |  |
-| [Project rasters onto ESPG:3857 ahead of time #61](https://github.com/BioDT/uc-ces-recreation/issues/61) | Efficiency / User experience | Important |
-| [Remove requirement for filesystem write access #71](https://github.com/BioDT/uc-ces-recreation/issues/71) |  | Required for deployment on DataLabs |
-| [Expand suite of tests #82](https://github.com/BioDT/uc-ces-recreation/issues/82) | Good practice |  |
-| [Installed package fails to read tiff files when initial download times out #86](https://github.com/BioDT/uc-ces-recreation/issues/86) | User experience |  |
-| [Tiff error on Windows #87](https://github.com/BioDT/uc-ces-recreation/issues/87) | **Bug (live)** | **Important** |
-| [terra::distance throwing error for large, sparse raster during write to disk #91](https://github.com/BioDT/uc-ces-recreation/issues/91) | Bug (circumvented by [#92](https://github.com/BioDT/uc-ces-recreation/pull/92)) | Possible upstream (terra) bug, worth reporting |
-| [Reduce size of input rasters #93](https://github.com/BioDT/uc-ces-recreation/issues/93) | User experience |  |
+| Issue                                                                                                                                                    | Theme                                                                           | Comments                                               |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| [Use Google Sheets for persona configuration #11](https://github.com/BioDT/uc-ces-recreation/issues/11)                                                  | User experience                                                                 | See @sec-storage                                       |
+| [Explanation for 'proximity' contributions #19](https://github.com/BioDT/uc-ces-recreation/issues/19)                                                    | Documentation                                                                   | Research required                                      |
+| [Toggle layers more efficiently using showGroup / hideGroup #35](https://github.com/BioDT/uc-ces-recreation/issues/35)                                   | Efficiency                                                                      | Probably inconsequential                               |
+| [Modify logistic function parameters so that proximity scores fall off over a longer distance #39](https://github.com/BioDT/uc-ces-recreation/issues/39) | Changes to the model                                                            | Research required                                      |
+| [Use descriptive feature/layer names #50](https://github.com/BioDT/uc-ces-recreation/issues/50)                                                          | Good practice                                                                   | **Important** (see @sec-layernames)                    |
+| [Compute 500m buffer using original vector layers #51](https://github.com/BioDT/uc-ces-recreation/issues/51)                                             | Efficiency                                                                      |                                                        |
+| [Replace HTML with Markdown for extended text sections in Shiny app #52](https://github.com/BioDT/uc-ces-recreation/issues/52)                           | Developer experience                                                            |                                                        |
+| [Relationship between the Recreational Potential model/app and 'Digital Twins' #53](https://github.com/BioDT/uc-ces-recreation/issues/53)                | Documentation                                                                   | Discussed in @sec-dt                                   |
+| [Consider non-linear colour mapping for the app #56](https://github.com/BioDT/uc-ces-recreation/issues/56)                                               | User experience                                                                 | Research required                                      |
+| [Include sufficient information in persona csv files for manual editing #57](https://github.com/BioDT/uc-ces-recreation/issues/57)                       | User experience                                                                 |                                                        |
+| [Download map from shiny app #59](https://github.com/BioDT/uc-ces-recreation/issues/59)                                                                  | User experience                                                                 |                                                        |
+| [Project rasters onto ESPG:3857 ahead of time #61](https://github.com/BioDT/uc-ces-recreation/issues/61)                                                 | Efficiency                                                                      | **Important**                                          |
+| [Remove requirement for filesystem write access #71](https://github.com/BioDT/uc-ces-recreation/issues/71)                                               | App deployment                                                                  | Required for deployment on DataLabs (see @sec-storage) |
+| [Expand suite of tests #82](https://github.com/BioDT/uc-ces-recreation/issues/82)                                                                        | Good practice                                                                   |                                                        |
+| [Installed package fails to read tiff files when initial download times out #86](https://github.com/BioDT/uc-ces-recreation/issues/86)                   | User experience                                                                 |                                                        |
+| [Tiff error on Windows #87](https://github.com/BioDT/uc-ces-recreation/issues/87)                                                                        | Bug (live)                                                                      | **Important**                                          |
+| [terra::distance throwing error for large, sparse raster during write to disk #91](https://github.com/BioDT/uc-ces-recreation/issues/91)                 | Bug (circumvented by [#92](https://github.com/BioDT/uc-ces-recreation/pull/92)) | Possible upstream (terra) bug, worth reporting         |
+| [Reduce size of input rasters #93](https://github.com/BioDT/uc-ces-recreation/issues/93)                                                                 | User experience                                                                 |                                                        |
 
 ### Re-engineering the data production process
 
@@ -564,7 +562,7 @@ Linear features should be vector layers rather than rasters. This would avoid pi
 
 The UI may also display the latitude-longitude coordinate or [what3words](https://what3words.com/) based on the cursor position. This would help users look up the relevant area on another service such as Komoot or Alltrails.
 
-#### Storage of personas
+#### Storage of personas {#sec-storage}
 
 As things stand, personas are stored in `.csv` files on the server side. This means the app requires write access to the server's filesystem.
 
