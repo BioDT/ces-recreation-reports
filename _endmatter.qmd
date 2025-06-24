@@ -17,7 +17,7 @@ Funding for SPEAK came from the Natural Environment Research Council – Growing
 
 ## CRediT statement {.appendix .unnumbered}
 
-**JMR** and **MT** developed the current version of the model, and wrote the original drafts of these reports. **CA** obtained the input data and developed the previous version of the model. **CA** and **JD** conceptualised the SPEAK project and carried out the ananalysis. **CA**, **JD** and **SR** acquired funding for the project under BioDT.
+**JMR:** software; visualisation; writing. **MT:** software; visualisation; writing. **CA:** conceptualisation; data curation; funding acquisition; software. **JD:** conceptualisation; funding acquisition; project administration. **SR:** funding acquisition; software.
 
 ## Acknowledgements {.appendix .unnumbered}
 
