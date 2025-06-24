@@ -568,7 +568,7 @@ dplyr::select(config_by_component$Water, Name, Description) |>
 #| tbl-cap: List of data sources.
 
 # Read table
-table <- readr::read_csv("data_sources.csv", show_col_types = FALSE)
+table <- readr::read_csv("data/data_sources.csv", show_col_types = FALSE)
 
 table <- dplyr::select(table,
   -`BES 2024 Code#`
@@ -591,7 +591,7 @@ knitr::kable(table, caption = "Data sources used for the creation of the underla
 #| tbl-cap: Reclassification of the Natural Features component (landform layers) baed on data extracted from @hutton2022soil.
 
 # Read table
-table <- readr::read_csv("landform_groups.csv", show_col_types = FALSE)
+table <- readr::read_csv("data/landform_groups.csv", show_col_types = FALSE)
 
 # Display nicely
 knitr::kable(table)

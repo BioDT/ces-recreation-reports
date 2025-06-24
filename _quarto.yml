@@ -1,9 +1,9 @@
 project:
   type: website
-  output-dir: _project
+  output-dir: _site
 
 # Metadata shared by all documents
-date: 2025-06-30
+date: 2025-06-24
 date-format: long
 date-modified: last-modified
 copyright: BioDT and the UK Centre for Ecology & Hydrology, 2025
@@ -29,11 +29,6 @@ format:
     theme:
       light: flatly
       dark: darkly
-  #pdf:
-    #colorlinks: true
-    #documentclass: scrartcl
-    #toccolor: blue
-    #linkcolor: purple
 
 # Website config
 website:
@@ -51,10 +46,6 @@ website:
       - href: example.qmd
         text: Worked Example
     right:
-      #- text: R Package
-      #  icon: github
-      #  href: "https://github.com/BioDT/uc-ces-recreation"
-      #  target: _blank
       - icon: github
         href: "https://github.com/BioDT/ces-recreation-reports"
         target: _blank
