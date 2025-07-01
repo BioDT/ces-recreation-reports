@@ -20,7 +20,7 @@ The driving motivation for this work is to promote good health and connection to
 
 [^1]: This was the objective of the [DECIDE](https://www.ceh.ac.uk/our-science/projects/decide) project.
 
-The RP component and the biodiversity component are distinct models that have been developed independently of each other. However, in both cases their outputs can be displayed on an interactive map of Scotland and served to users using an app framework such as [R Shiny](https://shiny.posit.co/).
+The RP component and the biodiversity component [@rolph2025biodiversity] are distinct models that have been developed independently of each other. However, in both cases their outputs can be displayed on an interactive map of Scotland and served to users using an app framework such as [R Shiny](https://shiny.posit.co/).
 
 In this short report we will describe basic aspects of the Recreational Potential model. For a detailed account of the inner workings of the model the reader is directed to the accompanying [technical supplement](tech_supp.html).
 
@@ -40,7 +40,7 @@ In the months since, development work has focused on improving the speed and sca
 
 The SPEAK project followed in the same spirit as [@Dick2022], but using the updated Recreational Potential model, which allows for greater individual customisation by users. Some preliminary findings from this study are available as a conference presentation [@Dick2025b] and workshop report [@Dick2025c].
 
-A retrospective look at the CES part of the BioDT project will be published shortly under @Rolph2025.
+A retrospective look at the CES part of the BioDT project will be published shortly under @Rolph2025 and @rolph2025biodiversity.
 
 ## Model description
 
@@ -55,7 +55,7 @@ The main model output is an two-dimensional array of numbers (a *raster*) repres
 An RP value is constructed from a combination of **87** *items* representing distinct attributes of the land. The 87 items are grouped into four *components*, which are outlined in @tbl-components. RP values are calculated by weighting each item by a *score* between $0$ and $10$ that reflects the importance of that item to the user. A full set of 87 scores is referred to as a *persona.*
 
 | Component | Short code | \# items |
-|:------------------------------------------|:--------------|:--------------|
+|:---------------------------------------|:---------------|:---------------|
 | **Landscape** - the suitability of land to support recreational activity | `SLSRA` | 40 |
 | **Natural Features** influencing the potential | `FIPS_N` | 24 |
 | **Infrastructure** features influencing the potential | `FIPS_I` | 10 |
@@ -80,15 +80,16 @@ Personas are stored in `.csv` files. However, the interactive R Shiny app provid
 
 ### Input data {#sec-inputs}
 
-There is another essential set of inputs to the model which are not specified by the user. These are a set of 87 _feature layers_ --- one for each of the 87 items --- covering Scotland at a resolution of 20x20m.
+There is another essential set of inputs to the model which are not specified by the user. These are a set of 87 *feature layers* --- one for each of the 87 items --- covering Scotland at a resolution of 20x20m.
 
-:::{.callout-note}
+::: callout-note
 #### Items and feature layers
-We use the term _items_ in the context of a persona (i.e. a single persona score is an _item_), and _feature layers_ in the context of raster data (a single layer of a raster is a _feature_).
+
+We use the term *items* in the context of a persona (i.e. a single persona score is an *item*), and *feature layers* in the context of raster data (a single layer of a raster is a *feature*).
 
 There is a one-to-one relationship between the 87 items and the 87 feature layers.
 
-Thus, they are described by the same set of labels. For example, the user must provide a score for the `Water_Lakes_1` (Pond) _item_, and the input dataset also contains a _feature layer_ called `Water_Lakes_1`.
+Thus, they are described by the same set of labels. For example, the user must provide a score for the `Water_Lakes_1` (Pond) *item*, and the input dataset also contains a *feature layer* called `Water_Lakes_1`.
 :::
 
 For features belonging to the *Landscape* (`SLSRA`) component or the *Natural Features* component (`FIPS_N`), these rasters contain just ones and zeros, with $1$ indicating presence of the feature in that pixel and $0$ indicating absence.
@@ -201,7 +202,7 @@ The RP model has been gradually developed within UKCEH over a number of years. T
 Some effort has been taken to make previous versions findable. All individuals known to have contributed to development are credited in the version 1.0 release [@MarshRossney2025].
 
 | Iteration | Version | Source |
-|----------------|:---------------|:----------------------------------------|
+|-----------------|:----------------|:-------------------------------------|
 | 1 (2023) | \- | <https://github.com/BioDT/uc-ces/tree/main/recreation_model> |
 | 2 (2024) | \- | <https://github.com/BioDT/uc-ces-recreation/tree/2024-model> |
 | 3 (2025) | SPEAK pre-release | <https://github.com/BioDT/uc-ces-recreation/tree/SPEAK-prerelease> |
@@ -485,9 +486,8 @@ Detailed instructions for using the app are contained within the app itself, in 
 The interactive demo is only provided in the HTML version of this report. This is available online at <https://biodt.github.io/ces-recreation-reports>.
 :::
 
-:::: {.content-visible when-format="html"}
+::::: {.content-visible when-format="html"}
 <!-- The source code used to produce this example can be found HERE. -->
-
 
 This interactive demo showcases the model running with the *Hard Recreationalist* persona for the Bush Estate area near Edinburgh.
 
@@ -536,11 +536,11 @@ We now take a step back, splitting each component into its constituent layers. Y
 
 The base map has been rendered in black and white to enhance the visibility of layers with sparse data. As shown, the *Landscape* (`SLSRA`) and *Natural Features* (`FIPS_N`) components display binary data, indicating either the presence or absence of features; whereas the *Infrastructure* (`FIPS_I`) and *Water* (`Water`) components present a distance gradient.
 
-:::{.callout-tip}
+::: callout-tip
 As you explore the maps, it is helpful to have the [list of features and their descriptions](tech_supp.html#sec-listitems) open in another browser window.
 :::
 
-:::{.panel-tabset}
+::: panel-tabset
 ### Water
 
 ```{r, echo=FALSE}
@@ -614,15 +614,12 @@ terra::plet(
   legend = "bottomleft"
 )
 ```
-
 :::
-
-::::
+:::::
 
 ## Scotland wide datasets
 
 The outputs of the RP model for the *Hard Recreationalist* and *Soft Recreationalist* personas for the whole of Scotland will soon be available for download as a data product [@Tigli2025]. The results are previewed in @fig-scotlandRP.
-
 
 ![Recreational Potential values for the whole of Scotland using the two persona presets.](images/RP_Scotland_figure.png){#fig-scotlandRP fig-align="center"}
 
