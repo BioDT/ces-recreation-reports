@@ -3,6 +3,8 @@ title: The BioDT Recreational Potential Model for Scotland
 subtitle: Technical Supplement
 abstract: >
   This supplement provides technical details about the Recreational Potential model. This includes a mathematical description of the model, details regarding the source data, and technical aspects of the code.
+resources:
+  - /data/Rivers_Raw.csv
 ---
 
 ## Technical description of the model {#sec-techdesc}
@@ -614,7 +616,7 @@ knitr::kable(table)
 | Canal | taken from dataset attribute "form" |
 | Lake | taken from dataset attribute "form" |
 
-: Reclassification of the Water component (river layers) based on @os2023rivers. {#tbl-rivers}
+: Example Reclassification of the Water component (river layers) based on @os2023rivers. <a href="data/Rivers_Raw.csv" download>Download the full table (csv) </a>. {#tbl-rivers}
 
 ### Lakes
 
