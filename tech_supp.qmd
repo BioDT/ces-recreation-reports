@@ -267,7 +267,7 @@ The 13 features can be divided into two categories:
 
     2.  initial dissolve: the merged dataset was “dissolved” in QGIS using the “name” and “Region” fields. This combined river segments sharing the same name and region into single features, reducing the dataset into 74 997 features.
 
-    3.  Reclassification: To simplify the river data at a national scale, a reclassification was carried out (see \[Appendix I: Reclassification info\] for examples). This is a subjective and based on:  the “form” attribute (indicating water type), or keywords searches in the “name” field, and researcher knowledge of major rivers of national and regional importance.
+    3.  Reclassification: To simplify the river data at a national scale, a reclassification was carried out (see @sec-reclass for examples). This is a subjective and based on:  the “form” attribute (indicating water type), or keywords searches in the “name” field, and researcher knowledge of major rivers of national and regional importance.
 
     4.  Rasterization: the dataset was converted into raster format at a 20 m x 20 m resolution.
 
@@ -283,7 +283,7 @@ The 13 features can be divided into two categories:
 
 With one exception, every raster layer produced by the manual process is an integer-valued categorical raster. The single exception is a 'slope' raster containing the average absolute gradient $s(x)$ within each pixel.
 
-We use `terra::classify` to quantise this continuous range into six categories according to their steepness (expressed in degrees), this was based on the six classification slopes (expressed in percentage) of @Dick2022.
+We use `terra::classify` to quantise this continuous range into six categories according to their steepness (expressed in degrees). These values are based on the six slope intervals from @Dick2022 (expressed in percentages).
 
 $$
 C_{\text{slope}}(x) = \begin{cases}
@@ -616,7 +616,7 @@ knitr::kable(table)
 | Canal | taken from dataset attribute "form" |
 | Lake | taken from dataset attribute "form" |
 
-: Example Reclassification of the Water component (river layers) based on @os2023rivers. <a href="data/Rivers_Raw.csv" download>Download the full table (csv) </a>. {#tbl-rivers}
+: Example search terms for the reclassification of the Water component (river layers) based on @os2023rivers. The full table can be downloaded as a `.csv` by clicking on <a href="data/Rivers_Raw.csv" download>this link</a>. {#tbl-rivers}
 
 ### Lakes
 
