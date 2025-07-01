@@ -215,7 +215,7 @@ The 24 features in this component are grouped into three main categories:
 
     1.  Dissolve: the dataset was “dissolved” in QGIS using the “Landform“ attribute, reducing it to 334 unique polygon features.
 
-    2.  Reclassification: the 334 landform types were manually grouped into 16 broader categories based on descriptive keywords (e.g. “hills”, “foothills” etc…). See @sec-reclass.
+    2.  Reclassification: the 334 landform types were manually grouped into 16 broader categories based on descriptive keywords (e.g. “hills”, “foothills” etc…). See @tbl-landform.
 
     3.  Rasterization: the dataset was converted into a raster at a 20 m x 20 m resolution.
 
@@ -231,7 +231,7 @@ The 24 features in this component are grouped into three main categories:
 
     1.  Initial dissolve: The dataset was “dissolved” by field “genSoilTyp” in QGIS, reducing it to 12 unique attribute values.
 
-    2.  Grouping: The values were manually aggregated into two soil classes: organic (peat) and mineral based on the original classifications (see @sec-reclass).
+    2.  Grouping: The values were manually aggregated into two soil classes: organic (peat) and mineral based on the original classifications (see @tbl-soil).
 
     3.  Rasterization: the dataset was converted into a raster at a 20 m x 20 m resolution.
 
@@ -267,7 +267,7 @@ The 13 features can be divided into two categories:
 
     2.  initial dissolve: the merged dataset was “dissolved” in QGIS using the “name” and “Region” fields. This combined river segments sharing the same name and region into single features, reducing the dataset into 74 997 features.
 
-    3.  Reclassification: To simplify the river data at a national scale, a reclassification was carried out (see @sec-reclass for examples). This is a subjective and based on:  the “form” attribute (indicating water type), or keywords searches in the “name” field, and researcher knowledge of major rivers of national and regional importance.
+    3.  Reclassification: To simplify the river data at a national scale, a reclassification was carried out (see @tbl-rivers for examples). This is a subjective and based on:  the “form” attribute (indicating water type), or keywords searches in the “name” field, and researcher knowledge of major rivers of national and regional importance.
 
     4.  Rasterization: the dataset was converted into raster format at a 20 m x 20 m resolution.
 
@@ -275,7 +275,7 @@ The 13 features can be divided into two categories:
 
 -   Lakes (7 features): The lakes data was sourced from the Spatial inventory of UK waterbodies dataset [@taylor2021waterbodies]. The following methodology was applied:
 
-    1.  Reclassification: The dataset contained 25404 features for Scotland. To make it into a relevant and scorable dataset it was reduced to six features based on the given size (in hectares) of a waterbody using the attribute “Poly_Area_Ha” (see @sec-reclass).
+    1.  Reclassification: The dataset contained 25404 features for Scotland. To make it into a relevant and scorable dataset it was reduced to six features based on the given size (in hectares) of a waterbody using the attribute “Poly_Area_Ha” (see @tbl-lakes).
 
     2.  Rasterization: the datasets were converted into raster format at a 20 m x 20 m resolution.
 
