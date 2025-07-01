@@ -464,7 +464,7 @@ The original Scotland-wide raster was divided into 20 overlapping spatial window
 At the time of writing there are around 20 open issues on the GitHub repository.
 
 | Issue | Theme | Comments |
-|----|----|----|
+|------------------------|------------------------|------------------------|
 | [Use Google Sheets for persona configuration #11](https://github.com/BioDT/uc-ces-recreation/issues/11) | Functionality / User experience |  |
 | [Explanation for 'proximity' contributions #19](https://github.com/BioDT/uc-ces-recreation/issues/19) | Documentation / Research required |  |
 | [Explain how contributions to the recreational potential are weighted #25](https://github.com/BioDT/uc-ces-recreation/issues/25) | Documentation / Research required |  |

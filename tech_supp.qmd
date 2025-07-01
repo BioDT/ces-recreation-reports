@@ -192,7 +192,7 @@ knitr::kable(table, caption = "Data sources used for the creation of the underla
 
 #### Landscape component
 
-The Landscape component raster consists of 40 layers, each representing one of its features (see [List of items/features] for full list). These features can be grouped into different sub-categories:
+The Landscape component raster consists of 40 layers, each representing one of its features (see [List of items/features](#sec-listitems) for full list). These features can be grouped into different sub-categories:
 
 -   CP (1 feature) : The Country Parks (CP) feature was sourced from @naturescot2020countryparks.
 
@@ -236,7 +236,7 @@ The 24 features in this component are grouped into three main categories:
 
 -   Slope features (6 features): Slope data were derived from the Copernicus GLO-30 Digital Elevation Model (DEM), a global 30 m resolution dataset [@esa2021dem]. The following methodology was applied:
 
-    1.   Slope calculation: the DEM was converted into a matching CRS (EPSG: 27700) using Warp (Reproject) using QGIS, with a slope raster calculated using GDAL Slope with its default settings.
+    1.  Slope calculation: the DEM was converted into a matching CRS (EPSG: 27700) using Warp (Reproject) using QGIS, with a slope raster calculated using GDAL Slope with its default settings.
 
     2.  Up-sampling: the raster was resampled to a 20 m x 20 m resolution.
 
@@ -256,7 +256,7 @@ The 10 features are grouped into three main categories:
 
 -   Roads Tracks (5 features): Road Tracks data was sourced from the OS OpenRoads dataset [@os2023roads]. The following methodologies were applied:
 
-    1.   Dissolve: The OpenRoads dataset [@os2023roads] was “dissolved” in QGIS by the field “Road type” and “Tracks”.
+    1.  Dissolve: The OpenRoads dataset [@os2023roads] was “dissolved” in QGIS by the field “Road type” and “Tracks”.
 
     2.  Adding access roads: the attribute field “Access roads” from the OSM_Roads dataset [@osmScotlandMap] was merged into the dissolved dataset.
 
@@ -298,7 +298,7 @@ The 13 features can be divided into two categories:
 
 With one exception, every raster layer produced by the manual process is an integer-valued categorical raster. The single exception is a 'slope' raster containing the average absolute gradient $s(x)$ within each pixel.
 
-We use `terra::classify` to quantise this continuous range into six categories according to their steepness,
+We use `terra::classify` to quantise this continuous range into six categories according to their steepness (expressed in degrees), this was based on the six classification slopes (expressed in percentage) of @Dick2022 (see Table below).
 
 $$
 C_{\text{slope}}(x) = \begin{cases}
@@ -320,9 +320,7 @@ $$ {#eq-slopequant}
 | 20-30     | very steep slope      |
 | \>30      | extremely steep slope |
 
-: Six classification slopes used, adapted from @Dick2022
-
-==**TODO: Why are these intervals different from the ones above?**==
+: Six classification slopes (%) used, adapted from @Dick2022
 
 ### Reprojection
 
@@ -534,7 +532,7 @@ make_layer_map_dist(rstack = fips_i_rstack, base_map,
 Here we list the full set of 87 items/features that make up the layers of the input rasters, and must be scored by the user to construct a persona.
 
 | Component | Short code | Num. layers | Description |
-|----------|----------|----------|------------------------------------------|
+|-------------|-------------|-------------|-----------------------------------|
 | Landscape | `SLSRA` | 40 | Land cover type, landscape designations and conservation, and farmland of high nature value. |
 | Natural Features | `FIPS_N` | 24 | Landform types, soil types and slope. |
 | Infrastructure | `FIPS_I` | 10 | Roads, tracks, footpaths and cycle networks. |
@@ -633,22 +631,22 @@ knitr::kable(table, caption = "Reclassification of the Natural Features componen
 
 |  |  |
 |-----------------------------------|-------------------------------------|
-| **Reclassification** |  **genSoilTyp** |
+| **Reclassification** | **genSoilTyp** |
 | Organic | Peaty podzols, Peaty gleys, Peat, |
 | Mineral | Mineral podzols, Mineral gleys, Brown soils, Montane soils, Immature soils, Alluvial soils, Calcareous soils |
 
 : Reclassification of the Natural Features component (soild layer).
 
 |  |  |
-|----|----|
-| **Class** |  **Example search terms / or   process** |
-| Major river   or tributary | Specific e.g.   "Tay", "Spey" etc… |
-|  Tidal river   or estuary | taken from   dataset attribute "form" |
-| Minor river   or tributary | e.g.   "River", "Abhainn", "Uisge" |
-| Named minor   stream or tributary | e.g.   "Allt", "Alltan", "Burn", "Feadan",   "Sruth", "Caochan" |
-| Unnamed minor   stream or tributary | Waterways   with no names |
-| Canal | taken from   dataset attribute "form" |
-| Lake | taken from   dataset attribute "form" |
+|------------------------------------|------------------------------------|
+| **Class** | **Example search terms / or process** |
+| Major river or tributary | Specific e.g. "Tay", "Spey" etc… |
+| Tidal river or estuary | taken from dataset attribute "form" |
+| Minor river or tributary | e.g. "River", "Abhainn", "Uisge" |
+| Named minor stream or tributary | e.g. "Allt", "Alltan", "Burn", "Feadan", "Sruth", "Caochan" |
+| Unnamed minor stream or tributary | Waterways with no names |
+| Canal | taken from dataset attribute "form" |
+| Lake | taken from dataset attribute "form" |
 
 : Reclassification of the Water component (river layer).
 
