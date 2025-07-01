@@ -55,7 +55,7 @@ The main model output is an two-dimensional array of numbers (a *raster*) repres
 An RP value is constructed from a combination of **87** *items* representing distinct attributes of the land. The 87 items are grouped into four *components*, which are outlined in @tbl-components. RP values are calculated by weighting each item by a *score* between $0$ and $10$ that reflects the importance of that item to the user. A full set of 87 scores is referred to as a *persona.*
 
 | Component | Short code | \# items |
-|:------------------------------------------|:--------------|:--------------|
+|:-----------------------|:-----------------------|:-----------------------|
 | **Landscape** - the suitability of land to support recreational activity | `SLSRA` | 40 |
 | **Natural Features** influencing the potential | `FIPS_N` | 24 |
 | **Infrastructure** features influencing the potential | `FIPS_I` | 10 |
@@ -192,7 +192,7 @@ The RP model has been gradually developed within UKCEH over a number of years. T
 Some effort has been taken to make previous versions findable. All individuals known to have contributed to development are credited in the version 1.0 release [@ukceh2025].
 
 | Iteration | Version | Source |
-|----------------|:---------------|:----------------------------------------|
+|------------------------|:-----------------------|:-----------------------|
 | 1 (2023) | \- | <https://github.com/BioDT/uc-ces/tree/main/recreation_model> |
 | 2 (2024) | \- | <https://github.com/BioDT/uc-ces-recreation/tree/2024-model> |
 | 3 (2025) | SPEAK pre-release | <https://github.com/BioDT/uc-ces-recreation/tree/SPEAK-prerelease> |
@@ -615,7 +615,7 @@ terra::plet(
 
 ## Scotland wide datasets
 
-We ran the RP model across its full domain using the tow "presets" persona of a Hard Recreationalist and a Soft Recreationalist (results showed as figure in [#fig_scotland_RP](#fig_scotland_RP)). The resulting datasets have been published to Zenodo.
+We ran the RP model across its full domain using the tow "presets" persona of a Hard Recreationalist and a Soft Recreationalist (results showed as figure in [#fig_scotland_RP](#fig_scotland_RP)). The resulting datasets have been published to Zenodo \[@tigli2025recreational\].
 
 ![Recreational Potential (RP) for the whole of Scotland using the two persona presets: hard recreationalist and soft recreationalist.](images/RP_Scotland_figure.png){#fig_scotland_RP fig-align="center"}
 
