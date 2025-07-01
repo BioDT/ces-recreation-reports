@@ -11,4 +11,6 @@ _site
 *_files/
 renv/
 
+_project
+
 .obsidian/
