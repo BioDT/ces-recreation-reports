@@ -22,7 +22,7 @@ The driving motivation for this work is to promote good health and connection to
 
 The RP component and the biodiversity component are distinct models that have been developed independently of each other. However, in both cases their outputs can be displayed on an interactive map of Scotland and served to users using an app framework such as R Shiny [@Shiny2025].
 
-In this short report we will describe basic aspects of the Recreational Potential model. For a detailed account of the inner workings of the model the reader is directed to the accompanying [technical supplement](tech_supp.html). The Biodiversity component is described in ==**REF**==.
+In this short report we will describe basic aspects of the Recreational Potential model. For a detailed account of the inner workings of the model the reader is directed to the accompanying [technical supplement](tech_supp.html). The Biodiversity component is described in @rolph2025biodiversity.
 
 ## Background
 
