@@ -5,7 +5,7 @@ project:
 # Metadata shared by all documents
 date: 2025-06-24
 date-format: long
-date-modified: last-modified
+date-modified: 2025-07-01
 copyright: BioDT and the UK Centre for Ecology & Hydrology, 2025
 license: CC BY
 bibliography: references.bib
