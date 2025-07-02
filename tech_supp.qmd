@@ -3,6 +3,8 @@ title: The BioDT Recreational Potential Model for Scotland
 subtitle: Technical Supplement
 abstract: >
   This supplement provides technical details about the Recreational Potential model. This includes a mathematical description of the model, details regarding the source data, and technical aspects of the code.
+resources:
+  - /data/Rivers_Raw.csv
 ---
 
 ## Technical description of the model {#sec-techdesc}
@@ -213,13 +215,13 @@ The 24 features in this component are grouped into three main categories:
 
     1.  Dissolve: the dataset was “dissolved” in QGIS using the “Landform“ attribute, reducing it to 334 unique polygon features.
 
-    2.  Reclassification: the 334 landform types were manually grouped into 16 broader categories based on descriptive keywords (e.g. “hills”, “foothills” etc…). See @sec-reclass.
+    2.  Reclassification: the 334 landform types were manually grouped into 16 broader categories based on descriptive keywords (e.g. “hills”, “foothills” etc…). See @tbl-landform.
 
     3.  Rasterization: the dataset was converted into a raster at a 20 m x 20 m resolution.
 
 -   Slope features (6 features): Slope data were derived from the Copernicus GLO-30 Digital Elevation Model (DEM), a global 30 m resolution dataset [@esa2021dem]. The following methodology was applied:
 
-    1.   Slope calculation: the DEM was converted into a matching CRS (EPSG: 27700) using Warp (Reproject) using QGIS, with a slope raster calculated using GDAL Slope with its default settings.
+    1.  Slope calculation: the DEM was converted into a matching CRS (EPSG: 27700) using Warp (Reproject) using QGIS, with a slope raster calculated using GDAL Slope with its default settings.
 
     2.  Up-sampling: the raster was resampled to a 20 m x 20 m resolution.
 
@@ -229,7 +231,7 @@ The 24 features in this component are grouped into three main categories:
 
     1.  Initial dissolve: The dataset was “dissolved” by field “genSoilTyp” in QGIS, reducing it to 12 unique attribute values.
 
-    2.  Grouping: The values were manually aggregated into two soil classes: organic (peat) and mineral based on the original classifications (see @sec-reclass).
+    2.  Grouping: The values were manually aggregated into two soil classes: organic (peat) and mineral based on the original classifications (see @tbl-soil).
 
     3.  Rasterization: the dataset was converted into a raster at a 20 m x 20 m resolution.
 
@@ -239,7 +241,7 @@ The 10 features are grouped into three main categories:
 
 -   Roads Tracks (5 features): Road Tracks data was sourced from the OS OpenRoads dataset [@os2023roads]. The following methodologies were applied:
 
-    1.   Dissolve: The OpenRoads dataset [@os2023roads] was “dissolved” in QGIS by the field “Road type” and “Tracks”.
+    1.  Dissolve: The OpenRoads dataset [@os2023roads] was “dissolved” in QGIS by the field “Road type” and “Tracks”.
 
     2.  Adding access roads: the attribute field “Access roads” from the OSM_Roads dataset [@osmScotlandMap] was merged into the dissolved dataset.
 
@@ -265,7 +267,7 @@ The 13 features can be divided into two categories:
 
     2.  initial dissolve: the merged dataset was “dissolved” in QGIS using the “name” and “Region” fields. This combined river segments sharing the same name and region into single features, reducing the dataset into 74 997 features.
 
-    3.  Reclassification: To simplify the river data at a national scale, a reclassification was carried out (see [Appendix I: Reclassification info] for examples). This is a subjective and based on:  the “form” attribute (indicating water type), or keywords searches in the “name” field, and researcher knowledge of major rivers of national and regional importance.
+    3.  Reclassification: To simplify the river data at a national scale, a reclassification was carried out (see @tbl-rivers for examples). This is a subjective and based on:  the “form” attribute (indicating water type), or keywords searches in the “name” field, and researcher knowledge of major rivers of national and regional importance.
 
     4.  Rasterization: the dataset was converted into raster format at a 20 m x 20 m resolution.
 
@@ -273,7 +275,7 @@ The 13 features can be divided into two categories:
 
 -   Lakes (7 features): The lakes data was sourced from the Spatial inventory of UK waterbodies dataset [@taylor2021waterbodies]. The following methodology was applied:
 
-    1.  Reclassification: The dataset contained 25404 features for Scotland. To make it into a relevant and scorable dataset it was reduced to six features based on the given size (in hectares) of a waterbody using the attribute “Poly_Area_Ha” (see @sec-reclass).
+    1.  Reclassification: The dataset contained 25404 features for Scotland. To make it into a relevant and scorable dataset it was reduced to six features based on the given size (in hectares) of a waterbody using the attribute “Poly_Area_Ha” (see @tbl-lakes).
 
     2.  Rasterization: the datasets were converted into raster format at a 20 m x 20 m resolution.
 
@@ -281,7 +283,7 @@ The 13 features can be divided into two categories:
 
 With one exception, every raster layer produced by the manual process is an integer-valued categorical raster. The single exception is a 'slope' raster containing the average absolute gradient $s(x)$ within each pixel.
 
-We use `terra::classify` to quantise this continuous range into six categories according to their steepness,
+We use `terra::classify` to quantise this continuous range into six categories according to their steepness (expressed in degrees). These values are based on the six slope intervals from @Dick2022 (expressed in percentages).
 
 $$
 C_{\text{slope}}(x) = \begin{cases}
@@ -293,8 +295,6 @@ C_{\text{slope}}(x) = \begin{cases}
 6 & &16.7 \leq s(x) \, .
 \end{cases}
 $$ {#eq-slopequant}
-
-These classification intervals differ from those used in @Dick2022 but are consistent with the [earliest known `R` implementation of the RP model](https://github.com/BioDT/uc-ces/blob/main/recreation_model/MODEL_Recreation_potential.R#L75).
 
 ### Reprojection
 
@@ -443,13 +443,11 @@ The distance raster was also truncated at 500m, setting any values above this to
 
 Here we provide a visual demonstration of how a 'proximity' raster is obtained from a raster containing just the presence/absence data. The example provided is for the `FIPS_I_RoadsTracks_2` feature layer, which corresponds to 'A' roads.
 
-The presence/absence raster traces out the path of the road. The distance from each cell to the nearest present cell is then calculated using the `terra::distance()` function
-. The resulting raster, labeled *distance* in the example map, contains the distance in meters from the center of each cell to the nearest feature. Application of @eq-proximity results in the 'proximity' layer.
+The presence/absence raster traces out the path of the road. The distance from each cell to the nearest present cell is then calculated using the `terra::distance()` function . The resulting raster, labeled *distance* in the example map, contains the distance in meters from the center of each cell to the nearest feature. Application of @eq-proximity results in the 'proximity' layer.
 
 The three layers can be toggled using the control panel in the top-right corner.
 
 ::: {.content-visible when-format="html"}
-
 ```{r, echo=FALSE}
 library(magrittr)
 library(biodt.recreation)
@@ -509,7 +507,7 @@ make_layer_map_dist(rstack = layers, base_map,
 Here we list the full set of 87 items/features that make up the layers of the input rasters, and must be scored by the user to construct a persona.
 
 | Component | Short code | Num. layers | Description |
-|----------|----------|----------|------------------------------------------|
+|-------------|-------------|-------------|-----------------------------------|
 | Landscape | `SLSRA` | 40 | Land cover type, landscape designations and conservation, and farmland of high nature value. |
 | Natural Features | `FIPS_N` | 24 | Landform types, soil types and slope. |
 | Infrastructure | `FIPS_I` | 10 | Roads, tracks, footpaths and cycle networks. |
@@ -585,7 +583,6 @@ knitr::kable(table, caption = "Data sources used for the creation of the underla
 
 ### Landform
 
-
 ```{r, echo=FALSE, display=FALSE}
 #| label: tbl-landform
 #| tbl-cap: Reclassification of the Natural Features component (landform layers) baed on data extracted from @hutton2022soil.
@@ -599,27 +596,27 @@ knitr::kable(table)
 
 ### Soil
 
-| **Reclassification** | **genSoilTyp**                                                                                               |
-| -------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Organic              | Peaty podzols, Peaty gleys, Peat,                                                                            |
-| Mineral              | Mineral podzols, Mineral gleys, Brown soils, Montane soils, Immature soils, Alluvial soils, Calcareous soils |
+| **Reclassification** | **genSoilTyp** |
+|---------------|--------------------------------------------------------|
+| Organic | Peaty podzols, Peaty gleys, Peat, |
+| Mineral | Mineral podzols, Mineral gleys, Brown soils, Montane soils, Immature soils, Alluvial soils, Calcareous soils |
 
 : Reclassification of the Natural Features component (soil layers) based on @hutton2022soil. {#tbl-soil}
 
 ### Rivers
 
-|                                   |                                                               |
-| --------------------------------- | ------------------------------------------------------------- |
-| **Class**                         | **Example search terms or process**                           |
-| Major river or tributary          | Specific e.g. "Tay", "Spey" etc…                              |
-| Tidal river or estuary            | taken from dataset attribute "form"                           |
-| Minor river or tributary          | e.g. "River", "Abhainn", "Uisge"                              |
-| Named minor stream or tributary   | e.g. "Allt", "Alltan", "Burn", "Feadan",   "Sruth", "Caochan" |
-| Unnamed minor stream or tributary | Waterways with no names                                       |
-| Canal                             | taken from dataset attribute "form"                           |
-| Lake                              | taken from dataset attribute "form"                           |
+|  |  |
+|--------------------------|----------------------------------------------|
+| **Class** | **Example search terms or process** |
+| Major river or tributary | Specific e.g. "Tay", "Spey" etc… |
+| Tidal river or estuary | taken from dataset attribute "form" |
+| Minor river or tributary | e.g. "River", "Abhainn", "Uisge" |
+| Named minor stream or tributary | e.g. "Allt", "Alltan", "Burn", "Feadan", "Sruth", "Caochan" |
+| Unnamed minor stream or tributary | Waterways with no names |
+| Canal | taken from dataset attribute "form" |
+| Lake | taken from dataset attribute "form" |
 
-: Reclassification of the Water component (river layers) based on @os2023rivers. {#tbl-rivers}
+: Example search terms for the reclassification of the Water component (river layers) based on @os2023rivers. The full table can be downloaded as a `.csv` by clicking on <a href="data/Rivers_Raw.csv" download>this link</a>. {#tbl-rivers}
 
 ### Lakes
 

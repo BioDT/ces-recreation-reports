@@ -11,8 +11,8 @@ The [BioDT project](https://biodt.eu/) (2022-25) brought together a diverse rang
 
 The CES pDT was imagined as a platform that brings together near real time data from a wide range of sources in a manner that is somehow tailored to the individual user. The proposed pDT [@Rolph2024] focuses on two components:
 
-1.  The **Recreational Potential (RP)** component aims to estimate the capacity of a given area to sustain the recreational activities valued by an individual user.
-2.  The **Biodiversity** component aims to predict spatial distributions of mammals, birds, plant and insects.
+1.  The **Recreational Potential (RP)** component [@MarshRossney2025] aims to estimate the capacity of a given area to sustain the recreational activities valued by an individual user.
+2.  The **Biodiversity** component [@rolph2025biodiversity] aims to predict spatial distributions of mammals, birds, plant and insects.
 
 The rationale behind bringing these two components together into a unified framework is that encountering interesting flora or fauna can enrich people's recreational experiences, and help them to discover new ways to value nature-rich landscapes.
 
@@ -36,7 +36,9 @@ Earlier on in the BioDT project (2022-25), the RP and biodiversity models were c
 
 [^2]: The beta version of the BioDT app is no longer available online.
 
-In the months since, development work has focused on improving the speed and scalability of these components, to enable the interactive and personalisable experience that was envisaged. The model was rewritten from scratch and a new Shiny app developed that was able to leverage these efficiencies. It was released as 'version 1.0' upon the close of the BioDT project [@MarshRossney2025], and is [available on GitHub](https://github.com/BioDT/uc-ces-recreation) under an open-source license.
+In the months since, development work has focused on improving the speed and scalability of these components, to enable the interactive and personalisable experience that was envisaged. The model was rewritten from scratch and a new Shiny app developed that was able to leverage these efficiencies. It was released as 'version 1.0' upon the close of the BioDT project [@MarshRossney2025], and is [available on GitHub](https://github.com/BioDT/uc-ces-recreation) under an open-source license. 
+
+Examples of Scotland-wide Recreational Potential maps, produced by running the model using two 'preset' configurations, were also made available to download from Zenodo [@Tigli2025]. These are previewed in @sec-scotlandwide.
 
 The SPEAK project followed in the same spirit as [@Dick2022], but using the updated Recreational Potential model, which allows for greater individual customisation by users. Some preliminary findings from this study are available as a conference presentation [@Dick2025b] and workshop report [@Dick2025c].
 
@@ -55,7 +57,7 @@ The main model output is an two-dimensional array of numbers (a *raster*) repres
 An RP value is constructed from a combination of **87** *items* representing distinct attributes of the land. The 87 items are grouped into four *components*, which are outlined in @tbl-components. RP values are calculated by weighting each item by a *score* between $0$ and $10$ that reflects the importance of that item to the user. A full set of 87 scores is referred to as a *persona.*
 
 | Component | Short code | \# items |
-|:------------------------------------------|:--------------|:--------------|
+|:---------------------------------------|:---------------|:---------------|
 | **Landscape** - the suitability of land to support recreational activity | `SLSRA` | 40 |
 | **Natural Features** influencing the potential | `FIPS_N` | 24 |
 | **Infrastructure** features influencing the potential | `FIPS_I` | 10 |
@@ -80,15 +82,16 @@ Personas are stored in `.csv` files. However, the interactive R Shiny app provid
 
 ### Input data {#sec-inputs}
 
-There is another essential set of inputs to the model which are not specified by the user. These are a set of 87 _feature layers_ --- one for each of the 87 items --- covering Scotland at a resolution of 20x20m.
+There is another essential set of inputs to the model which are not specified by the user. These are a set of 87 *feature layers* --- one for each of the 87 items --- covering Scotland at a resolution of 20x20m.
 
-:::{.callout-note}
+::: callout-note
 #### Items and feature layers
-We use the term _items_ in the context of a persona (i.e. a single persona score is an _item_), and _feature layers_ in the context of raster data (a single layer of a raster is a _feature_).
+
+We use the term *items* in the context of a persona (i.e. a single persona score is an *item*), and *feature layers* in the context of raster data (a single layer of a raster is a *feature*).
 
 There is a one-to-one relationship between the 87 items and the 87 feature layers.
 
-Thus, they are described by the same set of labels. For example, the user must provide a score for the `Water_Lakes_1` (Pond) _item_, and the input dataset also contains a _feature layer_ called `Water_Lakes_1`.
+Thus, they are described by the same set of labels. For example, the user must provide a score for the `Water_Lakes_1` (Pond) *item*, and the input dataset also contains a *feature layer* called `Water_Lakes_1`.
 :::
 
 For features belonging to the *Landscape* (`SLSRA`) component or the *Natural Features* component (`FIPS_N`), these rasters contain just ones and zeros, with $1$ indicating presence of the feature in that pixel and $0$ indicating absence.
@@ -201,7 +204,7 @@ The RP model has been gradually developed within UKCEH over a number of years. T
 Some effort has been taken to make previous versions findable. All individuals known to have contributed to development are credited in the version 1.0 release [@MarshRossney2025].
 
 | Iteration | Version | Source |
-|----------------|:---------------|:----------------------------------------|
+|-----------------|:----------------|:-------------------------------------|
 | 1 (2023) | \- | <https://github.com/BioDT/uc-ces/tree/main/recreation_model> |
 | 2 (2024) | \- | <https://github.com/BioDT/uc-ces-recreation/tree/2024-model> |
 | 3 (2025) | SPEAK pre-release | <https://github.com/BioDT/uc-ces-recreation/tree/SPEAK-prerelease> |
@@ -382,7 +385,7 @@ layers <- compute_potential(persona, bbox)
 
 The output of this function, `layers`, is a five-layered raster, whose layers are the four component layers plus the RP layer, as described in @sec-rpcalc.
 
-### 'Preset' personas
+### 'Preset' personas {#sec-presets}
 
 The code snippet above made use of two convenience functions for constructing a persona and a bounding box.
 
@@ -449,6 +452,8 @@ meaningful_scores <- summarise_persona_scores(soft_recreationalist)
 knitr::kable(meaningful_scores, format = "html")
 ```
 
+Scotland-wide Recreational Potential maps computed using these two personas are available to download from Zenodo [@Tigli2025].
+
 ### Shiny app {#sec-shinyapp}
 
 As part of the SPEAK study an R Shiny app was developed that focused exclusively on the Recreational Potential model. This is provided alongside the main package, since it provides a convenient, dynamic interface for testing and visualising outputs.
@@ -485,9 +490,8 @@ Detailed instructions for using the app are contained within the app itself, in 
 The interactive demo is only provided in the HTML version of this report. This is available online at <https://biodt.github.io/ces-recreation-reports>.
 :::
 
-:::: {.content-visible when-format="html"}
+::::: {.content-visible when-format="html"}
 <!-- The source code used to produce this example can be found HERE. -->
-
 
 This interactive demo showcases the model running with the *Hard Recreationalist* persona for the Bush Estate area near Edinburgh.
 
@@ -536,11 +540,11 @@ We now take a step back, splitting each component into its constituent layers. Y
 
 The base map has been rendered in black and white to enhance the visibility of layers with sparse data. As shown, the *Landscape* (`SLSRA`) and *Natural Features* (`FIPS_N`) components display binary data, indicating either the presence or absence of features; whereas the *Infrastructure* (`FIPS_I`) and *Water* (`Water`) components present a distance gradient.
 
-:::{.callout-tip}
+::: callout-tip
 As you explore the maps, it is helpful to have the [list of features and their descriptions](tech_supp.html#sec-listitems) open in another browser window.
 :::
 
-:::{.panel-tabset}
+::: panel-tabset
 ### Water
 
 ```{r, echo=FALSE}
@@ -614,15 +618,12 @@ terra::plet(
   legend = "bottomleft"
 )
 ```
-
 :::
+:::::
 
-::::
+## Scotland wide datasets {#sec-scotlandwide}
 
-## Scotland wide datasets
-
-The outputs of the RP model for the *Hard Recreationalist* and *Soft Recreationalist* personas for the whole of Scotland will soon be available for download as a data product [@Tigli2025]. The results are previewed in @fig-scotlandRP.
-
+The outputs of the RP model for the *Hard Recreationalist* and *Soft Recreationalist* personas (@sec-presets) for the whole of Scotland are available to download as a pair of `.tif` files containing the raster data [@Tigli2025]. The results are previewed in @fig-scotlandRP.
 
 ![Recreational Potential values for the whole of Scotland using the two persona presets.](images/RP_Scotland_figure.png){#fig-scotlandRP fig-align="center"}
 
