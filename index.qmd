@@ -1,10 +1,8 @@
 ---
 title: The BioDT Recreational Potential Model for Scotland
 
-
 toc: false
 number-sections: false
-
 nocite: |
   @Rolph2024, @Dick2025, @Dick2025b, @MarshRossney2025, @Tigli2025
 ---

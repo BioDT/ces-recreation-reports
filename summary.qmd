@@ -12,7 +12,7 @@ The [BioDT project](https://biodt.eu/) (2022-25) brought together a diverse rang
 The CES pDT was imagined as a platform that brings together near real time data from a wide range of sources in a manner that is somehow tailored to the individual user. The proposed pDT [@Rolph2024] focuses on two components:
 
 1.  The **Recreational Potential (RP)** component [@MarshRossney2025] aims to estimate the capacity of a given area to sustain the recreational activities valued by an individual user.
-2.  The **Biodiversity** component [rolph2025biodiversity] aims to predict spatial distributions of mammals, birds, plant and insects.
+2.  The **Biodiversity** component [@rolph2025biodiversity] aims to predict spatial distributions of mammals, birds, plant and insects.
 
 The rationale behind bringing these two components together into a unified framework is that encountering interesting flora or fauna can enrich people's recreational experiences, and help them to discover new ways to value nature-rich landscapes.
 
@@ -36,7 +36,9 @@ Earlier on in the BioDT project (2022-25), the RP and biodiversity models were c
 
 [^2]: The beta version of the BioDT app is no longer available online.
 
-In the months since, development work has focused on improving the speed and scalability of these components, to enable the interactive and personalisable experience that was envisaged. The model was rewritten from scratch and a new Shiny app developed that was able to leverage these efficiencies. It was released as 'version 1.0' upon the close of the BioDT project [@MarshRossney2025], and is [available on GitHub](https://github.com/BioDT/uc-ces-recreation) under an open-source license.
+In the months since, development work has focused on improving the speed and scalability of these components, to enable the interactive and personalisable experience that was envisaged. The model was rewritten from scratch and a new Shiny app developed that was able to leverage these efficiencies. It was released as 'version 1.0' upon the close of the BioDT project [@MarshRossney2025], and is [available on GitHub](https://github.com/BioDT/uc-ces-recreation) under an open-source license. 
+
+Examples of Scotland-wide Recreational Potential maps, produced by running the model using two 'preset' configurations, were also made available to download from Zenodo [@Tigli2025]. These are previewed in @sec-scotlandwide.
 
 The SPEAK project followed in the same spirit as [@Dick2022], but using the updated Recreational Potential model, which allows for greater individual customisation by users. Some preliminary findings from this study are available as a conference presentation [@Dick2025b] and workshop report [@Dick2025c].
 
@@ -383,7 +385,7 @@ layers <- compute_potential(persona, bbox)
 
 The output of this function, `layers`, is a five-layered raster, whose layers are the four component layers plus the RP layer, as described in @sec-rpcalc.
 
-### 'Preset' personas
+### 'Preset' personas {#sec-presets}
 
 The code snippet above made use of two convenience functions for constructing a persona and a bounding box.
 
@@ -449,6 +451,8 @@ meaningful_scores <- summarise_persona_scores(soft_recreationalist)
   
 knitr::kable(meaningful_scores, format = "html")
 ```
+
+Scotland-wide Recreational Potential maps computed using these two personas are available to download from Zenodo [@Tigli2025].
 
 ### Shiny app {#sec-shinyapp}
 
@@ -617,9 +621,9 @@ terra::plet(
 :::
 :::::
 
-## Scotland wide datasets
+## Scotland wide datasets {#sec-scotlandwide}
 
-The outputs of the RP model for the *Hard Recreationalist* and *Soft Recreationalist* personas for the whole of Scotland will soon be available for download as a data product [@Tigli2025]. The results are previewed in @fig-scotlandRP.
+The outputs of the RP model for the *Hard Recreationalist* and *Soft Recreationalist* personas (@sec-presets) for the whole of Scotland are available to download as a pair of `.tif` files containing the raster data [@Tigli2025]. The results are previewed in @fig-scotlandRP.
 
 ![Recreational Potential values for the whole of Scotland using the two persona presets.](images/RP_Scotland_figure.png){#fig-scotlandRP fig-align="center"}
 
